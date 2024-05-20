@@ -33,7 +33,7 @@ namespace Foxy.Params.SourceGenerator
                 sb.AppendLine();
                 sb.NullableEnable();
                 sb.AppendLine();
-                sb.Namespace(SemanticHelpers.GetNameSpaceNoGlobal(typeInfo));
+                AddNamespace(sb, typeInfo);
                 var nestLevel = CreateClasses(typeInfo, sb);
                 var maxOverridesMax = 0;
                 foreach (var item in uniqueClass)
@@ -80,6 +80,7 @@ namespace Foxy.Params.SourceGenerator
                             argNameSpanInput);
                         sb.CloseBlock();
                     }
+
                     if (item.HasParams)
                     {
                         sb.AppendLine();
@@ -100,15 +101,18 @@ namespace Foxy.Params.SourceGenerator
                             argNameSpanInput);
                         sb.CloseBlock();
                     }
+
                     maxOverridesMax = Math.Max(maxOverridesMax, maxOverrides);
                 }
+
                 CloseTimes(sb, nestLevel);
                 for (int i = 1; i <= maxOverridesMax; i++)
                 {
                     sb.AppendLine();
                     CreateArguments(sb, i);
                 }
-                sb.CloseBlock();
+
+                AddNamespaceCloseBlock(sb, typeInfo);
                 context.AddSource(
                     SemanticHelpers.CreateFileName(typeInfo),
                     SourceText.From(sb.ToString(), Encoding.UTF8));
@@ -266,6 +270,21 @@ namespace Foxy.Params.SourceGenerator
             }
         }
 
+        private static void AddNamespace(SourceBuilder sb, INamedTypeSymbol typeInfo)
+        {
+            if (typeInfo.ContainingNamespace.IsGlobalNamespace)
+                return;
+
+            sb.Namespace(SemanticHelpers.GetNameSpaceNoGlobal(typeInfo));
+        }
+
+        private static void AddNamespaceCloseBlock(SourceBuilder sb, INamedTypeSymbol typeInfo)
+        {
+            if (typeInfo.ContainingNamespace.IsGlobalNamespace)
+                return;
+
+            sb.CloseBlock();
+        }
     }
 }
 

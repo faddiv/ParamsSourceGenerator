@@ -226,4 +226,12 @@ public class SourceGenerationTests
         await VerifyCS.VerifyGeneratorAsync(code,
             TestEnvironment.GetOuputs());
     }
+
+    [Fact]
+    public async Task Generate_Overrides_WhenInGlobalNamespace()
+    {
+        string code = TestEnvironment.GetValidSource();
+        await VerifyCS.VerifyGeneratorAsync(code,
+            TestEnvironment.GetOuputs());
+    }
 }
