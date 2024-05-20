@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using Foxy.Params.SourceGenerator.Data;
@@ -10,6 +11,12 @@ namespace Foxy.Params.SourceGenerator.Helpers
 {
     internal static class SemanticHelpers
     {
+        public static void AssertNotNull([NotNull] object? typeInfo)
+        {
+            if (typeInfo is null)
+                throw new ArgumentNullException(nameof(typeInfo));
+        }
+
         public static bool TryGetAttribute(
             MemberDeclarationSyntax candidate,
             string attributeName,

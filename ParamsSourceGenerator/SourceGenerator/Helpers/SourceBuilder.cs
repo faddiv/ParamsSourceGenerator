@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Foxy.Params.SourceGenerator.Data;
@@ -132,6 +133,13 @@ namespace Foxy.Params.SourceGenerator.Helpers
             return new SourceLine(this);
         }
 
+        public void Clear()
+        {
+            _intendLevel = 0;
+            _builder.Clear();
+            _scope.Clear();
+        }
+
         public class SourceLine
         {
             private readonly SourceBuilder _builder;
@@ -192,10 +200,12 @@ namespace Foxy.Params.SourceGenerator.Helpers
                 _builder.Append(Intend);
             }
         }
+
         private void CommaSeparatedItemList(IEnumerable<string> args)
         {
             ItemList(", ", args);
         }
+
         private void ItemList(string separator, IEnumerable<string> args)
         {
             var more = false;
