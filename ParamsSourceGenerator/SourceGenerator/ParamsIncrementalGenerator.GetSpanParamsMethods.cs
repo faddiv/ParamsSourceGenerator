@@ -35,12 +35,12 @@ namespace Foxy.Params.SourceGenerator
             }
 
             var diagnostics = new List<Diagnostic>();
-            if (!IsContainingTypePartial(targetNode))
+            if (!IsContainingTypesArePartial(targetNode, out var typeName))
             {
                 diagnostics.Add(Diagnostic.Create(
                     DiagnosticReports.PartialIsMissingDescriptor,
                     attributeSyntax.GetLocation(),
-                    methodSymbol.ContainingType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat),
+                    typeName,
                     methodSymbol.Name));
             }
 
@@ -184,10 +184,20 @@ namespace Foxy.Params.SourceGenerator
             return spanParam == null || spanParam.MetadataName == "ReadOnlySpan`1";
         }
 
-        private static bool IsContainingTypePartial(SyntaxNode targetNode)
+        private static bool IsContainingTypesArePartial(
+            SyntaxNode targetNode,
+            [NotNullWhen(false)] out string? typeName)
         {
-            var containingType = targetNode.FirstAncestorOrSelf<TypeDeclarationSyntax>();
-            return containingType?.Modifiers.Any(token => token.IsKind(SyntaxKind.PartialKeyword)) ?? false;
+            foreach (var containingType in targetNode.Ancestors().OfType<TypeDeclarationSyntax>())
+            {
+                if (!containingType.Modifiers.Any(token => token.IsKind(SyntaxKind.PartialKeyword)))
+                {
+                    typeName = containingType.Identifier.Text;
+                    return false;
+                }
+            }
+            typeName = null;
+            return true;
         }
     }
 }

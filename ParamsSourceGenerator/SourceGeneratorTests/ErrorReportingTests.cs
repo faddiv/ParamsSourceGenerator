@@ -25,6 +25,19 @@ public class ErrorReportingTests
     }
 
     [Fact]
+    public async Task Reports_NoPartialKeywordOnParentClass()
+    {
+        string code = TestEnvironment.GetInvalidSource();
+
+        var expected = VerifyCS
+            .Diagnostic(DiagnosticReports.PartialIsMissingDescriptor)
+            .WithLocation(0)
+            .WithArguments("ParentClass", "Format");
+
+        await VerifyCS.VerifyGeneratorAsync(code, expected, TestEnvironment.GetDefaultOuput());
+    }
+
+    [Fact]
     public async Task Reports_NoParameter()
     {
         string code = TestEnvironment.GetInvalidSource();
