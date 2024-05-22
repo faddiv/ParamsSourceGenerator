@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Foxy.Params.SourceGenerator.Data;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Foxy.Params.SourceGenerator.Helpers
 {
@@ -109,6 +112,27 @@ namespace Foxy.Params.SourceGenerator.Helpers
         {
             AddIntend();
             _builder.AppendLine(text);
+        }
+
+        public void AppendTrivia(SyntaxTrivia syntaxTrivia)
+        {
+            AddIntend();
+            if (syntaxTrivia == SyntaxFactory.CarriageReturnLineFeed)
+            {
+                _builder.Append(syntaxTrivia.ToFullString());
+            }
+            else
+            {
+                _builder.AppendLine(syntaxTrivia.ToFullString());
+            }
+        }
+
+        public void AppendTrivias(params SyntaxTrivia[] syntaxTriviaList)
+        {
+            foreach (var item in syntaxTriviaList)
+            {
+                AppendTrivia(item);
+            }
         }
 
         public void OpenBlock(string scope)
