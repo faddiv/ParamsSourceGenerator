@@ -2,6 +2,7 @@
 using Foxy.Params.SourceGenerator.Helpers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Collections.Generic;
@@ -177,26 +178,56 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
 
         private void GenerateCallOriginalMethod(DerivedData data)
         {
-            var codeLine = _sourceBuilder.StartLine();
-            if (data.ReturnsKind != ReturnKind.ReturnsVoid)
-            {
-                codeLine.Returns();
-            }
+            SimpleNameSyntax methodName = data.TypeArguments.Count > 0
+                ? GenericName(Identifier(data.MethodName), TypeArgumentList(SeparatedList(GenerateInvocationTypeArguments(data))))
+                : IdentifierName(data.MethodName);
+            SyntaxNode invocationExpression = InvocationExpression(
+                methodName,
+                ArgumentList(SeparatedList(GenerateInvocationArguments(data))));
             if (data.ReturnsKind == ReturnKind.ReturnsRef)
             {
-                codeLine.AddSegment("ref ");
+                invocationExpression = RefExpression((ExpressionSyntax)invocationExpression);
             }
-            codeLine.AddSegment(data.MethodName);
-            if (data.TypeArguments.Count > 0)
+            if (data.ReturnsKind != ReturnKind.ReturnsVoid)
             {
-                codeLine.AddSegment("<");
-                codeLine.AddCommaSeparatedList(data.TypeArguments);
-                codeLine.AddSegment(">");
+                invocationExpression = ReturnStatement((ExpressionSyntax)invocationExpression);
             }
-            codeLine.AddSegment("(");
-            codeLine.AddCommaSeparatedList(data.ParameterInfos.Select(e => e.ToPassParameter()));
-            codeLine.AddSegment($", {data.ArgNameSpanInput})");
-            codeLine.EndLine();
+            _sourceBuilder.AppendBlockLine(invocationExpression);
+        }
+
+        private IEnumerable<TypeSyntax> GenerateInvocationTypeArguments(DerivedData data)
+        {
+            foreach (var item in data.TypeArguments)
+            {
+                yield return IdentifierName(item);
+            }
+        }
+
+        private IEnumerable<ArgumentSyntax> GenerateInvocationArguments(DerivedData data)
+        {
+            foreach (var item in data.ParameterInfos)
+            {
+                var argument = Argument(IdentifierName(item.Name));
+
+                switch (item.GetPassParameterModifier())
+                {
+                    case RefKind.Ref:
+                        argument = argument.WithRefKindKeyword(Token(SyntaxKind.RefKeyword));
+                        break;
+                    case RefKind.Out:
+                        argument = argument.WithRefKindKeyword(Token(SyntaxKind.OutKeyword));
+                        break;
+                    case RefKind.In:
+                        argument = argument.WithRefKindKeyword(Token(SyntaxKind.InKeyword));
+                        break;
+                    default:
+                        break;
+                }
+
+                yield return argument;
+            }
+            var argSpan = Argument(IdentifierName(data.ArgNameSpanInput));
+            yield return argSpan;
         }
 
         private static void CreateArguments(SourceBuilder sb, int length)
@@ -219,6 +250,10 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
         {
             if (typeInfo.ContainingNamespace.IsGlobalNamespace)
                 return;
+
+            /*var name = ParseName(SemanticHelpers.GetNameSpaceNoGlobal(typeInfo));
+            var @namespace = NamespaceDeclaration(name);
+            sb.AppendTrivia(@namespace);*/
 
             sb.Namespace(SemanticHelpers.GetNameSpaceNoGlobal(typeInfo));
         }

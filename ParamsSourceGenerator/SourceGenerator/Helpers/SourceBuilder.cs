@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Foxy.Params.SourceGenerator.Data;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using static System.Net.Mime.MediaTypeNames;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Foxy.Params.SourceGenerator.Helpers
 {
@@ -127,6 +128,21 @@ namespace Foxy.Params.SourceGenerator.Helpers
             }
         }
 
+        public void AppendBlockLine(SyntaxNode syntaxNode)
+        {
+            AddIntend();
+            _builder.Append(syntaxNode.NormalizeWhitespace().ToFullString());
+            var trailingTrivia = syntaxNode.GetTrailingTrivia();
+            if (trailingTrivia.Count > 0 &&
+                trailingTrivia.Last().Token.IsKind(SyntaxKind.SemicolonToken))
+            {
+                _builder.AppendLine();
+            } else
+            {
+                _builder.AppendLine(";");
+            }
+        }
+        
         public void AppendTrivias(params SyntaxTrivia[] syntaxTriviaList)
         {
             foreach (var item in syntaxTriviaList)

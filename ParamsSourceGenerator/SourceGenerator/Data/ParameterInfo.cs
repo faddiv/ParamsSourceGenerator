@@ -24,14 +24,9 @@ namespace Foxy.Params.SourceGenerator.Data
             return $"{SemanticHelpers.WithModifiers(Type, RefKind, IsNullable)} {Name}";
         }
 
-        public string ToPassParameter()
+        public RefKind GetPassParameterModifier()
         {
-            return SemanticHelpers.WithModifiers(Name, GetPassParameterModifier(RefKind), false);
-        }
-
-        private static RefKind GetPassParameterModifier(RefKind refKind)
-        {
-            switch (refKind)
+            switch (RefKind)
             {
                 case RefKind.Ref:
                     return RefKind.Ref;
