@@ -164,7 +164,54 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
 
         private void GenerateSpanVariableForParamsArgument(DerivedData data)
         {
-            _sourceBuilder.AppendLine($"var {data.ArgNameSpan} = new global::System.ReadOnlySpan<{data.SpanArgumentType}>({data.ArgName});");
+            var variableDeclaration = SimpleVarDeclaration(
+                VariableDeclarator(
+                    Identifier(data.ArgNameSpan),
+                    null,
+                    EqualsValueClause(NewReadOnlySpanOfTWithArgs(data.SpanArgumentType, data.ArgName))));
+            _sourceBuilder.AppendBlockLine(variableDeclaration);
+        }
+
+        /// <summary>
+        /// var {varDeclarator}
+        /// </summary>
+        private static VariableDeclarationSyntax SimpleVarDeclaration(VariableDeclaratorSyntax varDeclarator)
+        {
+            return VariableDeclaration(VarIdentifier(), SingletonSeparatedList(varDeclarator));
+        }
+
+        /// <summary>
+        /// new global::System.ReadOnlySpan&lt;T&gt;(argName)
+        /// </summary>
+        private static ObjectCreationExpressionSyntax NewReadOnlySpanOfTWithArgs(string spanArgumentType, string argName)
+        {
+            return ObjectCreationExpression(
+                ToGloballyQualifiedName("System",GenericName(Identifier("ReadOnlySpan"), OneTypeArgument(spanArgumentType))),
+                OneArgument(argName),
+                null);
+        }
+
+        private static TypeArgumentListSyntax OneTypeArgument(string spanArgumentType)
+        {
+            return TypeArgumentList(SingletonSeparatedList(ParseTypeName(spanArgumentType)));
+        }
+
+        private static ArgumentListSyntax OneArgument(string argName)
+        {
+            return ArgumentList(SingletonSeparatedList(Argument(IdentifierName(argName))));
+        }
+
+        private static QualifiedNameSyntax ToGloballyQualifiedName(string qualifier, SimpleNameSyntax nameSyntax)
+        {
+            return QualifiedName(
+                        AliasQualifiedName(
+                            IdentifierName(Token(SyntaxKind.GlobalKeyword)),
+                            IdentifierName(qualifier)
+                            ), nameSyntax);
+        }
+        private static IdentifierNameSyntax VarIdentifier()
+        {
+            return IdentifierName(Identifier("var"));
         }
 
         private void GenerateArgumentsClasses()
