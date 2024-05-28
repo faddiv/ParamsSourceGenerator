@@ -134,9 +134,40 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
             GenerateCallOriginalMethod(data);
         }
 
+
+        /// <summary>
+        /// var {argsSpan} = global::System.Runtime.InteropServices.MemoryMarshal.CreateReadOnlySpan(ref {arg}.arg0, {argsCount});
+        /// </summary>
         private void GenerateSpanVariableForInlineArray(DerivedData data, int argsCount)
         {
-            _sourceBuilder.AppendLine($"var {data.ArgNameSpan} = global::System.Runtime.InteropServices.MemoryMarshal.CreateReadOnlySpan(ref {data.ArgName}.arg0, {argsCount});");
+            var variableDeclaration = SimpleVarDeclaration(
+                VariableDeclarator(
+                    Identifier(data.ArgNameSpan),
+                    null,
+                    EqualsValueClause(CallCreateReadOnlySpan(data.ArgName, argsCount))));
+            _sourceBuilder.AppendBlockLine(variableDeclaration);
+        }
+
+        /// <summary>
+        /// global::System.Runtime.InteropServices.MemoryMarshal.CreateReadOnlySpan(ref args.arg0, 1)
+        /// </summary>
+        private ExpressionSyntax CallCreateReadOnlySpan(string argName, int argsCount)
+        {
+            return InvocationExpression(
+                GlobalMemberAccessChain(["System", "Runtime", "InteropServices", "MemoryMarshal", "CreateReadOnlySpan"]),
+                Arguments([
+                    QualifiedArgument(MemberAccessChain([argName, "arg0"]), SyntaxKind.RefKeyword),
+                    Argument(SimpleLiteral(argsCount))
+                    ])
+                );
+        }
+
+        /// <summary>
+        /// {intValue}
+        /// </summary>
+        private LiteralExpressionSyntax SimpleLiteral(int value)
+        {
+            return LiteralExpression(SyntaxKind.NumericLiteralExpression, Literal(value));
         }
 
         private void GenerateArgumentsVariable(DerivedData data, int argsCount)
@@ -162,6 +193,9 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
             GenerateCallOriginalMethod(data);
         }
 
+        /// <summary>
+        /// var {argsSpan} = new global::System.ReadOnlySpan<{T}>({args});
+        /// </summary>
         private void GenerateSpanVariableForParamsArgument(DerivedData data)
         {
             var variableDeclaration = SimpleVarDeclaration(
@@ -173,6 +207,105 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
         }
 
         /// <summary>
+        /// new global::System.ReadOnlySpan&lt;T&gt;(argName)
+        /// </summary>
+        private static ObjectCreationExpressionSyntax NewReadOnlySpanOfTWithArgs(string spanArgumentType, string argName)
+        {
+            return ObjectCreationExpression(
+                ToGloballyQualifiedName("System", GenericName(Identifier("ReadOnlySpan"), OneTypeArgument(spanArgumentType))),
+                Arguments(IdentifierName(argName)),
+                null);
+        }
+
+        /// <summary>
+        /// T0
+        /// </summary>
+        private static TypeArgumentListSyntax OneTypeArgument(string spanArgumentType)
+        {
+            return TypeArgumentList(SingletonSeparatedList(ParseTypeName(spanArgumentType)));
+        }
+
+        /// <summary>
+        /// {arg} (In argument list)
+        /// </summary>
+        private static ArgumentListSyntax Arguments(ExpressionSyntax arg)
+        {
+            return ArgumentList(SingletonSeparatedList(Argument(arg)));
+        }
+
+        /// <summary>
+        /// <code>ref {arg}</code>
+        /// or
+        /// <code>in {arg}</code>
+        /// or
+        /// <code>out {arg}</code>
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">not None, ref, in or out.</exception>
+        private static ArgumentSyntax QualifiedArgument(ExpressionSyntax arg, SyntaxKind syntaxKind = SyntaxKind.None)
+        {
+            return syntaxKind switch
+            {
+                SyntaxKind.None => Argument(arg),
+                SyntaxKind.RefKeyword or
+                SyntaxKind.OutKeyword or
+                SyntaxKind.InKeyword => Argument(default, Token(syntaxKind), arg),
+                _ => throw new ArgumentOutOfRangeException(nameof(syntaxKind)),
+            };
+        }
+
+        /// <summary>
+        /// {arg0}, {arg1}, {arg2}
+        /// </summary>
+        private static ArgumentListSyntax Arguments(IEnumerable<ArgumentSyntax> args)
+        {
+            return ArgumentList(SeparatedList(args));
+        }
+
+        private static QualifiedNameSyntax ToGloballyQualifiedName(string qualifier, SimpleNameSyntax nameSyntax)
+        {
+            return QualifiedName(
+                        GlobalNameSyntax(qualifier), nameSyntax);
+        }
+
+        /// <summary>
+        /// global::{parts[0]}.{parts[1]}.{parts[2]}
+        /// </summary>
+        private static ExpressionSyntax GlobalMemberAccessChain(
+            string[] parts)
+        {
+            return MemberAccessChain(parts, isGlobal: true);
+        }
+
+        /// <summary>
+        /// {parts[0]}.{parts[1]}.{parts[2]}
+        /// </summary>
+        private static ExpressionSyntax MemberAccessChain(
+            string[] parts, bool isGlobal = false)
+        {
+            ExpressionSyntax current = isGlobal
+                ? GlobalNameSyntax(parts[0])
+                : IdentifierName(parts[0]);
+            for (int i = 1; i < parts.Length; i++)
+            {
+                current = MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    current,
+                    IdentifierName(parts[i]));
+            }
+            return current;
+        }
+
+        /// <summary>
+        /// global::{qualifier}
+        /// </summary>
+        private static AliasQualifiedNameSyntax GlobalNameSyntax(string qualifier)
+        {
+            return AliasQualifiedName(
+                IdentifierName(Token(SyntaxKind.GlobalKeyword)),
+                IdentifierName(qualifier));
+        }
+
+        /// <summary>
         /// var {varDeclarator}
         /// </summary>
         private static VariableDeclarationSyntax SimpleVarDeclaration(VariableDeclaratorSyntax varDeclarator)
@@ -181,34 +314,8 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
         }
 
         /// <summary>
-        /// new global::System.ReadOnlySpan&lt;T&gt;(argName)
+        /// var
         /// </summary>
-        private static ObjectCreationExpressionSyntax NewReadOnlySpanOfTWithArgs(string spanArgumentType, string argName)
-        {
-            return ObjectCreationExpression(
-                ToGloballyQualifiedName("System",GenericName(Identifier("ReadOnlySpan"), OneTypeArgument(spanArgumentType))),
-                OneArgument(argName),
-                null);
-        }
-
-        private static TypeArgumentListSyntax OneTypeArgument(string spanArgumentType)
-        {
-            return TypeArgumentList(SingletonSeparatedList(ParseTypeName(spanArgumentType)));
-        }
-
-        private static ArgumentListSyntax OneArgument(string argName)
-        {
-            return ArgumentList(SingletonSeparatedList(Argument(IdentifierName(argName))));
-        }
-
-        private static QualifiedNameSyntax ToGloballyQualifiedName(string qualifier, SimpleNameSyntax nameSyntax)
-        {
-            return QualifiedName(
-                        AliasQualifiedName(
-                            IdentifierName(Token(SyntaxKind.GlobalKeyword)),
-                            IdentifierName(qualifier)
-                            ), nameSyntax);
-        }
         private static IdentifierNameSyntax VarIdentifier()
         {
             return IdentifierName(Identifier("var"));
@@ -223,6 +330,9 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
             }
         }
 
+        /// <summary>
+        /// return Format<{T}>({format}, {argsSpan})
+        /// </summary>
         private void GenerateCallOriginalMethod(DerivedData data)
         {
             SimpleNameSyntax methodName = data.TypeArguments.Count > 0
@@ -231,15 +341,29 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
             SyntaxNode invocationExpression = InvocationExpression(
                 methodName,
                 ArgumentList(SeparatedList(GenerateInvocationArguments(data))));
-            if (data.ReturnsKind == ReturnKind.ReturnsRef)
+            invocationExpression = AddReturnStatement(data.ReturnsKind, invocationExpression);
+            _sourceBuilder.AppendBlockLine(invocationExpression);
+        }
+
+        /// <summary>
+        /// <code>Format()</code> 
+        /// or
+        /// <code>return Format()</code>
+        /// or
+        /// <code>return ref Format()</code>
+        /// </summary>
+        private static SyntaxNode AddReturnStatement(ReturnKind returnKind, SyntaxNode invocationExpression)
+        {
+            if (returnKind == ReturnKind.ReturnsRef)
             {
                 invocationExpression = RefExpression((ExpressionSyntax)invocationExpression);
             }
-            if (data.ReturnsKind != ReturnKind.ReturnsVoid)
+            if (returnKind != ReturnKind.ReturnsVoid)
             {
                 invocationExpression = ReturnStatement((ExpressionSyntax)invocationExpression);
             }
-            _sourceBuilder.AppendBlockLine(invocationExpression);
+
+            return invocationExpression;
         }
 
         private IEnumerable<TypeSyntax> GenerateInvocationTypeArguments(DerivedData data)
