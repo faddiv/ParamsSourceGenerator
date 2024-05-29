@@ -22,4 +22,14 @@ namespace ConsoleApp
             return string.Format(provider, compositeFormat, span);
         }
     }
+
+    public partial class Foo<T>
+        where T : class
+    {
+        //[Params(MaxOverrides = 1)]
+        private static T Format(string format, ReadOnlySpan<T> args)
+        {
+            return default(T);
+        }
+    }
 }
