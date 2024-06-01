@@ -165,7 +165,7 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
         /// <summary>
         /// {intValue}
         /// </summary>
-        private LiteralExpressionSyntax SimpleLiteral(int value)
+        private static LiteralExpressionSyntax SimpleLiteral(int value)
         {
             return LiteralExpression(SyntaxKind.NumericLiteralExpression, Literal(value));
         }
@@ -218,11 +218,19 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
         }
 
         /// <summary>
-        /// T0
+        /// {argumentTypeName}
         /// </summary>
-        private static TypeArgumentListSyntax OneTypeArgument(string spanArgumentType)
+        private static TypeArgumentListSyntax OneTypeArgument(string argumentTypeName)
         {
-            return TypeArgumentList(SingletonSeparatedList(ParseTypeName(spanArgumentType)));
+            return TypeArgumentList(SingletonSeparatedList(ParseTypeName(argumentTypeName)));
+        }
+
+        /// <summary>
+        /// {typeParameterName}
+        /// </summary>
+        private static TypeParameterListSyntax OneTypeParameter(string typeParameterName)
+        {
+            return TypeParameterList(SingletonSeparatedList(TypeParameter(typeParameterName)));
         }
 
         /// <summary>
@@ -403,6 +411,24 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
 
         private static void CreateArguments(SourceBuilder sb, int length)
         {
+            var typeName = Identifier($"Arguments{length}");
+            var arguments = StructDeclaration(
+                attributeLists: InlineArray(length),
+                modifiers: TokenList(Token(SyntaxKind.FileKeyword)),
+                identifier: typeName,
+                typeParameterList: OneTypeParameter("T"),
+                baseList: default,
+                constraintClauses: default,
+                members: ArgumentsTypeMembers(typeName, length));
+            arguments = arguments.NormalizeWhitespace();
+            MemberDeclarationSyntax oldNode = arguments.Members[0];
+            var leadingT = oldNode.GetTrailingTrivia();
+            arguments = arguments.ReplaceNode(
+                oldNode,
+                oldNode.WithTrailingTrivia(leadingT.Add(CarriageReturnLineFeed))
+                );
+            sb.AppendBlockLine(arguments, false);
+            /*
             sb.Attribute($"System.Runtime.CompilerServices.InlineArray({length})");
             sb.GenericStruct($"Arguments{length}", "T");
             sb.Field("T", "arg0");
@@ -414,7 +440,93 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
                 sb.AppendLine($"this[{i}] = value{i};");
             }
             sb.CloseBlock();
-            sb.CloseBlock();
+            sb.CloseBlock();*/
+        }
+
+        private static SyntaxList<MemberDeclarationSyntax> ArgumentsTypeMembers(
+            SyntaxToken typeName,
+            int argumentsCount)
+        {
+            return List(
+                new MemberDeclarationSyntax[]{
+                    FieldDeclaration(
+                        VariableDeclaration(
+                            IdentifierName("T"))
+                        .WithVariables(
+                            SingletonSeparatedList(
+                                VariableDeclarator(
+                                    Identifier("arg0")))))
+                    .WithModifiers(
+                        TokenList(
+                            Token(SyntaxKind.PublicKeyword))),
+                    ConstructorDeclaration(typeName)
+                    .WithModifiers(
+                        TokenList(
+                            Token(SyntaxKind.PublicKeyword)))
+                    .WithParameterList(
+                        ParameterList(SeparatedList<ParameterSyntax>(
+                            ArgumentsTypeCtorArguments(argumentsCount))))
+                    .WithBody(
+                        Block(
+                            ArgumentsTypeCtorBody(argumentsCount))) });
+        }
+
+        private static IEnumerable<ParameterSyntax>? ArgumentsTypeCtorArguments(int argumentsCount)
+        {
+            for (int i = 0; i < argumentsCount; i++) {
+                yield return Parameter(Identifier($"value{i}"))
+                    .WithType(IdentifierName("T"));
+            }
+        }
+
+        private static IEnumerable<StatementSyntax> ArgumentsTypeCtorBody(int argumentsCount)
+        {
+            yield return ExpressionStatement(
+                    AssignmentExpression(
+                        SyntaxKind.SimpleAssignmentExpression,
+                        IdentifierName("arg0"),
+                        IdentifierName("value0")));
+            for (int i = 1; i < argumentsCount; i++)
+            {
+                yield return ExpressionStatement(
+                    AssignmentExpression(
+                        SyntaxKind.SimpleAssignmentExpression,
+                        ElementAccessExpression(ThisExpression())
+                        .WithArgumentList(Indexer(SimpleLiteral(i))),
+                        IdentifierName($"value{i}")));
+            }
+        }
+
+        private static BracketedArgumentListSyntax Indexer(ExpressionSyntax expressionSyntax)
+        {
+            return BracketedArgumentList(
+                SingletonSeparatedList(
+                    Argument(expressionSyntax)));
+        }
+
+        private static SyntaxList<AttributeListSyntax> InlineArray(int length)
+        {
+            return SingletonList<AttributeListSyntax>(
+                AttributeList(
+                    SingletonSeparatedList<AttributeSyntax>(
+                        Attribute(
+                            QualifiedName(
+                                QualifiedName(
+                                    QualifiedName(
+                                        AliasQualifiedName(
+                                            IdentifierName(
+                                                Token(SyntaxKind.GlobalKeyword)),
+                                            IdentifierName("System")),
+                                        IdentifierName("Runtime")),
+                                    IdentifierName("CompilerServices")),
+                                IdentifierName("InlineArray")))
+                        .WithArgumentList(
+                            AttributeArgumentList(
+                                SingletonSeparatedList<AttributeArgumentSyntax>(
+                                    AttributeArgument(
+                                        LiteralExpression(
+                                            SyntaxKind.NumericLiteralExpression,
+                                            Literal(length)))))))));
         }
 
         private static void AddNamespace(SourceBuilder sb, INamedTypeSymbol typeInfo)
@@ -435,6 +547,14 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
                 return;
 
             sb.CloseBlock();
+        }
+    }
+
+    public class AddReturn : CSharpSyntaxVisitor<FieldDeclarationSyntax>
+    {
+        public override FieldDeclarationSyntax? VisitFieldDeclaration(FieldDeclarationSyntax node)
+        {
+            return base.VisitFieldDeclaration(node);
         }
     }
 }

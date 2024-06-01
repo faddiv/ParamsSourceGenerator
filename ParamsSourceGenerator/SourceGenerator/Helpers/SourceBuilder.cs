@@ -12,7 +12,7 @@ namespace Foxy.Params.SourceGenerator.Helpers
     internal class SourceBuilder
     {
         private readonly StringBuilder _builder = new StringBuilder();
-        public string Intend { get; set; } = "    ";
+        private const string _intend = "    ";
         private int _intendLevel = 0;
         public Stack<string> _scope = new Stack<string>();
 
@@ -128,21 +128,40 @@ namespace Foxy.Params.SourceGenerator.Helpers
             }
         }
 
-        public void AppendBlockLine(SyntaxNode syntaxNode)
+        public void AppendBlockLine(SyntaxNode syntaxNode, bool normalizeWhitespace = true)
         {
-            AddIntend();
-            _builder.Append(syntaxNode.NormalizeWhitespace().ToFullString());
-            var trailingTrivia = syntaxNode.GetTrailingTrivia();
-            if (trailingTrivia.Count > 0 &&
-                trailingTrivia.Last().Token.IsKind(SyntaxKind.SemicolonToken))
+            if (normalizeWhitespace)
             {
-                _builder.AppendLine();
-            } else
+                syntaxNode = syntaxNode.NormalizeWhitespace();
+            }
+            string newCode = syntaxNode.ToFullString();
+
+            var lines = newCode.Split(new[] { "\r\n" }, StringSplitOptions.None);
+            if (lines.Length == 1)
             {
-                _builder.AppendLine(";");
+                AddIntend();
+                _builder.Append((string?)lines[0]);
+                if (_builder[_builder.Length - 1] == ';')
+                {
+                    _builder.AppendLine();
+                } else
+                {
+                    _builder.AppendLine(";");
+                }
+            }
+            else
+            {
+                foreach (string line in lines)
+                {
+                    if (line != "")
+                    {
+                        AddIntend();
+                    }
+                    _builder.AppendLine((string?)line);
+                }
             }
         }
-        
+
         public void AppendTrivias(params SyntaxTrivia[] syntaxTriviaList)
         {
             foreach (var item in syntaxTriviaList)
@@ -237,7 +256,7 @@ namespace Foxy.Params.SourceGenerator.Helpers
         {
             for (int i = 0; i < _intendLevel; i++)
             {
-                _builder.Append(Intend);
+                _builder.Append(_intend);
             }
         }
 
