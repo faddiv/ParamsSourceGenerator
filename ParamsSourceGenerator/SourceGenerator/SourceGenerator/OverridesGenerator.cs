@@ -1,4 +1,5 @@
-﻿using Foxy.Params.SourceGenerator.Data;
+﻿using Foxy.Params.SourceGenerator.CodeElements;
+using Foxy.Params.SourceGenerator.Data;
 using Foxy.Params.SourceGenerator.Helpers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -141,11 +142,8 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
         /// </summary>
         private void GenerateSpanVariableForInlineArray(DerivedData data, int argsCount)
         {
-            var variableDeclaration = SimpleVarDeclaration(
-                VariableDeclarator(
-                    Identifier(data.ArgNameSpan),
-                    null,
-                    EqualsValueClause(CallCreateReadOnlySpan(data.ArgName, argsCount))));
+            var variableDeclaration = 
+                Line.Var(data.ArgNameSpan, CallCreateReadOnlySpan(data.ArgName, argsCount));
             _sourceBuilder.AppendBlockLine(variableDeclaration);
         }
 
@@ -155,20 +153,11 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
         private ExpressionSyntax CallCreateReadOnlySpan(string argName, int argsCount)
         {
             return InvocationExpression(
-                GlobalMemberAccessChain(["System", "Runtime", "InteropServices", "MemoryMarshal", "CreateReadOnlySpan"]),
-                Arguments([
-                    QualifiedArgument(MemberAccessChain([argName, "arg0"]), SyntaxKind.RefKeyword),
-                    Argument(SimpleLiteral(argsCount))
-                    ])
+                TypeDef.Global("System", "Runtime", "InteropServices", "MemoryMarshal", "CreateReadOnlySpan"),
+                ArgumentDecl.List(
+                    ArgumentDecl.Ref(TypeDef.Of(argName, "arg0")),
+                    Argument(Literals.Value(argsCount)))
                 );
-        }
-
-        /// <summary>
-        /// {intValue}
-        /// </summary>
-        private static LiteralExpressionSyntax SimpleLiteral(int value)
-        {
-            return LiteralExpression(SyntaxKind.NumericLiteralExpression, Literal(value));
         }
 
         private void GenerateArgumentsVariable(DerivedData data, int argsCount)
@@ -195,15 +184,13 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
         }
 
         /// <summary>
-        /// var {argsSpan} = new global::System.ReadOnlySpan<{T}>({args});
+        /// var argsSpan = new global::System.ReadOnlySpan<T>(args);
         /// </summary>
         private void GenerateSpanVariableForParamsArgument(DerivedData data)
         {
-            var variableDeclaration = SimpleVarDeclaration(
-                VariableDeclarator(
-                    Identifier(data.ArgNameSpan),
-                    null,
-                    EqualsValueClause(NewReadOnlySpanOfTWithArgs(data.SpanArgumentType, data.ArgName))));
+            var variableDeclaration = Line.Var(
+                data.ArgNameSpan,
+                NewReadOnlySpanOfTWithArgs(data.SpanArgumentType, data.ArgName));
             _sourceBuilder.AppendBlockLine(variableDeclaration);
         }
 
@@ -213,17 +200,9 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
         private static ObjectCreationExpressionSyntax NewReadOnlySpanOfTWithArgs(string spanArgumentType, string argName)
         {
             return ObjectCreationExpression(
-                ToGloballyQualifiedName("System", GenericName(Identifier("ReadOnlySpan"), TypeArguments(spanArgumentType))),
-                Arguments(IdentifierName(argName)),
+                TypeDef.Global(["System", "ReadOnlySpan"], ParseTypeName(spanArgumentType)),
+                ArgumentDecl.Arguments(IdentifierName(argName)),
                 null);
-        }
-
-        /// <summary>
-        /// {argumentTypeName}
-        /// </summary>
-        private static TypeArgumentListSyntax TypeArguments(string argumentTypeName)
-        {
-            return TypeArgumentList(SingletonSeparatedList(ParseTypeName(argumentTypeName)));
         }
 
         /// <summary>
@@ -232,114 +211,6 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
         private static TypeParameterListSyntax TypeParameters(string typeParameterName)
         {
             return TypeParameterList(SingletonSeparatedList(TypeParameter(typeParameterName)));
-        }
-
-        /// <summary>
-        /// {arg} (In argument list)
-        /// </summary>
-        private static ArgumentListSyntax Arguments(ExpressionSyntax arg)
-        {
-            return ArgumentList(SingletonSeparatedList(Argument(arg)));
-        }
-
-        /// <summary>
-        /// <code>ref {arg}</code>
-        /// or
-        /// <code>in {arg}</code>
-        /// or
-        /// <code>out {arg}</code>
-        /// </summary>
-        /// <exception cref="ArgumentOutOfRangeException">not None, ref, in or out.</exception>
-        private static ArgumentSyntax QualifiedArgument(ExpressionSyntax arg, SyntaxKind syntaxKind = SyntaxKind.None)
-        {
-            return syntaxKind switch
-            {
-                SyntaxKind.None => Argument(arg),
-                SyntaxKind.RefKeyword or
-                SyntaxKind.OutKeyword or
-                SyntaxKind.InKeyword => Argument(default, Token(syntaxKind), arg),
-                _ => throw new ArgumentOutOfRangeException(nameof(syntaxKind)),
-            };
-        }
-
-        /// <summary>
-        /// {arg0}, {arg1}, {arg2}
-        /// </summary>
-        private static ArgumentListSyntax Arguments(IEnumerable<ArgumentSyntax> args)
-        {
-            return ArgumentList(SeparatedList(args));
-        }
-
-        private static QualifiedNameSyntax ToGloballyQualifiedName(string qualifier, SimpleNameSyntax nameSyntax)
-        {
-            return QualifiedName(
-                        GlobalNameSyntax(qualifier), nameSyntax);
-        }
-
-        /// <summary>
-        /// global::{parts[0]}.{parts[1]}.{parts[2]}
-        /// </summary>
-        private static ExpressionSyntax GlobalMemberAccessChain(
-            string[] parts)
-        {
-            return MemberAccessChain(parts, isGlobal: true);
-        }
-
-        /// <summary>
-        /// {parts[0]}.{parts[1]}.{parts[2]}
-        /// </summary>
-        private static ExpressionSyntax MemberAccessChain(
-            string[] parts, bool isGlobal = false)
-        {
-            ExpressionSyntax current = isGlobal
-                ? GlobalNameSyntax(parts[0])
-                : IdentifierName(parts[0]);
-            for (int i = 1; i < parts.Length; i++)
-            {
-                current = MemberAccessExpression(
-                    SyntaxKind.SimpleMemberAccessExpression,
-                    current,
-                    IdentifierName(parts[i]));
-            }
-            return current;
-        }
-
-        /// <summary>
-        /// global::{qualifier}
-        /// </summary>
-        private static AliasQualifiedNameSyntax GlobalNameSyntax(string qualifier)
-        {
-            return AliasQualifiedName(
-                IdentifierName(Token(SyntaxKind.GlobalKeyword)),
-                IdentifierName(qualifier));
-        }
-
-        private static NameSyntax GlobalNameSyntax(params string[] qualifiers)
-        {
-            NameSyntax result = GlobalNameSyntax(qualifiers[0]);
-            for(int i = 1;i < qualifiers.Length; i++)
-            {
-                result = QualifiedName(
-                        result,
-                        IdentifierName(qualifiers[i]));
-            }
-            return result;
-        }
-
-        /// <summary>
-        /// var {varDeclarator}
-        /// </summary>
-        private static VariableDeclarationSyntax SimpleVarDeclaration(VariableDeclaratorSyntax varDeclarator)
-        {
-            return VariableDeclaration(VarIdentifier(), SingletonSeparatedList(varDeclarator));
-        }
-
-        /// <summary>
-        /// var
-        /// </summary>
-        private static IdentifierNameSyntax VarIdentifier()
-        {
-            return IdentifierName(Identifier("var"));
         }
 
         private void GenerateArgumentsClasses()
@@ -399,35 +270,23 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
         {
             foreach (var item in data.ParameterInfos)
             {
-                var argument = Argument(IdentifierName(item.Name));
-
-                switch (item.GetPassParameterModifier())
+                yield return item.GetPassParameterModifier() switch
                 {
-                    case RefKind.Ref:
-                        argument = argument.WithRefKindKeyword(Token(SyntaxKind.RefKeyword));
-                        break;
-                    case RefKind.Out:
-                        argument = argument.WithRefKindKeyword(Token(SyntaxKind.OutKeyword));
-                        break;
-                    case RefKind.In:
-                        argument = argument.WithRefKindKeyword(Token(SyntaxKind.InKeyword));
-                        break;
-                    default:
-                        break;
-                }
-
-                yield return argument;
+                    RefKind.Ref => ArgumentDecl.Ref(IdentifierName(item.Name)),
+                    RefKind.Out => ArgumentDecl.Out(IdentifierName(item.Name)),
+                    RefKind.In => ArgumentDecl.In(IdentifierName(item.Name)),
+                    _ => ArgumentDecl.Of(item.Name)
+                };
             }
-            var argSpan = Argument(IdentifierName(data.ArgNameSpanInput));
-            yield return argSpan;
+            yield return ArgumentDecl.Of(data.ArgNameSpanInput);
         }
 
         private static void CreateArgumentsStruct(SourceBuilder sb, int length)
         {
             var typeName = Identifier($"Arguments{length}");
             var arguments = StructDeclaration(
-                attributeLists: Attributes(InlineArrayAttribute(length)),
-                modifiers: Modifiers(SyntaxKind.FileKeyword),
+                attributeLists: Attributes.List(InlineArrayAttribute(length)),
+                modifiers: Modifier.File(),
                 identifier: typeName,
                 typeParameterList: TypeParameters("T"),
                 baseList: default,
@@ -444,17 +303,17 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
 
             static IEnumerable<MemberDeclarationSyntax> ArgumentsStructMembers(SyntaxToken typeName, int argumentsCount)
             {
-                yield return PublicField(IdentifierName("T"), "arg0");
-                yield return ArgumentsTypeCtor(typeName, argumentsCount);
+                yield return Field.Public(IdentifierName("T"), "arg0");
+                yield return CtorArguments(typeName, argumentsCount);
             }
 
         }
 
-        private static MemberDeclarationSyntax ArgumentsTypeCtor(SyntaxToken typeName, int argumentsCount)
+        private static MemberDeclarationSyntax CtorArguments(SyntaxToken typeName, int argumentsCount)
         {
             return ConstructorDeclaration(
                 attributeLists: default,
-                modifiers: Modifiers(SyntaxKind.PublicKeyword),
+                modifiers: Modifier.Public(),
                 identifier: typeName,
                 parameterList: ArgumentsTypeCtorParameters(argumentsCount),
                 initializer: default,
@@ -481,66 +340,16 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
 
             static IEnumerable<StatementSyntax> ArgumentsTypeCtorBodyEnumerator(int argumentsCount)
             {
-                yield return SimpleAssignmentLine(IdentifierName("arg0"), IdentifierName("value0"));
+                yield return Line.Assign(IdentifierName("arg0"), IdentifierName("value0"));
                 for (int i = 1; i < argumentsCount; i++)
                 {
-                    yield return SimpleAssignmentLine(
-                        ElementAccessExpression(ThisExpression(), Indexer(i)),
+                    yield return Line.Assign(
+                        ElementAccessExpression(ThisExpression(), Indexers.Indexer(i)),
                         IdentifierName($"value{i}"));
                 }
             }
         }
 
-        private static FieldDeclarationSyntax PublicField(TypeSyntax type, string identifier)
-        {
-            return FieldDeclaration(
-                attributeLists: default,
-                modifiers: Modifiers(SyntaxKind.PublicKeyword),
-                VariableDeclaration(
-                    type,
-                    SingletonSeparatedList(VariableDeclarator(Identifier(identifier)))));
-        }
-
-        /// <summary>
-        /// left = right;
-        /// </summary>
-        private static ExpressionStatementSyntax SimpleAssignmentLine(ExpressionSyntax left, ExpressionSyntax right)
-        {
-            return ExpressionStatement(AssignmentExpression(SyntaxKind.SimpleAssignmentExpression, left, right));
-        }
-
-        /// <summary>
-        /// ?[index]
-        /// </summary>
-        private static BracketedArgumentListSyntax Indexer(int index)
-        {
-            return Indexer(SimpleLiteral(index));
-        }
-        /// <summary>
-        /// ?[expressionSyntax]
-        /// </summary>
-        private static BracketedArgumentListSyntax Indexer(ExpressionSyntax expressionSyntax)
-        {
-            return BracketedArgumentList(
-                SingletonSeparatedList(
-                    Argument(expressionSyntax)));
-        }
-
-        /// <summary>
-        /// modifier ?
-        /// </summary>
-        private static SyntaxTokenList Modifiers(SyntaxKind modifier)
-        {
-            return TokenList(Token(modifier));
-        }
-
-        /// <summary>
-        /// [attribute]<br/>
-        /// ?
-        /// </summary>
-        private static SyntaxList<AttributeListSyntax> Attributes(AttributeSyntax attribute) {
-            return SingletonList(AttributeList(SingletonSeparatedList(attribute)));
-        }
 
         /// <summary>
         /// [global::System.Runtime.CompilerServices.InlineArray(length)]<br/>
@@ -549,8 +358,8 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
         private static AttributeSyntax InlineArrayAttribute(int length)
         {
             return Attribute(
-                GlobalNameSyntax("System", "Runtime", "CompilerServices", "InlineArray"),
-                AttributeArgumentList(SingletonSeparatedList(AttributeArgument(SimpleLiteral(length))
+                TypeDef.Global("System", "Runtime", "CompilerServices", "InlineArray"),
+                AttributeArgumentList(SingletonSeparatedList(AttributeArgument(Literals.Value(length))
                 )));
         }
 
