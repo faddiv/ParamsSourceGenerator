@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -11,6 +12,14 @@ namespace Foxy.Params.SourceGenerator.CodeElements
         /// arg0, arg1, arg2
         /// </summary>
         public static ArgumentListSyntax List(params ArgumentSyntax[] args)
+        {
+            return ArgumentList(SeparatedList(args));
+        }
+
+        /// <summary>
+        /// arg0, arg1, arg2
+        /// </summary>
+        public static ArgumentListSyntax List(IEnumerable<ArgumentSyntax> args)
         {
             return ArgumentList(SeparatedList(args));
         }

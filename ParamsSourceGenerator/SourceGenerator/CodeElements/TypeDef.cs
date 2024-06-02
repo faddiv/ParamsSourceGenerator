@@ -9,17 +9,34 @@ namespace Foxy.Params.SourceGenerator.CodeElements
         /// <summary>
         /// parts0.parts1.parts2
         /// </summary>
-        public static ExpressionSyntax Of(params string[] parts)
+        public static NameSyntax Of(params string[] parts)
         {
-            ExpressionSyntax current = IdentifierName(parts[0]);
+            NameSyntax current = IdentifierName(parts[0]);
             for (int i = 1; i < parts.Length; i++)
             {
-                current = MemberAccessExpression(
-                    SyntaxKind.SimpleMemberAccessExpression,
-                    current,
-                    IdentifierName(parts[i]));
+                SimpleNameSyntax identifier = IdentifierName(parts[i]);
+                current = QualifiedName(current, identifier);
             }
             return current;
+        }
+
+
+        /// <summary>
+        /// qualifier1.qualifier2.qualifier3&lt;typeArgument1, typeArgumen2&gt;
+        /// </summary>
+        public static NameSyntax Of(string[] qualifiers, params TypeSyntax[] typeArgument)
+        {
+            NameSyntax? result = null;
+            for (int i = 0; i < qualifiers.Length; i++)
+            {
+                SimpleNameSyntax identifier = i == qualifiers.Length - 1
+                    ? GenericName(Identifier(qualifiers[i]), TypeArguments(typeArgument))
+                    : IdentifierName(qualifiers[i]);
+                result = result == null
+                    ? identifier 
+                    : QualifiedName(result, identifier);
+            }
+            return result;
         }
 
         /// <summary>

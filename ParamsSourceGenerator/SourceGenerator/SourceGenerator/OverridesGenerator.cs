@@ -131,20 +131,18 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
 
         private void GenerateBodyForOverrideWithNArgs(DerivedData data, int argsCount)
         {
-            GenerateArgumentsVariable(data, argsCount);
-            GenerateSpanVariableForInlineArray(data, argsCount);
+            _sourceBuilder.AppendBlockLine(GenerateArgumentsVariable(data, argsCount));
+            _sourceBuilder.AppendBlockLine(GenerateSpanVariableForInlineArray(data, argsCount));
             GenerateCallOriginalMethod(data);
         }
 
 
         /// <summary>
-        /// var {argsSpan} = global::System.Runtime.InteropServices.MemoryMarshal.CreateReadOnlySpan(ref {arg}.arg0, {argsCount});
+        /// var argsSpan = global::System.Runtime.InteropServices.MemoryMarshal.CreateReadOnlySpan(ref arg.arg0, argsCount);
         /// </summary>
-        private void GenerateSpanVariableForInlineArray(DerivedData data, int argsCount)
+        private VariableDeclarationSyntax GenerateSpanVariableForInlineArray(DerivedData data, int argsCount)
         {
-            var variableDeclaration = 
-                Line.Var(data.ArgNameSpan, CallCreateReadOnlySpan(data.ArgName, argsCount));
-            _sourceBuilder.AppendBlockLine(variableDeclaration);
+            return Line.Var(data.ArgNameSpan, CallCreateReadOnlySpan(data.ArgName, argsCount));
         }
 
         /// <summary>
@@ -160,9 +158,24 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
                 );
         }
 
-        private void GenerateArgumentsVariable(DerivedData data, int argsCount)
+        /// <summary>
+        /// var {argName} = new Arguments{argsCount}&lt;{SpanArgumentType}&gt;(argName1, argName2, argName3);
+        /// </summary>
+        private VariableDeclarationSyntax GenerateArgumentsVariable(DerivedData data, int argsCount)
         {
-            _sourceBuilder.AppendLine($"var {data.ArgName} = new Arguments{argsCount}<{data.SpanArgumentType}>({string.Join(", ", Enumerable.Range(0, argsCount).Select(j => $"{data.ArgName}{j}"))});");
+            return Line.Var(data.ArgName,
+                Constructor.New(
+                    TypeDef.Of([$"Arguments{argsCount}"], ParseTypeName(data.SpanArgumentType)),
+                    Arguments(argsCount, data.ArgName)
+                    ));
+
+            static IEnumerable<ArgumentSyntax> Arguments(int argsCount, string argNamePrefix)
+            {
+                for (var i = 0; i < argsCount; i++)
+                {
+                    yield return ArgumentDecl.Of($"{argNamePrefix}{i}");
+                }
+            }
         }
 
         private void GenerateOverrideWithParamsParameter(SuccessfulParamsCandidate paramsCandidate, DerivedData data)
@@ -199,10 +212,9 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
         /// </summary>
         private static ObjectCreationExpressionSyntax NewReadOnlySpanOfTWithArgs(string spanArgumentType, string argName)
         {
-            return ObjectCreationExpression(
+            return Constructor.New(
                 TypeDef.Global(["System", "ReadOnlySpan"], ParseTypeName(spanArgumentType)),
-                ArgumentDecl.Arguments(IdentifierName(argName)),
-                null);
+                ArgumentDecl.Of(argName));
         }
 
         /// <summary>
