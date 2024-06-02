@@ -57,17 +57,17 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
 
         private void GenerateNamespace()
         {
-            AddNamespace(_sourceBuilder, _typeInfo);
+            AddNamespace(_typeInfo);
 
             GeneratePartialClass();
             GenerateArgumentsClasses();
 
-            AddNamespaceCloseBlock(_sourceBuilder, _typeInfo);
+            AddNamespaceCloseBlock(_typeInfo);
         }
 
         private void GeneratePartialClass()
         {
-            var nestLevel = CreateClasses(_typeInfo, _sourceBuilder);
+            var nestLevel = CreateClasses(_typeInfo);
 
             foreach (var paramsCandidate in _paramsCandidates)
             {
@@ -86,25 +86,25 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
                 GenerateOverrideWithParamsParameter(paramsCandidate, data);
             }
 
-            CloseTimes(_sourceBuilder, nestLevel);
+            CloseTimes(nestLevel);
         }
 
-        private static int CreateClasses(INamedTypeSymbol? typeInfo, SourceBuilder sb)
+        private int CreateClasses(INamedTypeSymbol? typeInfo)
         {
             var items = SemanticHelpers.GetTypeHierarchy(typeInfo);
             foreach (var item in items)
             {
-                sb.Class(item.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat));
+                _sourceBuilder.Class(item.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat));
             }
 
             return items.Count;
         }
 
-        private static void CloseTimes(SourceBuilder sb, int nestLevel)
+        private void CloseTimes(int nestLevel)
         {
             for (int i = 0; i < nestLevel; i++)
             {
-                sb.CloseBlock();
+                _sourceBuilder.CloseBlock();
             }
         }
 
@@ -228,7 +228,7 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
             for (int i = 1; i <= _maxOverridesMax; i++)
             {
                 _sourceBuilder.AppendLine();
-                CreateArgumentsStruct(_sourceBuilder, i);
+                CreateArgumentsStruct(i);
             }
         }
 
@@ -290,7 +290,7 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
             yield return ArgumentDecl.Of(data.ArgNameSpanInput);
         }
 
-        private static void CreateArgumentsStruct(SourceBuilder sb, int length)
+        private void CreateArgumentsStruct(int length)
         {
             var typeName = Identifier($"Arguments{length}");
             var argumentsStruct = StructDeclaration(
@@ -303,7 +303,7 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
                 members: ArgumentsStructMembers(length, typeName));
             argumentsStruct = argumentsStruct.NormalizeWhitespace();
             argumentsStruct = argumentsStruct.AddEmptyLineAfterMember(argumentsStruct.Members[0]);
-            sb.AppendBlockLine(argumentsStruct, false);
+            _sourceBuilder.AppendBlockLine(argumentsStruct, false);
         }
 
         private static SyntaxList<MemberDeclarationSyntax> ArgumentsStructMembers(int length, SyntaxToken typeName)
@@ -372,7 +372,7 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
                 )));
         }
 
-        private static void AddNamespace(SourceBuilder sb, INamedTypeSymbol typeInfo)
+        private void AddNamespace(INamedTypeSymbol typeInfo)
         {
             if (typeInfo.ContainingNamespace.IsGlobalNamespace)
                 return;
@@ -381,15 +381,15 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
             var @namespace = NamespaceDeclaration(name);
             sb.AppendTrivia(@namespace);*/
 
-            sb.Namespace(SemanticHelpers.GetNameSpaceNoGlobal(typeInfo));
+            _sourceBuilder.Namespace(SemanticHelpers.GetNameSpaceNoGlobal(typeInfo));
         }
 
-        private static void AddNamespaceCloseBlock(SourceBuilder sb, INamedTypeSymbol typeInfo)
+        private void AddNamespaceCloseBlock(INamedTypeSymbol typeInfo)
         {
             if (typeInfo.ContainingNamespace.IsGlobalNamespace)
                 return;
 
-            sb.CloseBlock();
+            _sourceBuilder.CloseBlock();
         }
     }
 }

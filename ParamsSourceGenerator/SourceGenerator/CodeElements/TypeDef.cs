@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Foxy.Params.SourceGenerator.CodeElements
@@ -36,6 +37,8 @@ namespace Foxy.Params.SourceGenerator.CodeElements
                     ? identifier 
                     : QualifiedName(result, identifier);
             }
+            if (result == null)
+                throw new InvalidOperationException("result is null");
             return result;
         }
 
