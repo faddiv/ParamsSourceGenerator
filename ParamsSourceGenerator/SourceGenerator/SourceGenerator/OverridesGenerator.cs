@@ -113,8 +113,8 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
             var variableArguments = data.FixArguments.Concat(
                 Enumerable.Range(0, argsCount).Select(j => $"{data.SpanArgumentType} {data.ArgName}{j}"));
             GenerateMethodHeaderWithArguments(data, variableArguments);
-            GenerateBodyForOverrideWithNArgs(data, argsCount);
-            _sourceBuilder.CloseBlock();
+            var result = GenerateBodyForOverrideWithNArgs(data, argsCount);
+            _sourceBuilder.AppendSyntaxNode(result);
         }
 
         private void GenerateMethodHeaderWithArguments(DerivedData data, IEnumerable<string> arguments)
@@ -128,18 +128,19 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
                 data.TypeConstraints);
         }
 
-        private void GenerateBodyForOverrideWithNArgs(DerivedData data, int argsCount)
+        private BlockSyntax GenerateBodyForOverrideWithNArgs(DerivedData data, int argsCount)
         {
-            _sourceBuilder.AppendBlockLine(GenerateArgumentsVariable(data, argsCount));
-            _sourceBuilder.AppendBlockLine(GenerateSpanVariableForInlineArray(data, argsCount));
-            _sourceBuilder.AppendBlockLine(GenerateCallOriginalMethod(data));
+            return Block(
+                GenerateArgumentsVariable(data, argsCount),
+                GenerateSpanVariableForInlineArray(data, argsCount),
+                GenerateCallOriginalMethod(data));
         }
 
 
         /// <summary>
         /// var argsSpan = global::System.Runtime.InteropServices.MemoryMarshal.CreateReadOnlySpan(ref arg.arg0, argsCount);
         /// </summary>
-        private VariableDeclarationSyntax GenerateSpanVariableForInlineArray(DerivedData data, int argsCount)
+        private LocalDeclarationStatementSyntax GenerateSpanVariableForInlineArray(DerivedData data, int argsCount)
         {
             return Line.Var(data.ArgNameSpan, CallCreateReadOnlySpan(data.ArgName, argsCount));
         }
@@ -160,7 +161,7 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
         /// <summary>
         /// var {argName} = new Arguments{argsCount}&lt;{SpanArgumentType}&gt;(argName1, argName2, argName3);
         /// </summary>
-        private VariableDeclarationSyntax GenerateArgumentsVariable(DerivedData data, int argsCount)
+        private LocalDeclarationStatementSyntax GenerateArgumentsVariable(DerivedData data, int argsCount)
         {
             return Line.Var(data.ArgName,
                 Constructor.New(
@@ -185,20 +186,21 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
             }
             _sourceBuilder.AppendLine();
             GenerateMethodHeaderWithArguments(data, data.FixArguments.Append($"params {data.SpanArgumentType}[] {data.ArgName}"));
-            GenerateBodyWithParamsParameter(data);
-            _sourceBuilder.CloseBlock();
+            _sourceBuilder.AppendSyntaxNode(GenerateBodyWithParamsParameter(data));
         }
 
-        private void GenerateBodyWithParamsParameter(DerivedData data)
+        private BlockSyntax GenerateBodyWithParamsParameter(DerivedData data)
         {
-            _sourceBuilder.AppendBlockLine(GenerateSpanVariableForParamsArgument(data));
-            _sourceBuilder.AppendBlockLine(GenerateCallOriginalMethod(data));
+            return Block(
+                GenerateSpanVariableForParamsArgument(data),
+                GenerateCallOriginalMethod(data)
+                );
         }
 
         /// <summary>
         /// var argsSpan = new global::System.ReadOnlySpan<T>(args);
         /// </summary>
-        private VariableDeclarationSyntax GenerateSpanVariableForParamsArgument(DerivedData data)
+        private LocalDeclarationStatementSyntax GenerateSpanVariableForParamsArgument(DerivedData data)
         {
             return Line.Var(
                 data.ArgNameSpan,
@@ -235,12 +237,12 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
         /// <summary>
         /// return Format<{T}>({format}, {argsSpan})
         /// </summary>
-        private SyntaxNode GenerateCallOriginalMethod(DerivedData data)
+        private StatementSyntax GenerateCallOriginalMethod(DerivedData data)
         {
             SimpleNameSyntax methodName = data.TypeArguments.Count > 0
                 ? GenericName(Identifier(data.MethodName), TypeArgumentList(SeparatedList(GenerateInvocationTypeArguments(data))))
                 : IdentifierName(data.MethodName);
-            SyntaxNode invocationExpression = InvocationExpression(
+            var invocationExpression = InvocationExpression(
                 methodName,
                 ArgumentList(SeparatedList(GenerateInvocationArguments(data))));
             return AddReturnStatement(data.ReturnsKind, invocationExpression);
@@ -253,18 +255,15 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
         /// or
         /// <code>return ref Format()</code>
         /// </summary>
-        private static SyntaxNode AddReturnStatement(ReturnKind returnKind, SyntaxNode invocationExpression)
+        private static StatementSyntax AddReturnStatement(ReturnKind returnKind, ExpressionSyntax invocationExpression)
         {
             if (returnKind == ReturnKind.ReturnsRef)
             {
-                invocationExpression = RefExpression((ExpressionSyntax)invocationExpression);
+                invocationExpression = RefExpression(invocationExpression);
             }
-            if (returnKind != ReturnKind.ReturnsVoid)
-            {
-                invocationExpression = ReturnStatement((ExpressionSyntax)invocationExpression);
-            }
-
-            return invocationExpression;
+            return returnKind != ReturnKind.ReturnsVoid 
+                ? ReturnStatement(invocationExpression) 
+                : ExpressionStatement(invocationExpression);
         }
 
         private IEnumerable<TypeSyntax> GenerateInvocationTypeArguments(DerivedData data)
@@ -303,7 +302,7 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
                 members: ArgumentsStructMembers(length, typeName));
             argumentsStruct = argumentsStruct.NormalizeWhitespace();
             argumentsStruct = argumentsStruct.AddEmptyLineAfterMember(argumentsStruct.Members[0]);
-            _sourceBuilder.AppendBlockLine(argumentsStruct, false);
+            _sourceBuilder.AppendSyntaxNode(argumentsStruct, false);
         }
 
         private static SyntaxList<MemberDeclarationSyntax> ArgumentsStructMembers(int length, SyntaxToken typeName)

@@ -17,21 +17,23 @@ namespace Foxy.Params.SourceGenerator.CodeElements
         /// <summary>
         /// var variableName = equalsTo;
         /// </summary>
-        public static VariableDeclarationSyntax Var(string variableName, ExpressionSyntax equalsTo)
+        public static LocalDeclarationStatementSyntax Var(string variableName, ExpressionSyntax equalsTo)
         {
-            return SimpleVarDeclaration(
-                VariableDeclarator(
-                    Identifier(variableName),
-                    null,
-                    EqualsValueClause(equalsTo)));
+            return LocalDeclarationStatement(
+                SimpleVarDeclaration(variableName, equalsTo));
         }
 
         /// <summary>
-        /// var varDeclarator
+        /// var variableName = equalsTo
         /// </summary>
-        private static VariableDeclarationSyntax SimpleVarDeclaration(VariableDeclaratorSyntax varDeclarator)
+        private static VariableDeclarationSyntax SimpleVarDeclaration(string variableName, ExpressionSyntax equalsTo)
         {
-            return VariableDeclaration(Keyword.Var(), SingletonSeparatedList(varDeclarator));
+            return VariableDeclaration(Keyword.Var(), 
+                SingletonSeparatedList(
+                    VariableDeclarator(
+                        Identifier(variableName),
+                        null,
+                        EqualsValueClause(equalsTo))));
         }
 
     }

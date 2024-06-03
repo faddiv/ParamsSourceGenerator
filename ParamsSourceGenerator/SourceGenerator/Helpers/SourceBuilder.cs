@@ -73,7 +73,6 @@ namespace Foxy.Params.SourceGenerator.Helpers
             CommaSeparatedItemList(args);
             _builder.AppendLine(")");
             AddTypeConstraints(typeConstraintsList);
-            OpenBlock(name);
         }
 
         public void Attribute(string name)
@@ -126,7 +125,7 @@ namespace Foxy.Params.SourceGenerator.Helpers
             }
         }
 
-        public void AppendBlockLine(SyntaxNode syntaxNode, bool normalizeWhitespace = true)
+        public void AppendSyntaxNode(SyntaxNode syntaxNode, bool normalizeWhitespace = true)
         {
             if (normalizeWhitespace)
             {
