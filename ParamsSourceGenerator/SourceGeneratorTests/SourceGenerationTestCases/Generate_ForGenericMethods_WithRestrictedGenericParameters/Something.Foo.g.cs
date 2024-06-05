@@ -7,10 +7,8 @@ namespace Something
     partial class Foo
     {
         public static void Format<T, F, G, H>(string format, object args0)
-            where T : struct
-            where F : class, global::System.ICloneable, new()
-            where G : notnull, global::System.Attribute
-            where H : unmanaged
+            where T : struct where F : class, global::System.ICloneable, new()
+            where G : notnull, global::System.Attribute where H : unmanaged
         {
             var args = new Arguments1<object>(args0);
             var argsSpan = global::System.Runtime.InteropServices.MemoryMarshal.CreateReadOnlySpan(ref args.arg0, 1);

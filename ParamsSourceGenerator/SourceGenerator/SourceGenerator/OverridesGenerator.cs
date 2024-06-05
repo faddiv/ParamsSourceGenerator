@@ -112,9 +112,107 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
         {
             var variableArguments = data.FixArguments.Concat(
                 Enumerable.Range(0, argsCount).Select(j => $"{data.SpanArgumentType} {data.ArgName}{j}"));
-            GenerateMethodHeaderWithArguments(data, variableArguments);
+            var method = GenerateMethodHeaderWithArguments(data, argsCount);
             var result = GenerateBodyForOverrideWithNArgs(data, argsCount);
-            _sourceBuilder.AppendSyntaxNode(result);
+             method = method.WithBody(result);
+            _sourceBuilder.AppendSyntaxNode(method);
+        }
+
+        private MethodDeclarationSyntax GenerateMethodHeaderWithArguments(DerivedData data, int argsCount)
+        {
+            var method = MethodDeclaration(
+                ParseTypeName(data.ReturnType),
+                Identifier(data.MethodName));
+            method = method.WithModifiers(TokenList(Modifiers(data.IsStatic)));
+            if (data.TypeArguments.Count > 0)
+            {
+                method = method.WithTypeParameterList(TypeParameterList(SeparatedList(TypeParameters(data.TypeArguments))));
+            }
+            method = method.WithParameterList(ParameterList(SeparatedList(Parameters(data, argsCount))));
+            if(data.TypeConstraints.Count > 0)
+            {
+                method = method.WithConstraintClauses(List(Constraints(data)));
+            }
+
+            return method;
+
+            static IEnumerable<SyntaxToken> Modifiers(bool isStatic)
+            {
+                yield return Token(SyntaxKind.PublicKeyword);
+                if (isStatic)
+                {
+                    yield return Token(SyntaxKind.StaticKeyword);
+                }
+            }
+
+            static IEnumerable<TypeParameterSyntax> TypeParameters(IEnumerable<string> typeArguments)
+            {
+                foreach (var item in typeArguments)
+                {
+                    yield return TypeParameter(item);
+                }
+            }
+
+            static IEnumerable<ParameterSyntax> Parameters(DerivedData data, int argsCount)
+            {
+                foreach (var item in data.ParameterInfos)
+                {
+                    var type = ParseTypeName(item.Type);
+                    type = item.IsNullable ? NullableType(type) : type;
+                    yield return ParamDecl.Of(type, item.Name, item.RefKind);
+                }
+                var spanArgType = ParseTypeName(data.SpanArgumentType);
+                for (int i = 0; i < argsCount; i++)
+                {
+                    yield return ParamDecl.Of(spanArgType, $"{data.ArgName}{i}", RefKind.None);
+                }
+
+            }
+
+            static IEnumerable<TypeParameterConstraintClauseSyntax> Constraints(DerivedData data)
+            {
+                foreach (var constrain in data.TypeConstraints)
+                {
+                    yield return TypeParameterConstraintClause(IdentifierName(constrain.Type),
+                        SeparatedList(ConstraintsElements(constrain.Constraints)));
+                }
+            }
+
+            static IEnumerable<TypeParameterConstraintSyntax> ConstraintsElements(List<string> constraints)
+            {
+                foreach (var item in constraints)
+                {
+                    switch (item)
+                    {
+                        case "struct":
+                            yield return ClassOrStructConstraint(SyntaxKind.StructConstraint); 
+                            break;
+                        case "class":
+                            yield return ClassOrStructConstraint(SyntaxKind.ClassConstraint);
+                            break;
+                        case "notnull":
+                            yield return TypeConstraint(IdentifierName("notnull"));
+                            break;
+                        case "unmanaged":
+                            yield return TypeConstraint(IdentifierName("unmanaged"));
+                            break;
+                        case "new()":
+                            yield return ConstructorConstraint();
+                            break;
+                        default:
+                            yield return TypeConstraint(ParseTypeName(item));
+                            break;
+                    }
+                }
+            }
+
+            /*_sourceBuilder.Method(
+                data.MethodName,
+                arguments,
+                data.IsStatic,
+                data.ReturnType,
+                data.TypeArguments,
+                data.TypeConstraints);*/
         }
 
         private void GenerateMethodHeaderWithArguments(DerivedData data, IEnumerable<string> arguments)
@@ -204,7 +302,7 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
         {
             return Line.Var(
                 data.ArgNameSpan,
-                NewReadOnlySpanOfTWithArgs(data.SpanArgumentType, data.ArgName));            
+                NewReadOnlySpanOfTWithArgs(data.SpanArgumentType, data.ArgName));
         }
 
         /// <summary>
@@ -261,8 +359,8 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
             {
                 invocationExpression = RefExpression(invocationExpression);
             }
-            return returnKind != ReturnKind.ReturnsVoid 
-                ? ReturnStatement(invocationExpression) 
+            return returnKind != ReturnKind.ReturnsVoid
+                ? ReturnStatement(invocationExpression)
                 : ExpressionStatement(invocationExpression);
         }
 
