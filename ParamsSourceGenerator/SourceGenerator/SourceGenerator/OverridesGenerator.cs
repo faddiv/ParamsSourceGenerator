@@ -38,7 +38,9 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
                 CarriageReturnLineFeed,
                 NullableEnable(),
                 CarriageReturnLineFeed);
-            GenerateNamespace();
+            foreach (var item in GenerateNamespace()) {
+                _sourceBuilder.AppendSyntaxNode(item);
+            }
 
             return SourceText.From(_sourceBuilder.ToString(), Encoding.UTF8);
         }
@@ -56,17 +58,19 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
                     true));
         }
 
-        private void GenerateNamespace()
+        private SyntaxList<MemberDeclarationSyntax> GenerateNamespace()
         {
-            AddNamespace(_typeInfo);
-            _sourceBuilder.AppendSyntaxNode(GeneratePartialClass());
-            foreach (var item in GenerateArgumentsClasses())
+            var members =
+                SingletonList<MemberDeclarationSyntax>(GeneratePartialClass())
+                .AddRange(GenerateArgumentsClasses());
+            if(!_typeInfo.ContainingNamespace.IsGlobalNamespace)
             {
-                _sourceBuilder.AppendLine();
-                _sourceBuilder.AppendSyntaxNode(item);
+                members = SingletonList<MemberDeclarationSyntax>(
+                    AddNamespace(_typeInfo.ContainingNamespace)
+                    .WithMembers(members));
             }
 
-            AddNamespaceCloseBlock(_typeInfo);
+            return members;
         }
 
         private ClassDeclarationSyntax GeneratePartialClass()
@@ -467,6 +471,19 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
             _sourceBuilder.Namespace(SemanticHelpers.GetNameSpaceNoGlobal(typeInfo));
         }
 
+        private NamespaceDeclarationSyntax AddNamespace(INamespaceSymbol namespaceInfo)
+        {
+            return NamespaceDeclaration(GetNameSpaceName(namespaceInfo));
+            
+            static NameSyntax GetNameSpaceName(INamespaceSymbol namespaceInfo)
+            {
+                if(namespaceInfo.ContainingNamespace == null || namespaceInfo.ContainingNamespace.IsGlobalNamespace)
+                {
+                    return IdentifierName(namespaceInfo.Name);
+                }
+                return QualifiedName(GetNameSpaceName(namespaceInfo.ContainingNamespace), IdentifierName(namespaceInfo.Name));
+            }
+        }
         private void AddNamespaceCloseBlock(INamedTypeSymbol typeInfo)
         {
             if (typeInfo.ContainingNamespace.IsGlobalNamespace)
