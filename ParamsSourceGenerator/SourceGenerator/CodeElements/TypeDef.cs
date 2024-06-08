@@ -21,7 +21,6 @@ namespace Foxy.Params.SourceGenerator.CodeElements
             return current;
         }
 
-
         /// <summary>
         /// qualifier1.qualifier2.qualifier3&lt;typeArgument1, typeArgumen2&gt;
         /// </summary>
@@ -80,6 +79,16 @@ namespace Foxy.Params.SourceGenerator.CodeElements
                 result = QualifiedName(result, identifier);
             }
             return result;
+        }
+
+        /// <summary>
+        /// elementType[]
+        /// </summary>
+        public static ArrayTypeSyntax Array(TypeSyntax elementType)
+        {
+            return ArrayType(elementType,
+                SingletonList(ArrayRankSpecifier(
+                    SingletonSeparatedList<ExpressionSyntax>(OmittedArraySizeExpression()))));
         }
 
         /// <summary>

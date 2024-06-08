@@ -13,7 +13,7 @@ namespace Something
             return Format(format, argsSpan);
         }
 
-        public static string? Format(string? format, params object?[] args)
+        public static string? Format(string? format, params object? [] args)
         {
             var argsSpan = new global::System.ReadOnlySpan<object?>(args);
             return Format(format, argsSpan);

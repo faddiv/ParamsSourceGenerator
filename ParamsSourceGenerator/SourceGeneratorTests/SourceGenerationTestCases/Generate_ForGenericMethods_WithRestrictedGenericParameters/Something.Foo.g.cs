@@ -16,10 +16,8 @@ namespace Something
         }
 
         public static void Format<T, F, G, H>(string format, params object[] args)
-            where T : struct
-            where F : class, global::System.ICloneable, new()
-            where G : notnull, global::System.Attribute
-            where H : unmanaged
+            where T : struct where F : class, global::System.ICloneable, new()
+            where G : notnull, global::System.Attribute where H : unmanaged
         {
             var argsSpan = new global::System.ReadOnlySpan<object>(args);
             Format<T, F, G, H>(format, argsSpan);

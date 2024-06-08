@@ -80,7 +80,7 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
                         _sourceBuilder.AppendLine();
                     }
 
-                    GenerateMethodOverrideWithNArgs(data, n);
+                    _sourceBuilder.AppendSyntaxNode(GenerateMethodOverrideWithNArgs(data, n));
                 }
 
                 GenerateOverrideWithParamsParameter(paramsCandidate, data);
@@ -108,17 +108,25 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
             }
         }
 
-        private void GenerateMethodOverrideWithNArgs(DerivedData data, int argsCount)
+        private MethodDeclarationSyntax GenerateMethodOverrideWithNArgs(DerivedData data, int argsCount)
         {
             var variableArguments = data.FixArguments.Concat(
                 Enumerable.Range(0, argsCount).Select(j => $"{data.SpanArgumentType} {data.ArgName}{j}"));
-            var method = GenerateMethodHeaderWithArguments(data, argsCount);
-            var result = GenerateBodyForOverrideWithNArgs(data, argsCount);
-             method = method.WithBody(result);
-            _sourceBuilder.AppendSyntaxNode(method);
+            var method = GenerateMethodHeaderWithArguments(data, NArgs(argsCount));
+            method = method.WithBody(GenerateBodyForOverrideWithNArgs(data, argsCount));
+            return method;
+
+            IEnumerable<ParameterSyntax> NArgs(int argsCount)
+            {
+                var spanArgType = ParseTypeName(data.SpanArgumentType);
+                for (int i = 0; i < argsCount; i++)
+                {
+                    yield return ParamDecl.Of(spanArgType, $"{data.ArgName}{i}");
+                }
+            }
         }
 
-        private MethodDeclarationSyntax GenerateMethodHeaderWithArguments(DerivedData data, int argsCount)
+        private MethodDeclarationSyntax GenerateMethodHeaderWithArguments(DerivedData data, IEnumerable<ParameterSyntax> additional)
         {
             var method = MethodDeclaration(
                 ParseTypeName(data.ReturnType),
@@ -128,8 +136,9 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
             {
                 method = method.WithTypeParameterList(TypeParameterList(SeparatedList(TypeParameters(data.TypeArguments))));
             }
-            method = method.WithParameterList(ParameterList(SeparatedList(Parameters(data, argsCount))));
-            if(data.TypeConstraints.Count > 0)
+            method = method.WithParameterList(ParameterList(SeparatedList(
+                FixedParameters(data).Concat(additional))));
+            if (data.TypeConstraints.Count > 0)
             {
                 method = method.WithConstraintClauses(List(Constraints(data)));
             }
@@ -153,20 +162,14 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
                 }
             }
 
-            static IEnumerable<ParameterSyntax> Parameters(DerivedData data, int argsCount)
+            static IEnumerable<ParameterSyntax> FixedParameters(DerivedData data)
             {
                 foreach (var item in data.ParameterInfos)
                 {
                     var type = ParseTypeName(item.Type);
                     type = item.IsNullable ? NullableType(type) : type;
-                    yield return ParamDecl.Of(type, item.Name, item.RefKind);
+                    yield return ParamDecl.Of(TokenDef.Of(item.RefKind), type, item.Name);
                 }
-                var spanArgType = ParseTypeName(data.SpanArgumentType);
-                for (int i = 0; i < argsCount; i++)
-                {
-                    yield return ParamDecl.Of(spanArgType, $"{data.ArgName}{i}", RefKind.None);
-                }
-
             }
 
             static IEnumerable<TypeParameterConstraintClauseSyntax> Constraints(DerivedData data)
@@ -185,7 +188,7 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
                     switch (item)
                     {
                         case "struct":
-                            yield return ClassOrStructConstraint(SyntaxKind.StructConstraint); 
+                            yield return ClassOrStructConstraint(SyntaxKind.StructConstraint);
                             break;
                         case "class":
                             yield return ClassOrStructConstraint(SyntaxKind.ClassConstraint);
@@ -205,25 +208,6 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
                     }
                 }
             }
-
-            /*_sourceBuilder.Method(
-                data.MethodName,
-                arguments,
-                data.IsStatic,
-                data.ReturnType,
-                data.TypeArguments,
-                data.TypeConstraints);*/
-        }
-
-        private void GenerateMethodHeaderWithArguments(DerivedData data, IEnumerable<string> arguments)
-        {
-            _sourceBuilder.Method(
-                data.MethodName,
-                arguments,
-                data.IsStatic,
-                data.ReturnType,
-                data.TypeArguments,
-                data.TypeConstraints);
         }
 
         private BlockSyntax GenerateBodyForOverrideWithNArgs(DerivedData data, int argsCount)
@@ -283,8 +267,15 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
                 return;
             }
             _sourceBuilder.AppendLine();
-            GenerateMethodHeaderWithArguments(data, data.FixArguments.Append($"params {data.SpanArgumentType}[] {data.ArgName}"));
-            _sourceBuilder.AppendSyntaxNode(GenerateBodyWithParamsParameter(data));
+            var method = GenerateMethodHeaderWithArguments(data, SpanArgument(data));
+            method = method.WithBody(GenerateBodyWithParamsParameter(data));
+            _sourceBuilder.AppendSyntaxNode(method);
+
+            static IEnumerable<ParameterSyntax> SpanArgument(DerivedData data)
+            {
+                TypeSyntax elementType = ParseTypeName(data.SpanArgumentType);
+                yield return ParamDecl.Of(TokenDef.Params(), TypeDef.Array(elementType), data.ArgName);
+            }
         }
 
         private BlockSyntax GenerateBodyWithParamsParameter(DerivedData data)
