@@ -17,6 +17,7 @@ partial class Foo
         Format(format, argsSpan);
     }
 }
+
 [global::System.Runtime.CompilerServices.InlineArray(1)]
 file struct Arguments1<T>
 {
