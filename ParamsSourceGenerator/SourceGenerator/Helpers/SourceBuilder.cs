@@ -4,6 +4,7 @@ using System.Text;
 using Foxy.Params.SourceGenerator.Data;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Formatting;
 
 namespace Foxy.Params.SourceGenerator.Helpers
 {
@@ -13,6 +14,12 @@ namespace Foxy.Params.SourceGenerator.Helpers
         private const string _intend = "    ";
         private int _intendLevel = 0;
         public Stack<string> _scope = new Stack<string>();
+        private readonly AdhocWorkspace _workspace;
+
+        public SourceBuilder()
+        {
+            _workspace = new AdhocWorkspace();
+        }
 
         public override string ToString()
         {
@@ -129,7 +136,7 @@ namespace Foxy.Params.SourceGenerator.Helpers
         {
             if (normalizeWhitespace)
             {
-                syntaxNode = syntaxNode.NormalizeWhitespace();
+                syntaxNode = Formatter.Format(syntaxNode, _workspace);
             }
             string newCode = syntaxNode.ToFullString();
 

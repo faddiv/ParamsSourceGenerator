@@ -6,16 +6,14 @@ namespace Something
 {
     partial class Foo
     {
-        public static T Format<T>(string format, object args0)
-            where T : class, global::System.ICloneable, new()
+        public static T Format<T>(string format, object args0) where T : class, global::System.ICloneable, new()
         {
             var args = new Arguments1<object>(args0);
             var argsSpan = global::System.Runtime.InteropServices.MemoryMarshal.CreateReadOnlySpan(ref args.arg0, 1);
             return Format<T>(format, argsSpan);
         }
 
-        public static T Format<T>(string format, params object[] args)
-            where T : class, global::System.ICloneable, new()
+        public static T Format<T>(string format, params object[] args) where T : class, global::System.ICloneable, new()
         {
             var argsSpan = new global::System.ReadOnlySpan<object>(args);
             return Format<T>(format, argsSpan);

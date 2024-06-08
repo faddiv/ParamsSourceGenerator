@@ -29,6 +29,11 @@ namespace Foxy.Params.SourceGenerator.CodeElements
             return Tokens(SyntaxKind.ParamsKeyword);
         }
 
+        public static SyntaxTokenList Partial()
+        {
+            return Tokens(SyntaxKind.PartialKeyword);
+        }
+
         private static SyntaxTokenList Tokens(SyntaxKind syntaxKind)
         {
             return TokenList(Token(syntaxKind));

@@ -4,6 +4,7 @@ using Foxy.Params.SourceGenerator.Helpers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Collections.Generic;
@@ -58,54 +59,57 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
         private void GenerateNamespace()
         {
             AddNamespace(_typeInfo);
-
-            GeneratePartialClass();
-            GenerateArgumentsClasses();
+            _sourceBuilder.AppendSyntaxNode(GeneratePartialClass());
+            foreach (var item in GenerateArgumentsClasses())
+            {
+                _sourceBuilder.AppendLine();
+                _sourceBuilder.AppendSyntaxNode(item);
+            }
 
             AddNamespaceCloseBlock(_typeInfo);
         }
 
-        private void GeneratePartialClass()
+        private ClassDeclarationSyntax GeneratePartialClass()
         {
-            var nestLevel = CreateClasses(_typeInfo);
+            return CreateClasses(_typeInfo, List(Members()));
 
-            foreach (var paramsCandidate in _paramsCandidates)
+            IEnumerable<MemberDeclarationSyntax> Members()
             {
-                var data = new DerivedData(paramsCandidate);
-
-                for (int n = 1; n <= paramsCandidate.MaxOverrides; n++)
+                foreach (var paramsCandidate in _paramsCandidates)
                 {
-                    if (n > 1)
+                    var data = new DerivedData(paramsCandidate);
+
+                    for (int n = 1; n <= paramsCandidate.MaxOverrides; n++)
                     {
-                        _sourceBuilder.AppendLine();
+                        yield return GenerateMethodOverrideWithNArgs(data, n).WithTrailingTrivia(CarriageReturnLineFeed);
                     }
 
-                    _sourceBuilder.AppendSyntaxNode(GenerateMethodOverrideWithNArgs(data, n));
+                    if (paramsCandidate.HasParams)
+                    {
+                        yield return GenerateOverrideWithParamsParameter(paramsCandidate, data);
+                    }
                 }
-
-                GenerateOverrideWithParamsParameter(paramsCandidate, data);
             }
-
-            CloseTimes(nestLevel);
         }
 
-        private int CreateClasses(INamedTypeSymbol? typeInfo)
+        private ClassDeclarationSyntax CreateClasses(INamedTypeSymbol typeInfo, SyntaxList<MemberDeclarationSyntax> members)
         {
-            var items = SemanticHelpers.GetTypeHierarchy(typeInfo);
-            foreach (var item in items)
+            var classSyn = ClassDeclaration(
+                attributeLists: default,
+                modifiers: TokenDef.Partial(),
+                identifier: Identifier(typeInfo.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)),
+                typeParameterList: default,
+                baseList: default,
+                constraintClauses: default,
+                members: members
+                );
+
+            if (typeInfo.ContainingType is not null)
             {
-                _sourceBuilder.Class(item.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat));
+                return CreateClasses(typeInfo.ContainingType, SingletonList<MemberDeclarationSyntax>(classSyn));
             }
 
-            return items.Count;
-        }
-
-        private void CloseTimes(int nestLevel)
-        {
-            for (int i = 0; i < nestLevel; i++)
-            {
-                _sourceBuilder.CloseBlock();
-            }
+            return classSyn;
         }
 
         private MethodDeclarationSyntax GenerateMethodOverrideWithNArgs(DerivedData data, int argsCount)
@@ -260,16 +264,11 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
             }
         }
 
-        private void GenerateOverrideWithParamsParameter(SuccessfulParamsCandidate paramsCandidate, DerivedData data)
+        private MethodDeclarationSyntax GenerateOverrideWithParamsParameter(SuccessfulParamsCandidate paramsCandidate, DerivedData data)
         {
-            if (!paramsCandidate.HasParams)
-            {
-                return;
-            }
-            _sourceBuilder.AppendLine();
             var method = GenerateMethodHeaderWithArguments(data, SpanArgument(data));
             method = method.WithBody(GenerateBodyWithParamsParameter(data));
-            _sourceBuilder.AppendSyntaxNode(method);
+            return method;
 
             static IEnumerable<ParameterSyntax> SpanArgument(DerivedData data)
             {
@@ -314,12 +313,11 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
             return TypeParameterList(SingletonSeparatedList(TypeParameter(typeParameterName)));
         }
 
-        private void GenerateArgumentsClasses()
+        private IEnumerable<MemberDeclarationSyntax> GenerateArgumentsClasses()
         {
             for (int i = 1; i <= _maxOverridesMax; i++)
             {
-                _sourceBuilder.AppendLine();
-                CreateArgumentsStruct(i);
+                yield return CreateArgumentsStruct(i);
             }
         }
 
@@ -378,7 +376,7 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
             yield return ArgumentDecl.Of(data.ArgNameSpanInput);
         }
 
-        private void CreateArgumentsStruct(int length)
+        private StructDeclarationSyntax CreateArgumentsStruct(int length)
         {
             var typeName = Identifier($"Arguments{length}");
             var argumentsStruct = StructDeclaration(
@@ -389,9 +387,7 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
                 baseList: default,
                 constraintClauses: default,
                 members: ArgumentsStructMembers(length, typeName));
-            argumentsStruct = argumentsStruct.NormalizeWhitespace();
-            argumentsStruct = argumentsStruct.AddEmptyLineAfterMember(argumentsStruct.Members[0]);
-            _sourceBuilder.AppendSyntaxNode(argumentsStruct, false);
+            return argumentsStruct;
         }
 
         private static SyntaxList<MemberDeclarationSyntax> ArgumentsStructMembers(int length, SyntaxToken typeName)
@@ -446,7 +442,6 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
                 }
             }
         }
-
 
         /// <summary>
         /// [global::System.Runtime.CompilerServices.InlineArray(length)]<br/>
