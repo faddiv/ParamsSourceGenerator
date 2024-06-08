@@ -1,10 +1,9 @@
 using Microsoft.CodeAnalysis;
-using System.Reflection;
-using System.Xml.Linq;
+using System;
 
 namespace Foxy.Params.SourceGenerator.Data
 {
-    internal class SuccessfulParamsCandidate : ParamsCandidate
+    internal class SuccessfulParamsCandidate : ParamsCandidate, IEquatable<SuccessfulParamsCandidate?>
     {
         public override bool HasErrors => false;
 
@@ -24,6 +23,28 @@ namespace Foxy.Params.SourceGenerator.Data
             SpanParam.RefKind == RefKind.RefReadOnlyParameter);
 
         public string SpanParamName => SpanParam?.Name ?? "";
+
+        public override bool Equals(object? obj)
+        {
+            return Equals(obj as SuccessfulParamsCandidate);
+        }
+
+        public bool Equals(SuccessfulParamsCandidate? other)
+        {
+            return other is not null &&
+                   MaxOverrides == other.MaxOverrides &&
+                   HasParams == other.HasParams &&
+                   SymbolEqualityComparer.Default.Equals(MethodSymbol, other.MethodSymbol);
+        }
+
+        public override int GetHashCode()
+        {
+            int hashCode = 274651747;
+            hashCode = hashCode * -1521134295 + MaxOverrides.GetHashCode();
+            hashCode = hashCode * -1521134295 + HasParams.GetHashCode();
+            hashCode = hashCode * -1521134295 + SymbolEqualityComparer.Default.GetHashCode(MethodSymbol);
+            return hashCode;
+        }
     }
 }
 
