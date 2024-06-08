@@ -234,4 +234,12 @@ public class SourceGenerationTests
         await VerifyCS.VerifyGeneratorAsync(code,
             TestEnvironment.GetOuputs());
     }
+
+    [Fact]
+    public async Task OnGenericType_Generates_Overrides()
+    {
+        string code = TestEnvironment.GetValidSource();
+        await VerifyCS.VerifyGeneratorAsync(code,
+            TestEnvironment.GetOuputs());
+    }
 }

@@ -100,7 +100,7 @@ namespace Foxy.Params.SourceGenerator.Helpers
         }
         public static string CreateFileName(INamedTypeSymbol containingType)
         {
-            return $"{containingType.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat)}.g.cs";
+            return $"{containingType.ToDisplayString(DisplayFormats.ForFileName)}.g.cs";
         }
 
         public static string WithModifiers(string typeName, RefKind refKind, bool isNullable)
