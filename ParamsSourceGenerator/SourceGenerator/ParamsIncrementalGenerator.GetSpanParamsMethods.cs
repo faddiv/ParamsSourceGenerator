@@ -34,10 +34,10 @@ namespace Foxy.Params.SourceGenerator
                 return null;
             }
 
-            var diagnostics = new List<Diagnostic>();
+            var diagnostics = new List<DiagnosticInfo>();
             if (!IsContainingTypesArePartial(targetNode, out var typeName))
             {
-                diagnostics.Add(Diagnostic.Create(
+                diagnostics.Add(DiagnosticInfo.Create(
                     DiagnosticReports.PartialIsMissingDescriptor,
                     attributeSyntax.GetLocation(),
                     typeName,
@@ -49,21 +49,21 @@ namespace Foxy.Params.SourceGenerator
             if (spanParam is null ||
                 spanParam?.Type is not INamedTypeSymbol spanType)
             {
-                diagnostics.Add(Diagnostic.Create(
+                diagnostics.Add(DiagnosticInfo.Create(
                     DiagnosticReports.ParameterMissingDescriptor,
                     attributeSyntax.GetLocation(),
                     methodSymbol.Name));
             }
             else if (!IsReadOnlySpan(spanType))
             {
-                diagnostics.Add(Diagnostic.Create(
+                diagnostics.Add(DiagnosticInfo.Create(
                     DiagnosticReports.ParameterMismatchDescriptor,
                     attributeSyntax.GetLocation(),
                     methodSymbol.Name, spanParam.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat)));
             }
             else if (IsOutParameter(spanParam))
             {
-                diagnostics.Add(Diagnostic.Create(
+                diagnostics.Add(DiagnosticInfo.Create(
                     DiagnosticReports.OutModifierNotAllowedDescriptor,
                     attributeSyntax.GetLocation(),
                     methodSymbol.Name, spanParam.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat)));
@@ -71,7 +71,7 @@ namespace Foxy.Params.SourceGenerator
 
             if (HasNameCollision(methodSymbol.Parameters, maxOverrides, out string? unusableParameters))
             {
-                diagnostics.Add(Diagnostic.Create(
+                diagnostics.Add(DiagnosticInfo.Create(
                     DiagnosticReports.ParameterCollisionDescriptor,
                     attributeSyntax.GetLocation(),
                     methodSymbol.Name, unusableParameters));

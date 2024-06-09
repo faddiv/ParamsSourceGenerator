@@ -8,7 +8,7 @@ namespace Foxy.Params.SourceGenerator.Data
     {
         public override bool HasErrors => true;
 
-        public required List<Diagnostic> Diagnostics { get; init; }
+        public required List<DiagnosticInfo> Diagnostics { get; init; }
 
         public override bool Equals(object? obj)
         {
@@ -18,12 +18,12 @@ namespace Foxy.Params.SourceGenerator.Data
         public bool Equals(FailedParamsCandidate? other)
         {
             return other is not null &&
-                   EqualityComparer<List<Diagnostic>>.Default.Equals(Diagnostics, other.Diagnostics);
+                   EqualityComparer<List<DiagnosticInfo>>.Default.Equals(Diagnostics, other.Diagnostics);
         }
 
         public override int GetHashCode()
         {
-            return 244270639 + EqualityComparer<List<Diagnostic>>.Default.GetHashCode(Diagnostics);
+            return 244270639 + EqualityComparer<List<DiagnosticInfo>>.Default.GetHashCode(Diagnostics);
         }
     }
 }

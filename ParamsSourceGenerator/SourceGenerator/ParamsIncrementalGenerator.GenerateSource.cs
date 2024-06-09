@@ -15,7 +15,7 @@ namespace Foxy.Params.SourceGenerator
                 .OfType<FailedParamsCandidate>()
                 .SelectMany(e => e.Diagnostics))
             {
-                context.ReportDiagnostic(diagnostic);
+                context.ReportDiagnostic(diagnostic.ToDiagnostics());
 
             }
             foreach (var uniqueClass in typeSymbols
