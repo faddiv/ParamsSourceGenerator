@@ -12,193 +12,192 @@ using System.Collections.Immutable;
 using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Foxy.Params.SourceGenerator
+namespace Foxy.Params.SourceGenerator;
+
+partial class ParamsIncrementalGenerator : IIncrementalGenerator
 {
-    partial class ParamsIncrementalGenerator : IIncrementalGenerator
+    private ParamsCandidate? GetSpanParamsMethods(GeneratorAttributeSyntaxContext context, CancellationToken cancellationToken)
     {
-        private ParamsCandidate? GetSpanParamsMethods(GeneratorAttributeSyntaxContext context, CancellationToken cancellationToken)
+        SyntaxNode targetNode = context.TargetNode;
+        Debug.Assert(targetNode is MethodDeclarationSyntax);
+        var decl = Unsafe.As<MethodDeclarationSyntax>(targetNode);
+
+        if (!(context.SemanticModel.GetDeclaredSymbol(decl, cancellationToken) is IMethodSymbol methodSymbol)
+            || !SemanticHelpers.TryGetAttribute(decl, _attributeName, context.SemanticModel, cancellationToken, out var attributeSyntax))
         {
-            SyntaxNode targetNode = context.TargetNode;
-            Debug.Assert(targetNode is MethodDeclarationSyntax);
-            var decl = Unsafe.As<MethodDeclarationSyntax>(targetNode);
-
-            if (!(context.SemanticModel.GetDeclaredSymbol(decl, cancellationToken) is IMethodSymbol methodSymbol)
-                || !SemanticHelpers.TryGetAttribute(decl, _attributeName, context.SemanticModel, cancellationToken, out var attributeSyntax))
-            {
-                return null;
-            }
-
-            if (HasErrorType(methodSymbol) ||
-                HasDuplication(methodSymbol.Parameters))
-            {
-                return null;
-            }
-
-            var diagnostics = new List<DiagnosticInfo>();
-            if (!IsContainingTypesArePartial(targetNode, out var typeName))
-            {
-                diagnostics.Add(DiagnosticInfo.Create(
-                    DiagnosticReports.PartialIsMissingDescriptor,
-                    attributeSyntax.GetLocation(),
-                    typeName,
-                    methodSymbol.Name));
-            }
-
-            int maxOverrides = SemanticHelpers.GetValue(context.Attributes.First(), "MaxOverrides", 3);
-            var spanParam = methodSymbol.Parameters.LastOrDefault();
-            if (spanParam is null ||
-                spanParam?.Type is not INamedTypeSymbol spanType)
-            {
-                diagnostics.Add(DiagnosticInfo.Create(
-                    DiagnosticReports.ParameterMissingDescriptor,
-                    attributeSyntax.GetLocation(),
-                    methodSymbol.Name));
-            }
-            else if (!IsReadOnlySpan(spanType))
-            {
-                diagnostics.Add(DiagnosticInfo.Create(
-                    DiagnosticReports.ParameterMismatchDescriptor,
-                    attributeSyntax.GetLocation(),
-                    methodSymbol.Name, spanParam.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat)));
-            }
-            else if (IsOutParameter(spanParam))
-            {
-                diagnostics.Add(DiagnosticInfo.Create(
-                    DiagnosticReports.OutModifierNotAllowedDescriptor,
-                    attributeSyntax.GetLocation(),
-                    methodSymbol.Name, spanParam.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat)));
-            }
-
-            if (HasNameCollision(methodSymbol.Parameters, maxOverrides, out string? unusableParameters))
-            {
-                diagnostics.Add(DiagnosticInfo.Create(
-                    DiagnosticReports.ParameterCollisionDescriptor,
-                    attributeSyntax.GetLocation(),
-                    methodSymbol.Name, unusableParameters));
-            }
-
-            if (diagnostics.Count > 0)
-            {
-                return new FailedParamsCandidate { Diagnostics = diagnostics };
-            }
-
-            return new SuccessfulParamsCandidate
-            {
-                ContainingType = methodSymbol.ContainingType,
-                MethodSymbol = methodSymbol,
-                SpanParam = spanParam!,
-                MaxOverrides = maxOverrides,
-                HasParams = SemanticHelpers.GetValue(context.Attributes.First(), "HasParams", true)
-            };
+            return null;
         }
 
-        private List<INamedTypeSymbol> GetTypeChain(INamedTypeSymbol? containingType)
+        if (HasErrorType(methodSymbol) ||
+            HasDuplication(methodSymbol.Parameters))
         {
-            var list = new List<INamedTypeSymbol>();
-            while (containingType is not null)
-            {
-                list.Add(containingType);
-                containingType = containingType.ContainingType;
-            }
-
-            return list;
+            return null;
         }
 
-        private bool HasNameCollision(
-            ImmutableArray<IParameterSymbol> parameters,
-            int maxOverrides,
-            [NotNullWhen(true)] out string? unusableParameters)
+        var diagnostics = new List<DiagnosticInfo>();
+        if (!IsContainingTypesArePartial(targetNode, out var typeName))
         {
-            unusableParameters = null;
-            if (parameters.Length <= 1)
-            {
-                return false;
-            }
+            diagnostics.Add(DiagnosticInfo.Create(
+                DiagnosticReports.PartialIsMissingDescriptor,
+                attributeSyntax.GetLocation(),
+                typeName,
+                methodSymbol.Name));
+        }
 
-            var spanParameterName = parameters[parameters.Length - 1].Name;
-            var collisionParameters = new List<string>
-            {
-                $"{spanParameterName}Span"
-            };
+        int maxOverrides = SemanticHelpers.GetValue(context.Attributes.First(), "MaxOverrides", 3);
+        var spanParam = methodSymbol.Parameters.LastOrDefault();
+        if (spanParam is null ||
+            spanParam?.Type is not INamedTypeSymbol spanType)
+        {
+            diagnostics.Add(DiagnosticInfo.Create(
+                DiagnosticReports.ParameterMissingDescriptor,
+                attributeSyntax.GetLocation(),
+                methodSymbol.Name));
+        }
+        else if (!IsReadOnlySpan(spanType))
+        {
+            diagnostics.Add(DiagnosticInfo.Create(
+                DiagnosticReports.ParameterMismatchDescriptor,
+                attributeSyntax.GetLocation(),
+                methodSymbol.Name, spanParam.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat)));
+        }
+        else if (IsOutParameter(spanParam))
+        {
+            diagnostics.Add(DiagnosticInfo.Create(
+                DiagnosticReports.OutModifierNotAllowedDescriptor,
+                attributeSyntax.GetLocation(),
+                methodSymbol.Name, spanParam.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat)));
+        }
 
-            for (int i = 0; i < maxOverrides; i++)
-            {
-                collisionParameters.Add($"{spanParameterName}{i}");
-            }
+        if (HasNameCollision(methodSymbol.Parameters, maxOverrides, out string? unusableParameters))
+        {
+            diagnostics.Add(DiagnosticInfo.Create(
+                DiagnosticReports.ParameterCollisionDescriptor,
+                attributeSyntax.GetLocation(),
+                methodSymbol.Name, unusableParameters));
+        }
 
-            for (int i = 0; i < parameters.Length - 1; i++)
-            {
-                if (collisionParameters.Contains(parameters[i].Name))
-                {
-                    unusableParameters = string.Join(", ", collisionParameters);
-                    return true;
-                }
-            }
+        if (diagnostics.Count > 0)
+        {
+            return new FailedParamsCandidate { Diagnostics = diagnostics };
+        }
 
+        return new SuccessfulParamsCandidate
+        {
+            ContainingType = methodSymbol.ContainingType,
+            MethodSymbol = methodSymbol,
+            SpanParam = spanParam!,
+            MaxOverrides = maxOverrides,
+            HasParams = SemanticHelpers.GetValue(context.Attributes.First(), "HasParams", true)
+        };
+    }
+
+    private List<INamedTypeSymbol> GetTypeChain(INamedTypeSymbol? containingType)
+    {
+        var list = new List<INamedTypeSymbol>();
+        while (containingType is not null)
+        {
+            list.Add(containingType);
+            containingType = containingType.ContainingType;
+        }
+
+        return list;
+    }
+
+    private bool HasNameCollision(
+        ImmutableArray<IParameterSymbol> parameters,
+        int maxOverrides,
+        [NotNullWhen(true)] out string? unusableParameters)
+    {
+        unusableParameters = null;
+        if (parameters.Length <= 1)
+        {
             return false;
         }
 
-        private bool HasDuplication(ImmutableArray<IParameterSymbol> parameters)
+        var spanParameterName = parameters[parameters.Length - 1].Name;
+        var collisionParameters = new List<string>
         {
-            for (int i = 0; i < parameters.Length; i++)
+            $"{spanParameterName}Span"
+        };
+
+        for (int i = 0; i < maxOverrides; i++)
+        {
+            collisionParameters.Add($"{spanParameterName}{i}");
+        }
+
+        for (int i = 0; i < parameters.Length - 1; i++)
+        {
+            if (collisionParameters.Contains(parameters[i].Name))
             {
-                for (int j = i + 1; j < parameters.Length; j++)
-                {
-                    if (parameters[i].Name == parameters[j].Name)
-                    {
-                        return true;
-                    }
-                }
+                unusableParameters = string.Join(", ", collisionParameters);
+                return true;
             }
-
-            return false;
         }
 
-        private bool IsOutParameter(IParameterSymbol? spanParam)
-        {
-            return spanParam != null
-                && spanParam.RefKind == RefKind.Out;
-        }
+        return false;
+    }
 
-        private bool HasErrorType(IMethodSymbol methodSymbol)
+    private bool HasDuplication(ImmutableArray<IParameterSymbol> parameters)
+    {
+        for (int i = 0; i < parameters.Length; i++)
         {
-            foreach (var parameter in methodSymbol.Parameters)
+            for (int j = i + 1; j < parameters.Length; j++)
             {
-                if (parameter.Type.Kind == SymbolKind.ErrorType)
+                if (parameters[i].Name == parameters[j].Name)
                 {
                     return true;
                 }
             }
+        }
 
-            if (methodSymbol.ReturnType.Kind == SymbolKind.ErrorType)
+        return false;
+    }
+
+    private bool IsOutParameter(IParameterSymbol? spanParam)
+    {
+        return spanParam != null
+            && spanParam.RefKind == RefKind.Out;
+    }
+
+    private bool HasErrorType(IMethodSymbol methodSymbol)
+    {
+        foreach (var parameter in methodSymbol.Parameters)
+        {
+            if (parameter.Type.Kind == SymbolKind.ErrorType)
             {
                 return true;
-
             }
-
-            return false;
         }
 
-        private bool IsReadOnlySpan(INamedTypeSymbol? spanParam)
+        if (methodSymbol.ReturnType.Kind == SymbolKind.ErrorType)
         {
-            return spanParam == null || spanParam.MetadataName == "ReadOnlySpan`1";
-        }
-
-        private static bool IsContainingTypesArePartial(
-            SyntaxNode targetNode,
-            [NotNullWhen(false)] out string? typeName)
-        {
-            foreach (var containingType in targetNode.Ancestors().OfType<TypeDeclarationSyntax>())
-            {
-                if (!containingType.Modifiers.Any(token => token.IsKind(SyntaxKind.PartialKeyword)))
-                {
-                    typeName = containingType.Identifier.Text;
-                    return false;
-                }
-            }
-            typeName = null;
             return true;
+
         }
+
+        return false;
+    }
+
+    private bool IsReadOnlySpan(INamedTypeSymbol? spanParam)
+    {
+        return spanParam == null || spanParam.MetadataName == "ReadOnlySpan`1";
+    }
+
+    private static bool IsContainingTypesArePartial(
+        SyntaxNode targetNode,
+        [NotNullWhen(false)] out string? typeName)
+    {
+        foreach (var containingType in targetNode.Ancestors().OfType<TypeDeclarationSyntax>())
+        {
+            if (!containingType.Modifiers.Any(token => token.IsKind(SyntaxKind.PartialKeyword)))
+            {
+                typeName = containingType.Identifier.Text;
+                return false;
+            }
+        }
+        typeName = null;
+        return true;
     }
 }
 

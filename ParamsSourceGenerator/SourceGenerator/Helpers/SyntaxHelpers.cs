@@ -1,13 +1,12 @@
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Foxy.Params.SourceGenerator.Helpers
+namespace Foxy.Params.SourceGenerator.Helpers;
+
+internal static class SyntaxHelpers
 {
-    internal static class SyntaxHelpers
+    public static bool HasAttribute(MethodDeclarationSyntax methodDeclarationSyntax)
     {
-        public static bool HasAttribute(MethodDeclarationSyntax methodDeclarationSyntax)
-        {
-            return methodDeclarationSyntax.AttributeLists.Count > 0;
-        }
+        return methodDeclarationSyntax.AttributeLists.Count > 0;
     }
 }
 
