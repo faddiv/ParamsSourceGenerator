@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Foxy.Params.SourceGenerator.Data;
@@ -6,7 +7,7 @@ namespace Foxy.Params.SourceGenerator.Helpers;
 
 internal class SourceBuilder
 {
-    private readonly StringBuilder _builder = new StringBuilder();
+    private readonly StringBuilder _builder = new();
     public string Intend { get; set; } = "    ";
     private int _intendLevel = 0;
     public Stack<string> _scope = new Stack<string>();
@@ -15,32 +16,53 @@ internal class SourceBuilder
     {
         return _builder.ToString();
     }
-    public void Namespace(string name)
+
+    public void AddNamespaceHeader(string name)
     {
         AddLineInternal($"namespace {name}");
-        OpenBlock(name);
     }
 
-    public void Class(string name)
+    public void AddClassHeader(string name)
     {
         AddLineInternal($"partial class {name}");
-        OpenBlock(name);
     }
 
-    public void GenericStruct(string name, string genericParam1)
+    public void AddBlock(Action<SourceBuilder> buidler)
+    {
+        OpenBlock();
+        buidler(this);
+        CloseBlock();
+    }
+
+    public void AddBlock<TArg1>(Action<SourceBuilder, TArg1> buidler, in TArg1 arg1)
+    {
+        OpenBlock();
+        buidler(this, arg1);
+        CloseBlock();
+    }
+
+    public void AddNamedBlock<TArg1>(
+        string name,
+        Action<SourceBuilder, TArg1> buidler,
+        in TArg1 arg1)
+    {
+        PushScope(name);
+        AddBlock(buidler, arg1);
+        PopScope();
+    }
+
+    public void AddGenericStruct(string name, string genericParam1)
     {
         AddLineInternal($"file struct {name}<{genericParam1}>");
-        OpenBlock(name);
     }
 
-    public void Constructor(IEnumerable<string> args)
+    public void AddConstructorHeader(IEnumerable<string> args)
     {
         AddIntend();
         string className = _scope.Peek();
         _builder.Append($"public {className}(");
         CommaSeparatedItemList(args);
         _builder.AppendLine(")");
-        OpenBlock(className);
     }
 
     internal void Method(
@@ -70,7 +92,6 @@ internal class SourceBuilder
         CommaSeparatedItemList(args);
         _builder.AppendLine(")");
         AddTypeConstraints(typeConstraintsList);
-        OpenBlock(name);
     }
 
     public void Attribute(string name)
@@ -110,20 +131,28 @@ internal class SourceBuilder
         _builder.AppendLine(text);
     }
 
-    public void OpenBlock(string scope)
+    public void OpenBlock()
     {
         AddLineInternal("{");
-        IncreaseIntend(scope);
+        IncreaseIntend();
     }
 
-    public void IncreaseIntend(string scope)
+    private void IncreaseIntend()
     {
-        _scope.Push(scope);
         _intendLevel++;
     }
-    public void DecreaseIntend()
+    private void PushScope(string scope)
+    {
+        _scope.Push(scope);
+    }
+
+    private void PopScope()
     {
         _scope.Pop();
+    }
+
+    private void DecreaseIntend()
+    {
         _intendLevel--;
     }
 
@@ -175,7 +204,7 @@ internal class SourceBuilder
         if (typeConstraintsList.Count <= 0)
             return;
 
-        IncreaseIntend(_scope.Peek());
+        IncreaseIntend();
         foreach (var typeConstraints in typeConstraintsList)
         {
             AddIntend();
@@ -219,4 +248,3 @@ internal class SourceBuilder
         }
     }
 }
-

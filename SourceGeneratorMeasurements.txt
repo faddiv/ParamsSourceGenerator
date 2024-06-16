@@ -1,11 +1,16 @@
+SyntaxFactory:
+
+| Method       | Mean     | Error    | StdDev   | Gen0     | Gen1     | Allocated |
+|------------- |---------:|---------:|---------:|---------:|---------:|----------:|
+| RunGenerator | 16.07 ms | 0.320 ms | 0 .479 ms | 500.0000 | 166.6667 |   3.62 MB |
+
 StringBuilder:
 
 | Method       | Mean     | Error   | StdDev  | Gen0    | Gen1   | Allocated |
 |------------- |---------:|--------:|--------:|--------:|-------:|----------:|
 | RunGenerator | 594.6 us | 6.08 us | 8.12 us | 46.8750 | 7.8125 | 191.77 KB |
 
-SyntaxFactory:
-
-| Method       | Mean     | Error    | StdDev   | Gen0     | Gen1     | Allocated |
-|------------- |---------:|---------:|---------:|---------:|---------:|----------:|
-| RunGenerator | 16.07 ms | 0.320 ms | 0 .479 ms | 500.0000 | 166.6667 |   3.62 MB |
+StringBuilder v2:
+| Method       | Mean     | Error   | StdDev  | Gen0    | Gen1    | Allocated |
+|------------- |---------:|--------:|--------:|--------:|--------:|----------:|
+| RunGenerator | 564.7 us | 6.02 us | 6.69 us | 42.9688 | 11.7188 |  190.9 KB |

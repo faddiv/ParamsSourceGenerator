@@ -129,4 +129,3 @@ internal class DerivedData
         return typeConstraintsList;
     }
 }
-

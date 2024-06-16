@@ -24,10 +24,9 @@ partial class ParamsIncrementalGenerator : IIncrementalGenerator
         {
             var typeInfo = uniqueClass.Key as INamedTypeSymbol;
             SemanticHelpers.AssertNotNull(typeInfo);
-            var generator = new OverridesGenerator(typeInfo, uniqueClass);
             context.AddSource(
                 SemanticHelpers.CreateFileName(typeInfo),
-                generator.Execute());
+                OverridesGenerator.Execute(typeInfo, uniqueClass));
         }
     }
 }
