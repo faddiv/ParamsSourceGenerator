@@ -1,4 +1,5 @@
 using System.Threading;
+using Foxy.Params.SourceGenerator.Data;
 using Foxy.Params.SourceGenerator.Helpers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -17,7 +18,9 @@ public partial class ParamsIncrementalGenerator : IIncrementalGenerator
             _attributeName,
             predicate: Filter,
             transform: GetSpanParamsMethods)
+            .WithTrackingName(TrackingNames.GetSpanParamsMethods)
             .NotNull()
+            .WithTrackingName(TrackingNames.NotNullFilter)
             .Collect();
 
         context.RegisterSourceOutput(declarations, GenerateSource);

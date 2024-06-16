@@ -98,9 +98,9 @@ internal static class SemanticHelpers
         list.Reverse();
         return list;
     }
-    public static string CreateFileName(INamedTypeSymbol containingType)
+    public static string CreateFileName(string containingType)
     {
-        return $"{containingType.ToDisplayString(DisplayFormats.ForFileName)}.g.cs";
+        return $"{containingType}.g.cs";
     }
 
     public static string WithModifiers(string typeName, RefKind refKind, bool isNullable)

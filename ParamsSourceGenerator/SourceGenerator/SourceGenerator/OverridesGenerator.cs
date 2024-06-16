@@ -11,7 +11,7 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator;
 
 internal static class OverridesGenerator
 {
-    public static SourceText Execute(INamedTypeSymbol typeInfo, IEnumerable<SuccessfulParamsCandidate> paramsCandidates)
+    public static SourceText Execute(CandidateTypeInfo typeInfo, IEnumerable<SuccessfulParamsCandidate> paramsCandidates)
     {
         var _sourceBuilder = new SourceBuilder();
         var _typeInfo = typeInfo ?? throw new ArgumentNullException(nameof(typeInfo));
@@ -27,15 +27,15 @@ internal static class OverridesGenerator
         return SourceText.From(_sourceBuilder.ToString(), Encoding.UTF8);
     }
 
-    private static void GenerateNamespace(SourceBuilder builder, INamedTypeSymbol _typeInfo, IEnumerable<SuccessfulParamsCandidate> paramsCandidates, int maxOverridesMax)
+    private static void GenerateNamespace(SourceBuilder builder, CandidateTypeInfo _typeInfo, IEnumerable<SuccessfulParamsCandidate> paramsCandidates, int maxOverridesMax)
     {
-        if (_typeInfo.ContainingNamespace.IsGlobalNamespace)
+        if (_typeInfo.InGlobalNamespace)
         {
             GenerateNamespaceMembers(builder, (_typeInfo, paramsCandidates, maxOverridesMax));
         }
         else
         {
-            string namespaceName = SemanticHelpers.GetNameSpaceNoGlobal(_typeInfo);
+            string namespaceName = _typeInfo.Namespace;
             builder.AddNamespaceHeader(namespaceName);
             builder.AddBlock(GenerateNamespaceMembers,
                 (_typeInfo, paramsCandidates, maxOverridesMax));
@@ -44,7 +44,7 @@ internal static class OverridesGenerator
 
     private static void GenerateNamespaceMembers(
         SourceBuilder builder,
-        (INamedTypeSymbol typeInfo,
+        (CandidateTypeInfo typeInfo,
         IEnumerable<SuccessfulParamsCandidate> paramsCandidates,
         int maxOverridesMax) args)
     {
@@ -52,7 +52,7 @@ internal static class OverridesGenerator
         GenerateArgumentsClasses(builder, args.maxOverridesMax);
     }
 
-    private static void GeneratePartialClass(SourceBuilder builder, INamedTypeSymbol _typeInfo, IEnumerable<SuccessfulParamsCandidate> paramsCandidates)
+    private static void GeneratePartialClass(SourceBuilder builder, CandidateTypeInfo _typeInfo, IEnumerable<SuccessfulParamsCandidate> paramsCandidates)
     {
         var nestLevel = CreateClasses(_typeInfo, builder);
 
@@ -84,16 +84,16 @@ internal static class OverridesGenerator
         CloseTimes(builder, nestLevel);
     }
 
-    private static int CreateClasses(INamedTypeSymbol? typeInfo, SourceBuilder sb)
+    private static int CreateClasses(CandidateTypeInfo typeInfo, SourceBuilder sb)
     {
-        var items = SemanticHelpers.GetTypeHierarchy(typeInfo);
+        var items = typeInfo.TypeHierarchy;
         foreach (var item in items)
         {
-            sb.AddClassHeader(item.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat));
+            sb.AddClassHeader(item);
             sb.OpenBlock();
         }
 
-        return items.Count;
+        return items.Length;
     }
 
     private static void CloseTimes(SourceBuilder sb, int nestLevel)

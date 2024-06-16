@@ -11,6 +11,8 @@ internal class TestEnvironment
 
     private static readonly string _validTestDataDirectory;
 
+    private static readonly string _cachingTestDataDirectory;
+
 
     private static readonly string _invalidTestDataDirectory;
 
@@ -21,16 +23,25 @@ internal class TestEnvironment
         _projectDirectory = FindDirectoryOfFile(".csproj");
         _validTestDataDirectory = Path.Combine(_projectDirectory, "SourceGenerationTestCases");
         _invalidTestDataDirectory = Path.Combine(_projectDirectory, "ErrorReportingTestCases");
+        _cachingTestDataDirectory = Path.Combine(_projectDirectory, "CachingTestCases");
         AttributeImpl = File.ReadAllText(Path.Combine(_validTestDataDirectory, "Attribute.cs"));
     }
+
     public static string GetValidSource([CallerMemberName] string caller = null)
     {
         var sourcePath = Path.Combine(_validTestDataDirectory, caller, "_source.cs");
         return File.ReadAllText(sourcePath);
     }
+
     public static string GetInvalidSource([CallerMemberName] string caller = null)
     {
         var sourcePath = Path.Combine(_invalidTestDataDirectory, caller, "_source.cs");
+        return File.ReadAllText(sourcePath);
+    }
+
+    public static string GetCachingSource([CallerMemberName] string caller = null)
+    {
+        var sourcePath = Path.Combine(_cachingTestDataDirectory, caller, "_source.cs");
         return File.ReadAllText(sourcePath);
     }
 
@@ -38,9 +49,20 @@ internal class TestEnvironment
     {
         return ("ParamsAttribute.g.cs", AttributeImpl);
     }
+
     public static (string filename, string content)[] GetOuputs([CallerMemberName] string caller = null)
     {
-        var basePath = Path.Combine(_validTestDataDirectory, caller);
+        return GetOuputs(_validTestDataDirectory, caller);
+    }
+
+    public static (string filename, string content)[] GetCachingOuputs([CallerMemberName] string caller = null)
+    {
+        return GetOuputs(_cachingTestDataDirectory, caller);
+    }
+
+    public static (string filename, string content)[] GetOuputs(string baseDirectory, [CallerMemberName] string caller = null)
+    {
+        var basePath = Path.Combine(baseDirectory, caller);
         var sources = new List<(string filename, string content)>
         {
             GetDefaultOuput()

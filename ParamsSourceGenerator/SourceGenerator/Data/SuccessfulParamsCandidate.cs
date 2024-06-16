@@ -1,3 +1,4 @@
+using Foxy.Params.SourceGenerator.SourceGenerator;
 using Microsoft.CodeAnalysis;
 using System;
 
@@ -9,6 +10,7 @@ internal class SuccessfulParamsCandidate : ParamsCandidate, IEquatable<Successfu
 
     public required IMethodSymbol MethodSymbol { get; init; }
 
+    public required CandidateTypeInfo TypeInfo { get; init; }
     public required INamedTypeSymbol ContainingType { get; init; }
 
     public required IParameterSymbol SpanParam { get; init; }

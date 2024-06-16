@@ -11,6 +11,8 @@ using Foxy.Params.SourceGenerator.Data;
 using System.Collections.Immutable;
 using System;
 using System.Diagnostics.CodeAnalysis;
+using Foxy.Params.SourceGenerator.SourceGenerator;
+using System.Reflection;
 
 namespace Foxy.Params.SourceGenerator;
 
@@ -82,26 +84,24 @@ partial class ParamsIncrementalGenerator : IIncrementalGenerator
             return new FailedParamsCandidate { Diagnostics = diagnostics };
         }
 
+        INamedTypeSymbol containingType = methodSymbol.ContainingType;
         return new SuccessfulParamsCandidate
         {
-            ContainingType = methodSymbol.ContainingType,
+            ContainingType = containingType,
+            TypeInfo = new CandidateTypeInfo
+            { 
+                TypeName = containingType.ToDisplayString(DisplayFormats.ForFileName),
+                TypeHierarchy = SemanticHelpers.GetTypeHierarchy(containingType)
+                    .Select(e => e.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat))
+                    .ToArray(),
+                InGlobalNamespace = containingType.ContainingNamespace.IsGlobalNamespace,
+                Namespace = SemanticHelpers.GetNameSpaceNoGlobal(containingType)
+            },
             MethodSymbol = methodSymbol,
             SpanParam = spanParam!,
             MaxOverrides = maxOverrides,
             HasParams = SemanticHelpers.GetValue(context.Attributes.First(), "HasParams", true)
         };
-    }
-
-    private List<INamedTypeSymbol> GetTypeChain(INamedTypeSymbol? containingType)
-    {
-        var list = new List<INamedTypeSymbol>();
-        while (containingType is not null)
-        {
-            list.Add(containingType);
-            containingType = containingType.ContainingType;
-        }
-
-        return list;
     }
 
     private bool HasNameCollision(

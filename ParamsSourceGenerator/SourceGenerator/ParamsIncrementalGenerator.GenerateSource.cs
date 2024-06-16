@@ -20,12 +20,11 @@ partial class ParamsIncrementalGenerator : IIncrementalGenerator
         }
         foreach (var uniqueClass in typeSymbols
             .OfType<SuccessfulParamsCandidate>()
-            .GroupBy(e => e.ContainingType, SymbolEqualityComparer.Default))
+            .GroupBy(e => e.TypeInfo))
         {
-            var typeInfo = uniqueClass.Key as INamedTypeSymbol;
-            SemanticHelpers.AssertNotNull(typeInfo);
+            CandidateTypeInfo typeInfo = uniqueClass.Key;
             context.AddSource(
-                SemanticHelpers.CreateFileName(typeInfo),
+                SemanticHelpers.CreateFileName(typeInfo.TypeName),
                 OverridesGenerator.Execute(typeInfo, uniqueClass));
         }
     }

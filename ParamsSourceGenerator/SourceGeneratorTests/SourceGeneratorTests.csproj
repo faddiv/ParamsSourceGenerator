@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <IsPackable>false</IsPackable>
@@ -6,8 +6,10 @@
   <ItemGroup>
     <Compile Remove="SourceGenerationTestCases\**\*.cs" />
     <None Include="SourceGenerationTestCases\**\*" />
-    <Compile Remove="ErrorReportingTestCases\**\*.cs" />
-    <None Include="ErrorReportingTestCases\**\*" />
+		<Compile Remove="ErrorReportingTestCases\**\*.cs" />
+		<None Include="ErrorReportingTestCases\**\*" />
+		<Compile Remove="CachingTestCases\**\*.cs" />
+		<None Include="CachingTestCases\**\*" />
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="ErrorReportingTestCases\Attribute.cs" />
