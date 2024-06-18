@@ -21,12 +21,18 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator
         public bool Equals(CandidateTypeInfo? other)
         {
             return other is not null &&
-                   TypeName == other.TypeName;
+                   TypeName == other.TypeName &&
+                   InGlobalNamespace == other.InGlobalNamespace &&
+                   Namespace == other.Namespace;
         }
 
         public override int GetHashCode()
         {
-            return -448171650 + EqualityComparer<string>.Default.GetHashCode(TypeName);
+            int hashCode = 1623501290;
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(TypeName);
+            hashCode = hashCode * -1521134295 + InGlobalNamespace.GetHashCode();
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Namespace);
+            return hashCode;
         }
     }
 }

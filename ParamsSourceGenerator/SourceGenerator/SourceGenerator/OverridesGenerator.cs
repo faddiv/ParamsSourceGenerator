@@ -58,7 +58,7 @@ internal static class OverridesGenerator
 
         foreach (var paramsCandidate in paramsCandidates)
         {
-            var data = new DerivedData(paramsCandidate);
+            var data = paramsCandidate.DerivedData;
 
             for (int n = 1; n <= paramsCandidate.MaxOverrides; n++)
             {

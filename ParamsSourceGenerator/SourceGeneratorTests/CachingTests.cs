@@ -24,7 +24,7 @@ namespace SourceGeneratorTests
         // A collection of all the tracking names. I'll show how to simplify this later
         private static string[] AllTrackingNames = [TrackingNames.GetSpanParamsMethods, TrackingNames.NotNullFilter];
 
-        [Fact(Skip = "Implementation in progress.")]
+        [Fact]
         public void CanGenerate()
         {
             string input = TestEnvironment.GetCachingSource();

@@ -9,6 +9,13 @@ public class CollectionComparer
     {
         return CollectionComparer<TElement[], TElement>.Default;
     }
+
+    public static CollectionComparer<List<TElement>, TElement> GetFor<TElement>(
+        List<TElement> _)
+    {
+        return CollectionComparer<List<TElement>, TElement>.Default;
+    }
+
     public static CollectionComparer<TList, TElement> GetFor<TList, TElement>(
         TList _)
         where TList : ICollection<TElement>

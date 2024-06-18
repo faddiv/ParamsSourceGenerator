@@ -1,10 +1,11 @@
 using Foxy.Params.SourceGenerator.Helpers;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Generic;
 
 namespace Foxy.Params.SourceGenerator.Data;
 
-public class ParameterInfo
+public class ParameterInfo : IEquatable<ParameterInfo?>
 {
     public ParameterInfo(IParameterSymbol arg)
     {
@@ -43,6 +44,30 @@ public class ParameterInfo
             default:
                 return RefKind.None;
         }
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return Equals(obj as ParameterInfo);
+    }
+
+    public bool Equals(ParameterInfo? other)
+    {
+        return other is not null &&
+               Type == other.Type &&
+               Name == other.Name &&
+               RefKind == other.RefKind &&
+               IsNullable == other.IsNullable;
+    }
+
+    public override int GetHashCode()
+    {
+        int hashCode = -1345310773;
+        hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Type);
+        hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Name);
+        hashCode = hashCode * -1521134295 + RefKind.GetHashCode();
+        hashCode = hashCode * -1521134295 + IsNullable.GetHashCode();
+        return hashCode;
     }
 }
 

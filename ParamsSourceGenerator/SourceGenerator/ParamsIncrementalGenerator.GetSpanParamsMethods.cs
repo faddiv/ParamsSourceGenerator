@@ -85,9 +85,15 @@ partial class ParamsIncrementalGenerator : IIncrementalGenerator
         }
 
         INamedTypeSymbol containingType = methodSymbol.ContainingType;
+        var argNameSpan = $"{spanParam!.Name}Span";
+        var spanParamName = spanParam?.Name ?? "";
+        var isSpanRefType =
+            spanParam is not null && (
+            spanParam.RefKind == RefKind.Ref ||
+            spanParam.RefKind == RefKind.RefReadOnlyParameter);
+        var parameterInfos = DerivedData.GetNonParamsArguments(methodSymbol);
         return new SuccessfulParamsCandidate
         {
-            ContainingType = containingType,
             TypeInfo = new CandidateTypeInfo
             { 
                 TypeName = containingType.ToDisplayString(DisplayFormats.ForFileName),
@@ -97,10 +103,25 @@ partial class ParamsIncrementalGenerator : IIncrementalGenerator
                 InGlobalNamespace = containingType.ContainingNamespace.IsGlobalNamespace,
                 Namespace = SemanticHelpers.GetNameSpaceNoGlobal(containingType)
             },
-            MethodSymbol = methodSymbol,
-            SpanParam = spanParam!,
             MaxOverrides = maxOverrides,
-            HasParams = SemanticHelpers.GetValue(context.Attributes.First(), "HasParams", true)
+            HasParams = SemanticHelpers.GetValue(context.Attributes.First(), "HasParams", true),
+            DerivedData = new DerivedData
+            {
+                ReturnType = DerivedData.CreateReturnTypeFor(methodSymbol),
+                SpanArgumentType = DerivedData.GetSpanArgumentType(spanParam!),
+                ParameterInfos = parameterInfos,
+                FixArguments = parameterInfos.Select(e => e.ToParameter()).ToList(),
+                ReturnsKind = SemanticHelpers.GetReturnsKind(methodSymbol),
+                TypeArguments = methodSymbol.TypeArguments.Select(e => e.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)).ToList(),
+                TypeConstraints = DerivedData.CreateTypeConstraints(methodSymbol.TypeArguments),
+                ArgNameSpan = argNameSpan,
+                ArgNameSpanInput = isSpanRefType
+                    ? $"ref {argNameSpan}"
+                    : argNameSpan,
+                MethodName = methodSymbol.Name,
+                IsStatic = methodSymbol.IsStatic,
+                ArgName = spanParamName
+            }
         };
     }
 
