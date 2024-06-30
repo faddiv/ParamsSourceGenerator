@@ -24,14 +24,14 @@ namespace SourceGeneratorTests.IntegrationTests
         private static string[] AllTrackingNames = [TrackingNames.GetSpanParamsMethods, TrackingNames.NotNullFilter];
 
         [Fact]
-        public void CanGenerate()
+        public async Task CanGenerate()
         {
             string input = TestEnvironment.GetCachingSource();
             var expected = TestEnvironment.GetCachingOuputs()[0];
 
             // run the generator, passing in the inputs and the tracking names
             var (diagnostics, output)
-                = CachingTestHelpers.GetGeneratedTrees<ParamsIncrementalGenerator>([input], AllTrackingNames);
+                = await CachingTestHelpers.GetGeneratedTrees<ParamsIncrementalGenerator>([input], AllTrackingNames);
 
             // Assert the output
             using var s = new AssertionScope();

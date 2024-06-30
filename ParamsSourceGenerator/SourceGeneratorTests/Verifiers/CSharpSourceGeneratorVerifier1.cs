@@ -1,58 +1,76 @@
-using System;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Testing;
 using Microsoft.CodeAnalysis.Text;
-using System.IO;
+using Microsoft.CodeAnalysis.CSharp.Testing;
+using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities.Resources;
+using Microsoft.CodeAnalysis.Options;
 
 namespace SourceGeneratorTests;
 
-internal static partial class CSharpSourceGeneratorVerifier<TSourceGenerator>
-    where TSourceGenerator : IIncrementalGenerator, new()
+partial class CSharpSourceGeneratorVerifier<TSourceGenerator>
 {
-    internal static readonly (string filename, string content)[] EmptyGeneratedSources = Array.Empty<(string filename, string content)>();
+    private static readonly (string filename, string content)[] _emptyGeneratedSources = [];
 
-    public static DiagnosticResult Diagnostic()
-        => new DiagnosticResult();
+    public static DiagnosticResult Diagnostic() => new DiagnosticResult();
 
-    public static DiagnosticResult Diagnostic(string id, DiagnosticSeverity severity)
-        => new DiagnosticResult(id, severity);
+    public static DiagnosticResult Diagnostic(string id, DiagnosticSeverity severity) => new(id, severity);
 
-    public static DiagnosticResult Diagnostic(DiagnosticDescriptor descriptor)
-        => new DiagnosticResult(descriptor);
+    public static DiagnosticResult Diagnostic(DiagnosticDescriptor descriptor) => new(descriptor);
 
-    public static async Task VerifyGeneratorAsync(string source, (string filename, string content) generatedSource)
-        => await VerifyGeneratorAsync(source, DiagnosticResult.EmptyDiagnosticResults, new[] { generatedSource });
+    public static async Task VerifyGeneratorAsync(
+        string source,
+        (string filename, string content) generatedSource)
+        => await VerifyGeneratorAsync(source, DiagnosticResult.EmptyDiagnosticResults, [generatedSource]);
 
-    public static async Task VerifyGeneratorAsync(string source, params (string filename, string content)[] generatedSources)
+    public static async Task VerifyGeneratorAsync(
+        string source,
+        params (string filename, string content)[] generatedSources)
         => await VerifyGeneratorAsync(source, DiagnosticResult.EmptyDiagnosticResults, generatedSources);
 
-    public static async Task VerifyGeneratorAsync(string source, DiagnosticResult diagnostic)
-        => await VerifyGeneratorAsync(source, new[] { diagnostic }, EmptyGeneratedSources);
+    public static async Task VerifyGeneratorAsync(
+        string source,
+        DiagnosticResult diagnostic)
+        => await VerifyGeneratorAsync(source, [diagnostic], _emptyGeneratedSources);
 
-    public static async Task VerifyGeneratorAsync(string source, params DiagnosticResult[] diagnostics)
-        => await VerifyGeneratorAsync(source, diagnostics, EmptyGeneratedSources);
+    public static async Task VerifyGeneratorAsync(
+        string source,
+        params DiagnosticResult[] diagnostics)
+        => await VerifyGeneratorAsync(source, diagnostics, _emptyGeneratedSources);
 
-    public static async Task VerifyGeneratorAsync(string source, DiagnosticResult diagnostic, (string filename, string content) generatedSource)
-        => await VerifyGeneratorAsync(source, new[] { diagnostic }, new[] { generatedSource });
+    public static async Task VerifyGeneratorAsync(
+        string source,
+        DiagnosticResult diagnostic,
+        (string filename, string content) generatedSource)
+        => await VerifyGeneratorAsync(source, [diagnostic], [generatedSource]);
 
-    public static async Task VerifyGeneratorAsync(string source, DiagnosticResult[] diagnostics, (string filename, string content) generatedSource)
-        => await VerifyGeneratorAsync(source, diagnostics, new[] { generatedSource });
+    public static async Task VerifyGeneratorAsync(
+        string source,
+        DiagnosticResult[] diagnostics,
+        (string filename, string content) generatedSource)
+        => await VerifyGeneratorAsync(source, diagnostics, [generatedSource]);
 
-    public static async Task VerifyGeneratorAsync(string source, DiagnosticResult diagnostic, params (string filename, string content)[] generatedSources)
-        => await VerifyGeneratorAsync(source, new[] { diagnostic }, generatedSources);
+    public static async Task VerifyGeneratorAsync(
+        string source,
+        DiagnosticResult diagnostic,
+        params (string filename, string content)[] generatedSources)
+        => await VerifyGeneratorAsync(source, [diagnostic], generatedSources);
 
-    public static async Task VerifyGeneratorAsync(string source, DiagnosticResult[] diagnostics, params (string filename, string content)[] generatedSources)
+    public static async Task VerifyGeneratorAsync(
+        string source,
+        DiagnosticResult[] diagnostics,
+        (string filename, string content)[] generatedSources,
+        CancellationToken cancellation = default)
     {
-        Test test = new()
+        Test<TSourceGenerator> test = new()
         {
             TestState =
             {
                 Sources = { source },
             },
-            ReferenceAssemblies = _lazyNet80.Value,
+            ReferenceAssemblies = ReferenceAssemblies.Net.Net80,
         };
 
         foreach ((string filename, string content) in generatedSources)
@@ -62,17 +80,6 @@ internal static partial class CSharpSourceGeneratorVerifier<TSourceGenerator>
 
         test.ExpectedDiagnostics.AddRange(diagnostics);
 
-        await test.RunAsync(CancellationToken.None);
+        await test.RunAsync(cancellation);
     }
-    private static readonly Lazy<ReferenceAssemblies> _lazyNet80 =
-    new Lazy<ReferenceAssemblies>(() =>
-                {
-                    return new ReferenceAssemblies(
-                        "net8.0",
-                        new PackageIdentity(
-                            "Microsoft.NETCore.App.Ref",
-                            "8.0.0"),
-                        Path.Combine("ref", "net8.0"));
-                });
-
 }

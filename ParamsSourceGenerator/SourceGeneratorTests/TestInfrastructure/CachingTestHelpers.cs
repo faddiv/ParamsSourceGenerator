@@ -7,6 +7,11 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
+using SourceGeneratorTests.Verifiers;
+using System.Threading.Tasks;
+using System.Threading;
+using System.Reflection.Metadata;
+using Microsoft.CodeAnalysis.Testing;
 
 namespace SourceGeneratorTests.TestInfrastructure;
 
@@ -14,9 +19,10 @@ internal static class CachingTestHelpers
 {
     // You call this method passing in C# sources, and the list of stages you expect
     // It runs the generator, asserts the outputs are ok, 
-    public static (ImmutableArray<Diagnostic> Diagnostics, string[] Output) GetGeneratedTrees<T>(
+    public static async Task<(ImmutableArray<Diagnostic> Diagnostics, string[] Output)> GetGeneratedTrees<T>(
         string[] sources, // C# source code 
         string[] stages,  // The tracking stages we expect
+        CancellationToken cancellation = default,
         bool assertOutputs = true) // You can disable cacheability checking during dev
         where T : IIncrementalGenerator, new() // T is your generator
     {
@@ -25,15 +31,12 @@ internal static class CachingTestHelpers
 
         // Configure the assembly references you need
         // This will vary depending on your generator and requirements
-        var references = AppDomain.CurrentDomain.GetAssemblies()
-            .Where(_ => !_.IsDynamic && !string.IsNullOrWhiteSpace(_.Location))
-            .Select(_ => MetadataReference.CreateFromFile(_.Location))
-            .Concat([MetadataReference.CreateFromFile(typeof(T).Assembly.Location)]);
+        var references = await ReferenceAssemblies.Net.Net80.ResolveAsync("csharp", cancellation);
 
         // Create a Compilation object
         // You may want to specify other results here
         CSharpCompilation compilation = CSharpCompilation.Create(
-            "EnumExtensions.Generated",
+            "TestingAssambly",
             syntaxTrees,
             references,
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
