@@ -1,7 +1,7 @@
 using Foxy.Params;
 using System;
 
-namespace Something;
+namespace SourceGeneratorTests.IntegrationTests.ErrorReportingTestCases.Reports_NoPartialKeywordOnParentClass;
 
 public class ParentClass
 {

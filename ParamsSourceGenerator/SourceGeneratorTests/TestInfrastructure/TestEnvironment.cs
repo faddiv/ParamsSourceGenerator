@@ -7,12 +7,9 @@ namespace SourceGeneratorTests.TestInfrastructure;
 
 internal class TestEnvironment
 {
-    private static readonly string _projectDirectory;
-
     private static readonly string _validTestDataDirectory;
 
     private static readonly string _cachingTestDataDirectory;
-
 
     private static readonly string _invalidTestDataDirectory;
 
@@ -20,10 +17,11 @@ internal class TestEnvironment
 
     static TestEnvironment()
     {
-        _projectDirectory = FindDirectoryOfFile(".csproj");
-        _validTestDataDirectory = Path.Combine(_projectDirectory, "SourceGenerationTestCases");
-        _invalidTestDataDirectory = Path.Combine(_projectDirectory, "ErrorReportingTestCases");
-        _cachingTestDataDirectory = Path.Combine(_projectDirectory, "CachingTestCases");
+        var projectDirectory = FindDirectoryOfFile(".csproj");
+        var integrartionTestPath = Path.Combine(projectDirectory, "IntegrationTests");
+        _validTestDataDirectory = Path.Combine(integrartionTestPath, "SourceGenerationTestCases");
+        _invalidTestDataDirectory = Path.Combine(integrartionTestPath, "ErrorReportingTestCases");
+        _cachingTestDataDirectory = Path.Combine(integrartionTestPath, "CachingTestCases");
         AttributeImpl = File.ReadAllText(Path.Combine(_validTestDataDirectory, "Attribute.cs"));
     }
 

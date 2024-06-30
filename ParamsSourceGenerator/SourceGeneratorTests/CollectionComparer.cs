@@ -3,7 +3,7 @@ using Foxy.Params.SourceGenerator.Helpers;
 using Xunit;
 using FluentAssertions;
 
-namespace Foxy.Params.SourceGenerator.Tests.Helpers
+namespace SourceGeneratorTests
 {
     public class CollectionComparerTests
     {

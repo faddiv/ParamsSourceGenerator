@@ -14,9 +14,8 @@ using SourceGeneratorTests.TestInfrastructure;
 using Foxy.Params.SourceGenerator;
 using System.Collections;
 using System.Reflection;
-using SourceGeneratorTests.Helpers;
 
-namespace SourceGeneratorTests
+namespace SourceGeneratorTests.IntegrationTests
 {
     public class CachingTests
     {

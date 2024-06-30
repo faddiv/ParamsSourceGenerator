@@ -7,20 +7,18 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace SourceGeneratorTests.Helpers;
+namespace SourceGeneratorTests.TestInfrastructure;
 
 internal static class CachingTestHelpers
 {
     // You call this method passing in C# sources, and the list of stages you expect
     // It runs the generator, asserts the outputs are ok, 
     public static (ImmutableArray<Diagnostic> Diagnostics, string[] Output) GetGeneratedTrees<T>(
-    string[] sources, // C# source code 
-    string[] stages,  // The tracking stages we expect
-    bool assertOutputs = true) // You can disable cacheability checking during dev
-    where T : IIncrementalGenerator, new() // T is your generator
+        string[] sources, // C# source code 
+        string[] stages,  // The tracking stages we expect
+        bool assertOutputs = true) // You can disable cacheability checking during dev
+        where T : IIncrementalGenerator, new() // T is your generator
     {
         // Convert the source files to SyntaxTrees
         IEnumerable<SyntaxTree> syntaxTrees = sources.Select(static x => CSharpSyntaxTree.ParseText(x));
@@ -132,9 +130,9 @@ internal static class CachingTestHelpers
     }
 
     private static void AssertEqual(
- ImmutableArray<IncrementalGeneratorRunStep> runSteps1,
- ImmutableArray<IncrementalGeneratorRunStep> runSteps2,
- string stepName)
+        ImmutableArray<IncrementalGeneratorRunStep> runSteps1,
+        ImmutableArray<IncrementalGeneratorRunStep> runSteps2,
+        string stepName)
     {
         runSteps1.Should().HaveSameCount(runSteps2);
 

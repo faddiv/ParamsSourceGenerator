@@ -5,7 +5,7 @@ using SourceGeneratorTests.TestInfrastructure;
 using Foxy.Params.SourceGenerator.Data;
 using Microsoft.CodeAnalysis;
 
-namespace SourceGeneratorTests;
+namespace SourceGeneratorTests.IntegrationTests;
 
 using VerifyCS = CSharpSourceGeneratorVerifier<ParamsIncrementalGenerator>;
 
