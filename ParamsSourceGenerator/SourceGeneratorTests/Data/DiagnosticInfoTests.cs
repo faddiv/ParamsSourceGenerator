@@ -3,7 +3,7 @@ using Xunit;
 using FluentAssertions;
 using Foxy.Params.SourceGenerator.Data;
 
-namespace Foxy.Params.SourceGenerator.Tests.Data
+namespace SourceGeneratorTests.Data
 {
     public class DiagnosticInfoTests
     {

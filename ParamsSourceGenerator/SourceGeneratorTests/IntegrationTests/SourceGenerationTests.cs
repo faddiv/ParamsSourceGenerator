@@ -15,7 +15,7 @@ public class SourceGenerationTests
         string code = @"";
 
         await VerifyCS.VerifyGeneratorAsync(code,
-            TestEnvironment.GetDefaultOuput());
+            TestEnvironment.DefaultOuput);
     }
 
     [Fact]

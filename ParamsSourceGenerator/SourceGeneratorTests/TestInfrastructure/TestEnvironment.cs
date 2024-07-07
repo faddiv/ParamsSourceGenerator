@@ -7,11 +7,14 @@ namespace SourceGeneratorTests.TestInfrastructure;
 
 internal class TestEnvironment
 {
+
     private static readonly string _validTestDataDirectory;
 
     private static readonly string _cachingTestDataDirectory;
 
     private static readonly string _invalidTestDataDirectory;
+
+    public static readonly CSharpFile DefaultOuput;
 
     public static readonly string AttributeImpl;
 
@@ -23,6 +26,7 @@ internal class TestEnvironment
         _invalidTestDataDirectory = Path.Combine(integrartionTestPath, "ErrorReportingTestCases");
         _cachingTestDataDirectory = Path.Combine(integrartionTestPath, "CachingTestCases");
         AttributeImpl = File.ReadAllText(Path.Combine(_validTestDataDirectory, "Attribute.cs"));
+        DefaultOuput = new("ParamsAttribute.g.cs", AttributeImpl);
     }
 
     public static string GetValidSource([CallerMemberName] string caller = null)
@@ -43,28 +47,24 @@ internal class TestEnvironment
         return File.ReadAllText(sourcePath);
     }
 
-    public static (string filename, string content) GetDefaultOuput()
-    {
-        return ("ParamsAttribute.g.cs", AttributeImpl);
-    }
-
-    public static (string filename, string content)[] GetOuputs([CallerMemberName] string caller = null)
+    public static CSharpFile[] GetOuputs([CallerMemberName] string caller = null)
     {
         return GetOuputs(_validTestDataDirectory, caller);
     }
 
-    public static (string filename, string content)[] GetCachingOuputs([CallerMemberName] string caller = null)
+    public static CSharpFile[] GetCachingOuputs([CallerMemberName] string caller = null)
     {
         return GetOuputs(_cachingTestDataDirectory, caller);
     }
 
-    public static (string filename, string content)[] GetOuputs(string baseDirectory, [CallerMemberName] string caller = null)
+    public static CSharpFile[] GetOuputs(string baseDirectory, [CallerMemberName] string caller = null)
     {
         var basePath = Path.Combine(baseDirectory, caller);
-        var sources = new List<(string filename, string content)>
+        var sources = new List<CSharpFile>
         {
-            GetDefaultOuput()
+            DefaultOuput
         };
+
         foreach (var filePath in Directory.GetFiles(basePath, "*.cs", SearchOption.TopDirectoryOnly))
         {
             var fileName = Path.GetFileName(filePath);
@@ -72,9 +72,10 @@ internal class TestEnvironment
                 continue;
 
             var content = File.ReadAllText(filePath);
-            sources.Add((fileName, content));
+            sources.Add(new CSharpFile(fileName, content));
         }
-        return sources.ToArray();
+
+        return [.. sources];
     }
 
     private static string FindDirectoryOfFile(string fileExtension, [CallerFilePath] string baseFilePath = null)

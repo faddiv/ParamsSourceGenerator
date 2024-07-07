@@ -1,101 +1,42 @@
 ﻿using FluentAssertions;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Reflection;
-using SourceGeneratorTests.Verifiers;
-using System.Threading.Tasks;
-using System.Threading;
-using System.Reflection.Metadata;
-using Microsoft.CodeAnalysis.Testing;
+using System.IO;
 
 namespace SourceGeneratorTests.TestInfrastructure;
 
-internal static class CachingTestHelpers
+internal static partial class CachingTestHelpers
 {
-    // You call this method passing in C# sources, and the list of stages you expect
-    // It runs the generator, asserts the outputs are ok, 
-    public static async Task<(ImmutableArray<Diagnostic> Diagnostics, string[] Output)> GetGeneratedTrees<T>(
-        string[] sources, // C# source code 
-        string[] stages,  // The tracking stages we expect
-        CancellationToken cancellation = default,
-        bool assertOutputs = true) // You can disable cacheability checking during dev
-        where T : IIncrementalGenerator, new() // T is your generator
+    public static void AssertOutputs(GeneratorDriverRunResult runResult, ICollection<CSharpFile> files)
     {
-        // Convert the source files to SyntaxTrees
-        IEnumerable<SyntaxTree> syntaxTrees = sources.Select(static x => CSharpSyntaxTree.ParseText(x));
+        var actualFileNames = runResult.GeneratedTrees.Select(e => Path.GetFileName(e.FilePath));
+        var expectedFileNames = files.Select(e => e.Name);
 
-        // Configure the assembly references you need
-        // This will vary depending on your generator and requirements
-        var references = await ReferenceAssemblies.Net.Net80.ResolveAsync("csharp", cancellation);
+        actualFileNames.Should().Contain(expectedFileNames);
+        expectedFileNames.Should().Contain(actualFileNames);
 
-        // Create a Compilation object
-        // You may want to specify other results here
-        CSharpCompilation compilation = CSharpCompilation.Create(
-            "TestingAssambly",
-            syntaxTrees,
-            references,
-            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
-
-        // Run the generator, get the results, and assert cacheability if applicable
-        GeneratorDriverRunResult runResult = RunGeneratorAndAssertOutput<T>(
-            compilation, stages, assertOutputs);
-
-        // Return the generator diagnostics and generated sources
-        return (runResult.Diagnostics, runResult.GeneratedTrees.Select(x => x.ToString()).ToArray());
-    }
-
-    private static GeneratorDriverRunResult RunGeneratorAndAssertOutput<T>(
-        CSharpCompilation compilation,
-        string[] trackingNames,
-        bool assertOutput = true)
-        where T : IIncrementalGenerator, new()
-    {
-        ISourceGenerator generator = new T().AsSourceGenerator();
-
-        // ⚠ Tell the driver to track all the incremental generator outputs
-        // without this, you'll have no tracked outputs!
-        var opts = new GeneratorDriverOptions(
-            disabledOutputs: IncrementalGeneratorOutputKind.None,
-            trackIncrementalGeneratorSteps: true);
-
-        GeneratorDriver driver = CSharpGeneratorDriver.Create([generator], driverOptions: opts);
-
-        // Create a clone of the compilation that we will use later
-        var clone = compilation.Clone();
-
-        // Do the initial run
-        // Note that we store the returned driver value, as it contains cached previous outputs
-        driver = driver.RunGenerators(compilation);
-        GeneratorDriverRunResult runResult = driver.GetRunResult();
-
-        if (assertOutput)
+        foreach (var file in files)
         {
-            // Run again, using the same driver, with a clone of the compilation
-            GeneratorDriverRunResult runResult2 = driver
-                                                  .RunGenerators(clone)
-                                                  .GetRunResult();
-
-            // Compare all the tracked outputs, throw if there's a failure
-            AssertRunsEqual(runResult, runResult2, trackingNames);
-
-            // verify the second run only generated cached source outputs
-            runResult2.Results[0]
-                        .TrackedOutputSteps
-                        .SelectMany(x => x.Value) // step executions
-                        .SelectMany(x => x.Outputs) // execution results
-                        .Should()
-                        .OnlyContain(x => x.Reason == IncrementalStepRunReason.Cached);
+            var tree = runResult.GeneratedTrees.First(e => Path.GetFileName(e.FilePath) == file.Name);
+            tree.ToString().Should().Be(file.Content);
         }
-
-        return runResult;
     }
 
-    private static void AssertRunsEqual(
+    public static void AssertAllStepsCached(GeneratorDriverRunResult runResult)
+    {
+        // verify the second run only generated cached source outputs
+        runResult.Results[0]
+                    .TrackedOutputSteps
+                    .SelectMany(x => x.Value) // step executions
+                    .SelectMany(x => x.Outputs) // execution results
+                    .Should()
+                    .OnlyContain(x => x.Reason == IncrementalStepRunReason.Cached);
+    }
+
+    public static void AssertRunsEqual(
         GeneratorDriverRunResult runResult1,
         GeneratorDriverRunResult runResult2,
         string[] trackingNames)
@@ -161,60 +102,6 @@ internal static class CachingTestHelpers
 
             // Make sure we're not using anything we shouldn't
             //AssertObjectGraph(runStep1, stepName);
-        }
-    }
-
-    static void AssertObjectGraph(IncrementalGeneratorRunStep runStep, string stepName)
-    {
-        // Including the stepName in error messages to make it easy to isolate issues
-        var because = $"{stepName} shouldn't contain banned symbols";
-        var visited = new HashSet<object>();
-
-        // Check all of the outputs - probably overkill, but why not
-        foreach (var (obj, _) in runStep.Outputs)
-        {
-            Visit(obj);
-        }
-
-        void Visit(object node)
-        {
-            // If we've already seen this object, or it's null, stop.
-            if (node is null || !visited.Add(node))
-            {
-                return;
-            }
-
-            // Make sure it's not a banned type
-            node.Should()
-                .NotBeOfType<Compilation>(because)
-                .And.NotBeOfType<ISymbol>(because)
-                .And.NotBeOfType<SyntaxNode>(because);
-
-            // Examine the object
-            Type type = node.GetType();
-            if (type.IsPrimitive || type.IsEnum || type == typeof(string))
-            {
-                return;
-            }
-
-            // If the object is a collection, check each of the values
-            if (node is IEnumerable collection and not string)
-            {
-                foreach (object element in collection)
-                {
-                    // recursively check each element in the collection
-                    Visit(element);
-                }
-
-                return;
-            }
-
-            // Recursively check each field in the object
-            foreach (FieldInfo field in type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
-            {
-                object fieldValue = field.GetValue(node);
-                Visit(fieldValue);
-            }
         }
     }
 }

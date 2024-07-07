@@ -1,19 +1,11 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis;
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using Foxy.Params.SourceGenerator.Data;
 using Xunit;
 using SourceGeneratorTests.TestInfrastructure;
 using Foxy.Params.SourceGenerator;
-using System.Collections;
-using System.Reflection;
+using static SourceGeneratorTests.TestInfrastructure.CachingTestHelpers;
 
 namespace SourceGeneratorTests.IntegrationTests
 {
@@ -21,24 +13,30 @@ namespace SourceGeneratorTests.IntegrationTests
     {
 
         // A collection of all the tracking names. I'll show how to simplify this later
-        private static string[] AllTrackingNames = [TrackingNames.GetSpanParamsMethods, TrackingNames.NotNullFilter];
+        private static string[] _allTrackingNames = [TrackingNames.GetSpanParamsMethods, TrackingNames.NotNullFilter];
 
         [Fact]
         public async Task CanGenerate()
         {
+            var runner = new SourceGeneratorTestRunner<ParamsIncrementalGenerator>();
             string input = TestEnvironment.GetCachingSource();
-            var expected = TestEnvironment.GetCachingOuputs()[0];
+            var expected = TestEnvironment.GetCachingOuputs();
 
-            // run the generator, passing in the inputs and the tracking names
-            var (diagnostics, output)
-                = await CachingTestHelpers.GetGeneratedTrees<ParamsIncrementalGenerator>([input], AllTrackingNames);
+            await runner.LoadCSharpAssemblies();
 
-            // Assert the output
-            using var s = new AssertionScope();
-            diagnostics.Should().BeEmpty();
-            output[0].Should().Be(expected.content);
+            var compilation = runner.CompileSourceTexts(input);
+
+            var result1 = runner.RunSourceGenerator(compilation);
+
+            var compilation2 = compilation.Clone();
+
+            var result2 = runner.RunSourceGenerator(compilation2);
+
+            AssertRunsEqual(result1, result2, _allTrackingNames);
+            AssertAllStepsCached(result2);
+            result1.Diagnostics.Should().BeEmpty();
+            AssertOutputs(result1, expected);
 
         }
-
     }
 }
