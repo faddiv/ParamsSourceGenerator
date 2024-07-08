@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Testing;
@@ -10,18 +9,14 @@ namespace SourceGeneratorTests;
 internal static partial class CSharpSourceGeneratorVerifier<TSourceGenerator>
     where TSourceGenerator : IIncrementalGenerator, new()
 {
-    public sealed class Test : CSharpSourceGeneratorTest<EmptySourceGeneratorProvider, DefaultVerifier>
+    private sealed class Test<TSourceGenerator2> : CSharpSourceGeneratorTest<TSourceGenerator2, DefaultVerifier>
+        where TSourceGenerator2 : IIncrementalGenerator, new()
     {
         public Test()
         {
         }
 
         public LanguageVersion LanguageVersion { get; set; } = LanguageVersion.Default;
-
-        protected override IEnumerable<ISourceGenerator> GetSourceGenerators()
-        {
-            return new[] { new TSourceGenerator().AsSourceGenerator() };
-        }
 
         protected override CompilationOptions CreateCompilationOptions()
         {

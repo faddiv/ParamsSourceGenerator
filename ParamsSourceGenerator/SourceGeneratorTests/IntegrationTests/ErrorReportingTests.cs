@@ -5,7 +5,7 @@ using SourceGeneratorTests.TestInfrastructure;
 using Foxy.Params.SourceGenerator.Data;
 using Microsoft.CodeAnalysis;
 
-namespace SourceGeneratorTests;
+namespace SourceGeneratorTests.IntegrationTests;
 
 using VerifyCS = CSharpSourceGeneratorVerifier<ParamsIncrementalGenerator>;
 
@@ -21,7 +21,7 @@ public class ErrorReportingTests
             .WithLocation(0)
             .WithArguments("Foo", "Format");
 
-        await VerifyCS.VerifyGeneratorAsync(code, expected, TestEnvironment.GetDefaultOuput());
+        await VerifyCS.VerifyGeneratorAsync(code, expected, TestEnvironment.DefaultOuput);
     }
 
     [Fact]
@@ -34,7 +34,7 @@ public class ErrorReportingTests
             .WithLocation(0)
             .WithArguments("ParentClass", "Format");
 
-        await VerifyCS.VerifyGeneratorAsync(code, expected, TestEnvironment.GetDefaultOuput());
+        await VerifyCS.VerifyGeneratorAsync(code, expected, TestEnvironment.DefaultOuput);
     }
 
     [Fact]
@@ -47,7 +47,7 @@ public class ErrorReportingTests
             .WithLocation(0)
             .WithArguments("Format");
 
-        await VerifyCS.VerifyGeneratorAsync(code, expected, TestEnvironment.GetDefaultOuput());
+        await VerifyCS.VerifyGeneratorAsync(code, expected, TestEnvironment.DefaultOuput);
     }
 
     [Fact]
@@ -60,7 +60,7 @@ public class ErrorReportingTests
             .WithLocation(0)
             .WithArguments("Format", "object args");
 
-        await VerifyCS.VerifyGeneratorAsync(code, expected, TestEnvironment.GetDefaultOuput());
+        await VerifyCS.VerifyGeneratorAsync(code, expected, TestEnvironment.DefaultOuput);
     }
 
     [Fact]
@@ -73,7 +73,7 @@ public class ErrorReportingTests
             .WithLocation(0)
             .WithArguments("ThisIsWrong");
 
-        await VerifyCS.VerifyGeneratorAsync(code, expected, TestEnvironment.GetDefaultOuput());
+        await VerifyCS.VerifyGeneratorAsync(code, expected, TestEnvironment.DefaultOuput);
     }
 
     [Fact]
@@ -86,7 +86,7 @@ public class ErrorReportingTests
             .WithLocation(0)
             .WithArguments("ThisIsWrong");
 
-        await VerifyCS.VerifyGeneratorAsync(code, expected, TestEnvironment.GetDefaultOuput());
+        await VerifyCS.VerifyGeneratorAsync(code, expected, TestEnvironment.DefaultOuput);
     }
 
     [Fact]
@@ -99,7 +99,7 @@ public class ErrorReportingTests
             .WithLocation(0)
             .WithArguments("Format", "out System.ReadOnlySpan<object> args");
 
-        await VerifyCS.VerifyGeneratorAsync(code, expected, TestEnvironment.GetDefaultOuput());
+        await VerifyCS.VerifyGeneratorAsync(code, expected, TestEnvironment.DefaultOuput);
     }
 
     [Fact]
@@ -112,7 +112,7 @@ public class ErrorReportingTests
             .WithLocation(0)
             .WithArguments("values");
 
-        await VerifyCS.VerifyGeneratorAsync(code, expected, TestEnvironment.GetDefaultOuput());
+        await VerifyCS.VerifyGeneratorAsync(code, expected, TestEnvironment.DefaultOuput);
     }
 
     [Fact]
@@ -125,6 +125,6 @@ public class ErrorReportingTests
             .WithLocation(0)
             .WithArguments("Format", "valuesSpan, values0, values1, values2");
 
-        await VerifyCS.VerifyGeneratorAsync(code, expected, TestEnvironment.GetDefaultOuput());
+        await VerifyCS.VerifyGeneratorAsync(code, expected, TestEnvironment.DefaultOuput);
     }
 }

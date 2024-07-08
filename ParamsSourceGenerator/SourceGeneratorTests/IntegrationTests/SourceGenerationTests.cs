@@ -3,7 +3,7 @@ using Foxy.Params.SourceGenerator;
 using Xunit;
 using SourceGeneratorTests.TestInfrastructure;
 
-namespace SourceGeneratorTests;
+namespace SourceGeneratorTests.IntegrationTests;
 
 using VerifyCS = CSharpSourceGeneratorVerifier<ParamsIncrementalGenerator>;
 
@@ -15,7 +15,7 @@ public class SourceGenerationTests
         string code = @"";
 
         await VerifyCS.VerifyGeneratorAsync(code,
-            TestEnvironment.GetDefaultOuput());
+            TestEnvironment.DefaultOuput);
     }
 
     [Fact]

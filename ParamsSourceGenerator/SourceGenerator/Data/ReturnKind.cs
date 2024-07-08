@@ -1,9 +1,8 @@
-namespace Foxy.Params.SourceGenerator.Data
+namespace Foxy.Params.SourceGenerator.Data;
+
+internal enum ReturnKind
 {
-    internal enum ReturnKind
-    {
-        ReturnsVoid,
-        ReturnsType,
-        ReturnsRef
-    }
+    ReturnsVoid,
+    ReturnsType,
+    ReturnsRef
 }

@@ -1,37 +1,39 @@
 using System.Threading;
+using Foxy.Params.SourceGenerator.Data;
 using Foxy.Params.SourceGenerator.Helpers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Foxy.Params.SourceGenerator
+namespace Foxy.Params.SourceGenerator;
+
+[Generator]
+public partial class ParamsIncrementalGenerator : IIncrementalGenerator
 {
-    [Generator]
-    public partial class ParamsIncrementalGenerator : IIncrementalGenerator
+    private const string _attributeName = "Foxy.Params.ParamsAttribute";
+
+    public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        private const string _attributeName = "Foxy.Params.ParamsAttribute";
+        context.RegisterPostInitializationOutput(AddParamsAttribute);
+        var declarations = context.SyntaxProvider.ForAttributeWithMetadataName(
+            _attributeName,
+            predicate: Filter,
+            transform: GetSpanParamsMethods)
+            .WithTrackingName(TrackingNames.GetSpanParamsMethods)
+            .NotNull()
+            .WithTrackingName(TrackingNames.NotNullFilter)
+            .Collect();
 
-        public void Initialize(IncrementalGeneratorInitializationContext context)
-        {
-            context.RegisterPostInitializationOutput(AddParamsAttribute);
-            var declarations = context.SyntaxProvider.ForAttributeWithMetadataName(
-                _attributeName,
-                predicate: Filter,
-                transform: GetSpanParamsMethods)
-                .NotNull()
-                .Collect();
+        context.RegisterSourceOutput(declarations, GenerateSource);
+    }
 
-            context.RegisterSourceOutput(declarations, GenerateSource);
-        }
+    private void AddParamsAttribute(IncrementalGeneratorPostInitializationContext context)
+    {
+        context.AddSource("ParamsAttribute.g.cs", _paramsAttribute);
+    }
 
-        private void AddParamsAttribute(IncrementalGeneratorPostInitializationContext context)
-        {
-            context.AddSource("ParamsAttribute.g.cs", _paramsAttribute);
-        }
-
-        private static bool Filter(SyntaxNode s, CancellationToken token)
-        {
-            return s is MethodDeclarationSyntax methodDeclarationSyntax;
-        }
+    private static bool Filter(SyntaxNode s, CancellationToken token)
+    {
+        return s is MethodDeclarationSyntax methodDeclarationSyntax;
     }
 }
 
