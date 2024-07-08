@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace SourceGeneratorTests.TestInfrastructure;
@@ -47,6 +48,15 @@ internal class TestEnvironment
         return File.ReadAllText(sourcePath);
     }
 
+    public static CSharpFile[] GetCachingSources([CallerMemberName] string caller = null)
+    {
+        var sourcePath = Path.Combine(_cachingTestDataDirectory, caller);
+        return Directory.EnumerateFiles(sourcePath, "_source*")
+            .OrderBy(x => x)
+            .Select(e => new CSharpFile(Path.GetFileName(e), File.ReadAllText(e)))
+            .ToArray();
+    }
+
     public static CSharpFile[] GetOuputs([CallerMemberName] string caller = null)
     {
         return GetOuputs(_validTestDataDirectory, caller);
@@ -68,7 +78,7 @@ internal class TestEnvironment
         foreach (var filePath in Directory.GetFiles(basePath, "*.cs", SearchOption.TopDirectoryOnly))
         {
             var fileName = Path.GetFileName(filePath);
-            if (fileName == "_source.cs")
+            if (fileName.StartsWith("_source"))
                 continue;
 
             var content = File.ReadAllText(filePath);
