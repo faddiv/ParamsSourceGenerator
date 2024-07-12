@@ -14,3 +14,11 @@ StringBuilder v2:
 | Method       | Mean     | Error   | StdDev  | Gen0    | Gen1    | Allocated |
 |------------- |---------:|--------:|--------:|--------:|--------:|----------:|
 | RunGenerator | 564.7 us | 6.02 us | 6.69 us | 42.9688 | 11.7188 |  190.9 KB |
+
+Testing if separating file grouping during pipeline make optimizations.
+Calculating all output together:
+| Method             | Mean     | Error   | StdDev  | Gen0       | Gen1      | Allocated |
+|------------------- |---------:|--------:|--------:|-----------:|----------:|----------:|
+| OnlyOneFileChanges | 247.4 ms | 3.88 ms | 3.63 ms | 17000.0000 | 6000.0000 | 104.55 MB |
+
+grouping outputs should recalculate only the changed groups:
