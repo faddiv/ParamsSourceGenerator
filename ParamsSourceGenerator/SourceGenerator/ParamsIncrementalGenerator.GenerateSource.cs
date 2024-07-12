@@ -16,8 +16,8 @@ partial class ParamsIncrementalGenerator : IIncrementalGenerator
             .SelectMany(e => e.Diagnostics))
         {
             context.ReportDiagnostic(diagnostic.ToDiagnostics());
-
         }
+
         foreach (var uniqueClass in typeSymbols
             .OfType<SuccessfulParamsCandidate>()
             .GroupBy(e => e.TypeInfo))

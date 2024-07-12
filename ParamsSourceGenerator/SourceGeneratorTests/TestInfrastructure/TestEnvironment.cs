@@ -42,10 +42,10 @@ internal class TestEnvironment
         return File.ReadAllText(sourcePath);
     }
 
-    public static string GetCachingSource([CallerMemberName] string caller = null)
+    public static CSharpFile GetCachingSource([CallerMemberName] string caller = null)
     {
         var sourcePath = Path.Combine(_cachingTestDataDirectory, caller, "_source.cs");
-        return File.ReadAllText(sourcePath);
+        return new CSharpFile(Path.GetFileName(sourcePath), File.ReadAllText(sourcePath));
     }
 
     public static CSharpFile[] GetCachingSources([CallerMemberName] string caller = null)

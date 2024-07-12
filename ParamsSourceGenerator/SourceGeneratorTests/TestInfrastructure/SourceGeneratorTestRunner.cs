@@ -68,6 +68,27 @@ public class SourceGeneratorTestRunner
         return compilation;
     }
 
+    public CSharpCompilation CompileSources(params CSharpFile[] sources)
+    {
+        if (_references.Length == 0)
+        {
+            throw new Exception("No references are loaded.");
+        }
+
+        // Convert the source files to SyntaxTrees
+        IEnumerable<SyntaxTree> syntaxTrees = sources.Select(static x => CSharpSyntaxTree.ParseText(x.Content, path: x.Name));
+
+        // Create a Compilation object
+        // You may want to specify other results here
+        CSharpCompilation compilation = CSharpCompilation.Create(
+            AssemblyName,
+            syntaxTrees,
+            _references,
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+
+        return compilation;
+    }
+
     public GeneratorDriverRunResult RunSourceGenerator(Compilation compilation, CancellationToken cancellation = default)
     {
         _driver = _driver.RunGenerators(compilation, cancellation) as CSharpGeneratorDriver;

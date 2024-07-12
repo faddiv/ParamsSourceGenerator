@@ -28,7 +28,7 @@ namespace SourceGeneratorTests.IntegrationTests
 
             await runner.LoadCSharpAssemblies();
 
-            var compilation = runner.CompileSourceTexts(input);
+            var compilation = runner.CompileSources(input);
 
             var result1 = runner.RunSourceGenerator(compilation);
 
@@ -51,11 +51,11 @@ namespace SourceGeneratorTests.IntegrationTests
 
             await runner.LoadCSharpAssemblies();
 
-            var compilation = runner.CompileSourceTexts(inputs[0].Content);
+            var compilation = runner.CompileSources(inputs[0]);
 
             var result1 = runner.RunSourceGenerator(compilation);
 
-            var compilation2 = runner.CompileSourceTexts(inputs[1].Content);
+            var compilation2 = runner.CompileSources(inputs[1]);
 
             var result2 = runner.RunSourceGenerator(compilation2);
 
@@ -74,11 +74,11 @@ namespace SourceGeneratorTests.IntegrationTests
 
             await runner.LoadCSharpAssemblies();
 
-            var compilation = runner.CompileSourceTexts(inputs[0].Content);
+            var compilation = runner.CompileSources(inputs[0]);
 
             var result1 = runner.RunSourceGenerator(compilation);
 
-            var compilation2 = runner.CompileSourceTexts(inputs[1].Content);
+            var compilation2 = runner.CompileSources(inputs[1]);
 
             var result2 = runner.RunSourceGenerator(compilation2);
 
@@ -96,17 +96,38 @@ namespace SourceGeneratorTests.IntegrationTests
 
             await runner.LoadCSharpAssemblies();
 
-            var compilation = runner.CompileSourceTexts(inputs[0].Content);
+            var compilation = runner.CompileSources(inputs[0]);
 
             var result1 = runner.RunSourceGenerator(compilation);
 
-            var compilation2 = runner.CompileSourceTexts(inputs[1].Content);
+            var compilation2 = runner.CompileSources(inputs[1]);
 
             var result2 = runner.RunSourceGenerator(compilation2);
 
             AssertsModifiedOnLastStep(result2);
             result2.Diagnostics.Should().BeEmpty();
             AssertOutputs(result2, expected);
+        }
+
+        [Fact]
+        public async Task Caches_When_OtherFileChanges()
+        {
+            var runner = new SourceGeneratorTestRunner<ParamsIncrementalGenerator>();
+            var inputs = TestEnvironment.GetCachingSources();
+            var expected = TestEnvironment.GetCachingOuputs();
+
+            await runner.LoadCSharpAssemblies();
+
+            var compilation = runner.CompileSources(inputs[0], inputs[1]);
+
+            var result1 = runner.RunSourceGenerator(compilation);
+
+            var compilation2 = runner.CompileSources(inputs[0], inputs[2]);
+
+            var result2 = runner.RunSourceGenerator(compilation2);
+
+            AssertOutputs(result2, expected);
+            // TODO How to test?
         }
     }
 }
