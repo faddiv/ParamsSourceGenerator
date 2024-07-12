@@ -36,6 +36,18 @@ internal static partial class CachingTestHelpers
                     .OnlyContain(x => x.Reason == IncrementalStepRunReason.Cached);
     }
 
+    public static void AssertsModifiedOnLastStep(GeneratorDriverRunResult runResult)
+    {
+        // verify the second run only generated cached source outputs
+        runResult.Results[0]
+                    .TrackedOutputSteps
+                    .SelectMany(x => x.Value) // step executions
+                    .SelectMany(x => x.Outputs) // execution results
+                    .Last().Reason
+                    .Should()
+                    .Be(IncrementalStepRunReason.Modified);
+    }
+
     public static void AssertRunsEqual(
         GeneratorDriverRunResult runResult1,
         GeneratorDriverRunResult runResult2,
