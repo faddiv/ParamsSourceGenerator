@@ -11,7 +11,7 @@ namespace Foxy.Params.SourceGenerator.SourceGenerator;
 
 internal static class OverridesGenerator
 {
-    public static SourceText Execute(CandidateTypeInfo typeInfo, IEnumerable<SuccessfulParamsCandidate> paramsCandidates)
+    public static SourceText Execute(CandidateTypeInfo typeInfo, IEnumerable<SuccessfulParams> paramsCandidates)
     {
         var _sourceBuilder = new SourceBuilder();
         var _typeInfo = typeInfo ?? throw new ArgumentNullException(nameof(typeInfo));
@@ -27,7 +27,7 @@ internal static class OverridesGenerator
         return SourceText.From(_sourceBuilder.ToString(), Encoding.UTF8);
     }
 
-    private static void GenerateNamespace(SourceBuilder builder, CandidateTypeInfo _typeInfo, IEnumerable<SuccessfulParamsCandidate> paramsCandidates, int maxOverridesMax)
+    private static void GenerateNamespace(SourceBuilder builder, CandidateTypeInfo _typeInfo, IEnumerable<SuccessfulParams> paramsCandidates, int maxOverridesMax)
     {
         if (_typeInfo.InGlobalNamespace)
         {
@@ -45,14 +45,14 @@ internal static class OverridesGenerator
     private static void GenerateNamespaceMembers(
         SourceBuilder builder,
         (CandidateTypeInfo typeInfo,
-        IEnumerable<SuccessfulParamsCandidate> paramsCandidates,
+        IEnumerable<SuccessfulParams> paramsCandidates,
         int maxOverridesMax) args)
     {
         GeneratePartialClass(builder, args.typeInfo, args.paramsCandidates);
         GenerateArgumentsClasses(builder, args.maxOverridesMax);
     }
 
-    private static void GeneratePartialClass(SourceBuilder builder, CandidateTypeInfo _typeInfo, IEnumerable<SuccessfulParamsCandidate> paramsCandidates)
+    private static void GeneratePartialClass(SourceBuilder builder, CandidateTypeInfo _typeInfo, IEnumerable<SuccessfulParams> paramsCandidates)
     {
         var nestLevel = CreateClasses(_typeInfo, builder);
 

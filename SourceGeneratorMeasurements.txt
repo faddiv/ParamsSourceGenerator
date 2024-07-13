@@ -21,4 +21,7 @@ Calculating all output together:
 |------------------- |---------:|--------:|--------:|-----------:|----------:|----------:|
 | OnlyOneFileChanges | 247.4 ms | 3.88 ms | 3.63 ms | 17000.0000 | 6000.0000 | 104.55 MB |
 
-grouping outputs should recalculate only the changed groups:
+Grouping outputs recalculate only the changed groups:
+| Method             | Mean     | Error   | StdDev  | Gen0      | Gen1      | Allocated |
+|------------------- |---------:|--------:|--------:|----------:|----------:|----------:|
+| OnlyOneFileChanges | 198.8 ms | 3.74 ms | 7.65 ms | 3000.0000 | 1000.0000 |  21.89 MB |

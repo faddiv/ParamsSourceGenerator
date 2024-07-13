@@ -5,7 +5,7 @@ namespace Foxy.Params.SourceGenerator.Helpers;
 public class CollectionComparer<TList, TElement> : 
     CollectionComparer,
     IEqualityComparer<TList>
-    where TList : ICollection<TElement>
+    where TList : IReadOnlyCollection<TElement>
 {
     public static CollectionComparer<TList, TElement> Default = new();
 

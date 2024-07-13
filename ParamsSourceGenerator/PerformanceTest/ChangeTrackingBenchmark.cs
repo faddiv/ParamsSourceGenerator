@@ -75,5 +75,7 @@ public partial class Foo0
     {
         _driver = _driver.RunGenerators(_compilation1);
         (_compilation1, _compilation2) = (_compilation2, _compilation1);
+        /*var output = _driver.GetRunResult();
+        Console.WriteLine(output);*/
     }
 }

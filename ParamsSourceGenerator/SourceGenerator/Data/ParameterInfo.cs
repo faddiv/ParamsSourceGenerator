@@ -7,12 +7,19 @@ namespace Foxy.Params.SourceGenerator.Data;
 
 public class ParameterInfo : IEquatable<ParameterInfo?>
 {
-    public ParameterInfo(IParameterSymbol arg)
+    public ParameterInfo(IParameterSymbol arg) : this(
+        type: arg.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+        name: arg.Name,
+        refKind: arg.RefKind,
+        isNullable: arg.NullableAnnotation == NullableAnnotation.Annotated)
+    { }
+
+    public ParameterInfo(string type, string name, RefKind refKind, bool isNullable)
     {
-        Type = arg.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-        Name = arg.Name;
-        RefKind = arg.RefKind;
-        IsNullable = arg.NullableAnnotation == NullableAnnotation.Annotated;
+        Type = type;
+        Name = name;
+        RefKind = refKind;
+        IsNullable = isNullable;
     }
 
     public string Type { get; }

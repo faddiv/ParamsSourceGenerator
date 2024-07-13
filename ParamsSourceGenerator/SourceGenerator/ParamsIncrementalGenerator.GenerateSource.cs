@@ -9,24 +9,29 @@ namespace Foxy.Params.SourceGenerator;
 
 partial class ParamsIncrementalGenerator : IIncrementalGenerator
 {
-    private static void GenerateSource(SourceProductionContext context, ImmutableArray<ParamsCandidate> typeSymbols)
+    private static void GenerateSource(SourceProductionContext context, ParamsCandidate typeSymbols)
     {
-        foreach (var diagnostic in typeSymbols
-            .OfType<FailedParamsCandidate>()
-            .SelectMany(e => e.Diagnostics))
+        if (typeSymbols is FailedParamsCandidate fail)
         {
-            context.ReportDiagnostic(diagnostic.ToDiagnostics());
+            foreach (var diagnostic in fail.Diagnostics)
+            {
+                context.ReportDiagnostic(diagnostic.ToDiagnostics());
+            }
         }
-
-        foreach (var uniqueClass in typeSymbols
-            .OfType<SuccessfulParamsCandidate>()
-            .GroupBy(e => e.TypeInfo))
+        else if (typeSymbols is SuccessfulParamsGroupCandidate ts)
         {
-            CandidateTypeInfo typeInfo = uniqueClass.Key;
+            CandidateTypeInfo typeInfo = ts.TypeInfo;
             context.AddSource(
                 SemanticHelpers.CreateFileName(typeInfo.TypeName),
-                OverridesGenerator.Execute(typeInfo, uniqueClass));
+                OverridesGenerator.Execute(typeInfo, ts.ParamCanditates));
+        } else
+        {
+            string diagnosticMessage = $"Invalid ParamsCanditate: {typeSymbols.GetType().Name}";
+            Diagnostic diagnostic = Diagnostic.Create(DiagnosticReports.InternalError, null, diagnosticMessage);
+            context.ReportDiagnostic(diagnostic);
         }
+
+
     }
 }
 

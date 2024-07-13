@@ -45,4 +45,13 @@ public class DiagnosticReports
         Category,
         DiagnosticSeverity.Warning,
         isEnabledByDefault: true);
+
+    public static DiagnosticDescriptor InternalError { get; } = new DiagnosticDescriptor(
+        "PRM1005",
+        "Internal error",
+        "Internal error occured during source generation: {0}",
+        Category,
+        DiagnosticSeverity.Warning,
+        isEnabledByDefault: true);
+
 }

@@ -16,9 +16,15 @@ public class CollectionComparer
         return CollectionComparer<List<TElement>, TElement>.Default;
     }
 
+    public static CollectionComparer<IReadOnlyList<TElement>, TElement> GetFor<TElement>(
+        IReadOnlyList<TElement> list)
+    {
+        return GetFor<IReadOnlyList<TElement>, TElement>(list);
+    }
+
     public static CollectionComparer<TList, TElement> GetFor<TList, TElement>(
         TList _)
-        where TList : ICollection<TElement>
+        where TList : IReadOnlyCollection<TElement>
     {
         return CollectionComparer<TList, TElement>.Default;
     }
@@ -26,7 +32,7 @@ public class CollectionComparer
     public static CollectionComparer<TList, TElement> CreateFor<TList, TElement>(
         TList _,
         IEqualityComparer<TElement> elementComparer)
-        where TList : ICollection<TElement>
+        where TList : IReadOnlyCollection<TElement>
     {
         return new CollectionComparer<TList, TElement>(elementComparer);
     }

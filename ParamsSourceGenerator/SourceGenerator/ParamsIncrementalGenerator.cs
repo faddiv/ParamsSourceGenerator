@@ -1,3 +1,5 @@
+using System.Collections.Immutable;
+using System.Linq;
 using System.Threading;
 using Foxy.Params.SourceGenerator.Data;
 using Foxy.Params.SourceGenerator.Helpers;
@@ -21,7 +23,17 @@ public partial class ParamsIncrementalGenerator : IIncrementalGenerator
             .WithTrackingName(TrackingNames.GetSpanParamsMethods)
             .NotNull()
             .WithTrackingName(TrackingNames.NotNullFilter)
-            .Collect();
+            .Collect()
+            .SelectMany((e, c) => e.OfType<SuccessfulParamsCandidate>().GroupBy(x => x.TypeInfo).Select(x => new SuccessfulParamsGroupCandidate 
+            {
+                ParamCanditates = x.Select(y => new SuccessfulParams { 
+                    DerivedData = y.DerivedData,
+                    HasParams = y.HasParams,
+                    MaxOverrides = y.MaxOverrides,
+                }).ToImmutableList(),
+                TypeInfo = x.Key
+            }).Cast<ParamsCandidate>()
+            .Concat(e.OfType<FailedParamsCandidate>()));
 
         context.RegisterSourceOutput(declarations, GenerateSource);
     }

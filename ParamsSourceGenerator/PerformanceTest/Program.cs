@@ -9,11 +9,12 @@ using PerformanceTest;
 /*var c = new CodeGenerationBenchmark();
 c.CreateBaseSource();
 c.RunGenerator();*/
-/*
-var c = new ChangeTrackingBenchmark();
+
+/*var c = new ChangeTrackingBenchmark();
 await c.CreateBaseSource();
 c.OnlyOneFileChanges();
-*/
+c.OnlyOneFileChanges();
+c.OnlyOneFileChanges();*/
 
 var config = new ManualConfig()
     .WithOptions(ConfigOptions.DisableOptimizationsValidator)
