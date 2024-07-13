@@ -173,7 +173,7 @@ internal static class OverridesGenerator
             codeLine.AddSegment(">");
         }
         codeLine.AddSegment("(");
-        codeLine.AddCommaSeparatedList(data.ParameterInfos.Select(e => e.ToPassParameter()));
+        codeLine.AddCommaSeparatedList(data.FixedParameters.Convert(e => e.ToPassParameter()));
         codeLine.AddSegment($", {data.ArgNameSpanInput})");
         codeLine.EndLine();
     }

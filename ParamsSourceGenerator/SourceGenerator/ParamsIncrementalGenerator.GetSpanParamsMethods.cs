@@ -13,6 +13,9 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using Foxy.Params.SourceGenerator.SourceGenerator;
 using System.Reflection;
+using ParameterInfo = Foxy.Params.SourceGenerator.Data.ParameterInfo;
+using System.Buffers;
+using System.Runtime.InteropServices;
 
 namespace Foxy.Params.SourceGenerator;
 
@@ -83,15 +86,8 @@ partial class ParamsIncrementalGenerator : IIncrementalGenerator
         {
             return new FailedParamsCandidate { Diagnostics = diagnostics };
         }
-
         INamedTypeSymbol containingType = methodSymbol.ContainingType;
-        var argNameSpan = $"{spanParam!.Name}Span";
-        var spanParamName = spanParam?.Name ?? "";
-        var isSpanRefType =
-            spanParam is not null && (
-            spanParam.RefKind == RefKind.Ref ||
-            spanParam.RefKind == RefKind.RefReadOnlyParameter);
-        var parameterInfos = DerivedData.GetNonParamsArguments(methodSymbol);
+        var parameterInfos = DerivedData.GetArguments(methodSymbol);
         return new SuccessfulParamsCandidate
         {
             TypeInfo = new CandidateTypeInfo
@@ -109,18 +105,12 @@ partial class ParamsIncrementalGenerator : IIncrementalGenerator
             {
                 ReturnType = DerivedData.CreateReturnTypeFor(methodSymbol),
                 SpanArgumentType = DerivedData.GetSpanArgumentType(spanParam!),
-                ParameterInfos = parameterInfos,
-                FixArguments = parameterInfos.Select(e => e.ToParameter()).ToList(),
+                Parameters = parameterInfos,
                 ReturnsKind = SemanticHelpers.GetReturnsKind(methodSymbol),
                 TypeArguments = methodSymbol.TypeArguments.Select(e => e.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)).ToList(),
                 TypeConstraints = DerivedData.CreateTypeConstraints(methodSymbol.TypeArguments),
-                ArgNameSpan = argNameSpan,
-                ArgNameSpanInput = isSpanRefType
-                    ? $"ref {argNameSpan}"
-                    : argNameSpan,
                 MethodName = methodSymbol.Name,
-                IsStatic = methodSymbol.IsStatic,
-                ArgName = spanParamName
+                IsStatic = methodSymbol.IsStatic
             }
         };
     }

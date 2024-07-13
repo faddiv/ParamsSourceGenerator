@@ -6,8 +6,9 @@ namespace Foxy.Params.SourceGenerator.Data;
 
 public class TypeConstrainInfo : IEquatable<TypeConstrainInfo?>
 {
-    public string Type { get; set; }
-    public List<string> Constraints { get; set; }
+    public required string Type { get; init; }
+
+    public required List<string> Constraints { get; init; }
 
     public override bool Equals(object? obj)
     {

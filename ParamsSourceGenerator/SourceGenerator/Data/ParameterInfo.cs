@@ -5,27 +5,17 @@ using System.Collections.Generic;
 
 namespace Foxy.Params.SourceGenerator.Data;
 
-public class ParameterInfo : IEquatable<ParameterInfo?>
+public class ParameterInfo(string type, string name, RefKind refKind, bool isNullable) : IEquatable<ParameterInfo?>
 {
-    public ParameterInfo(IParameterSymbol arg) : this(
-        type: arg.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-        name: arg.Name,
-        refKind: arg.RefKind,
-        isNullable: arg.NullableAnnotation == NullableAnnotation.Annotated)
-    { }
+    public string Type { get; } = type;
 
-    public ParameterInfo(string type, string name, RefKind refKind, bool isNullable)
-    {
-        Type = type;
-        Name = name;
-        RefKind = refKind;
-        IsNullable = isNullable;
-    }
+    public string Name { get; } = name;
 
-    public string Type { get; }
-    public string Name { get; }
-    public RefKind RefKind { get; }
-    public bool IsNullable { get; }
+    public RefKind RefKind { get; } = refKind;
+
+    public bool IsNullable { get; } = isNullable;
+
+    public bool IsSpanRefType => RefKind is RefKind.Ref or RefKind.RefReadOnlyParameter;
 
     public string ToParameter()
     {
@@ -77,4 +67,3 @@ public class ParameterInfo : IEquatable<ParameterInfo?>
         return hashCode;
     }
 }
-

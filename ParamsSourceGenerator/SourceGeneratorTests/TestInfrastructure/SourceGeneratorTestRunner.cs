@@ -10,19 +10,19 @@ using System.Linq;
 
 namespace SourceGeneratorTests.TestInfrastructure;
 
-public class SourceGeneratorTestRunner<T>(ReferenceAssemblies referenceAssemblies = null)
+public class SourceGeneratorTestRunner<T>(ReferenceAssemblies? referenceAssemblies = null)
     : SourceGeneratorTestRunner([typeof(T)], referenceAssemblies);
 
 public class SourceGeneratorTestRunner
 {
-    private ReferenceAssemblies _referenceAssemblies;
+    private readonly ReferenceAssemblies _referenceAssemblies;
     private CSharpGeneratorDriver _driver;
     private ImmutableArray<MetadataReference> _references;
     private ImmutableArray<ISourceGenerator> _sourceGenerators;
 
     public SourceGeneratorTestRunner(
         ImmutableArray<Type> sourceGeneratorTypes,
-        ReferenceAssemblies referenceAssemblies = null)
+        ReferenceAssemblies? referenceAssemblies = null)
     {
         _referenceAssemblies = referenceAssemblies ?? ReferenceAssemblies.Net.Net80;
         _sourceGenerators = CreateSourceGenerators(sourceGeneratorTypes);
@@ -32,11 +32,6 @@ public class SourceGeneratorTestRunner
         var opts = new GeneratorDriverOptions(
             disabledOutputs: IncrementalGeneratorOutputKind.None,
             trackIncrementalGeneratorSteps: true);
-        StartNewGenerator(opts);
-    }
-
-    private void StartNewGenerator(GeneratorDriverOptions opts)
-    {
         _driver = CSharpGeneratorDriver.Create(_sourceGenerators, driverOptions: opts);
     }
 
@@ -91,7 +86,7 @@ public class SourceGeneratorTestRunner
 
     public GeneratorDriverRunResult RunSourceGenerator(Compilation compilation, CancellationToken cancellation = default)
     {
-        _driver = _driver.RunGenerators(compilation, cancellation) as CSharpGeneratorDriver;
+        _driver = (CSharpGeneratorDriver)_driver.RunGenerators(compilation, cancellation);
         return _driver.GetRunResult();
     }
 
@@ -102,7 +97,7 @@ public class SourceGeneratorTestRunner
         {
             object value = Activator.CreateInstance(type)!;
             return value as ISourceGenerator
-                ?? (value as IIncrementalGenerator).AsSourceGenerator();
+                ?? ((IIncrementalGenerator)value).AsSourceGenerator();
         });
     }
 }

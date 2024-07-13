@@ -13,9 +13,13 @@ internal class DerivedData : IEquatable<DerivedData?>
 
     public required string SpanArgumentType { get; init; }
 
-    public required List<ParameterInfo> ParameterInfos { get; init; }
+    public required ParameterInfo[] Parameters { get; init; }
 
-    public required List<string> FixArguments { get; init; }
+    public ReadOnlySpan<ParameterInfo> FixedParameters => new(Parameters, 0, Parameters.Length - 1);
+
+    public ref ParameterInfo ParamsArgument => ref Parameters[^1];
+
+    public List<string> FixArguments => FixedParameters.ToImmutableArray().Select(e => e.ToParameter()).ToList();
 
     public required ReturnKind ReturnsKind { get; init; }
 
@@ -23,11 +27,13 @@ internal class DerivedData : IEquatable<DerivedData?>
 
     public required List<TypeConstrainInfo> TypeConstraints { get; init; }
 
-    public required string ArgName { get; init; }
+    public string ArgName => ParamsArgument.Name;
 
-    public required string ArgNameSpan { get; init; }
+    public string ArgNameSpan => $"{ParamsArgument.Name}Span";
 
-    public required string ArgNameSpanInput { get; init; }
+    public string ArgNameSpanInput => ParamsArgument.IsSpanRefType
+                    ? $"ref {ArgNameSpan}"
+                    : ArgNameSpan;
 
     public required string MethodName { get; init; }
 
@@ -59,12 +65,15 @@ internal class DerivedData : IEquatable<DerivedData?>
         return SemanticHelpers.WithModifiers(spanTypeName, RefKind.None, isNullable);
     }
 
-    public static List<ParameterInfo> GetNonParamsArguments(IMethodSymbol methodSymbol)
+    public static ParameterInfo[] GetArguments(IMethodSymbol methodSymbol)
     {
         return methodSymbol.Parameters
-            .Take(methodSymbol.Parameters.Length - 1)
-            .Select(arg => new ParameterInfo(arg))
-            .ToList();
+            .Select(arg => new ParameterInfo(
+        type: arg.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+        name: arg.Name,
+        refKind: arg.RefKind,
+        isNullable: arg.NullableAnnotation == NullableAnnotation.Annotated))
+            .ToArray();
     }
 
     public static List<TypeConstrainInfo> CreateTypeConstraints(ImmutableArray<ITypeSymbol> typeArguments)
@@ -122,14 +131,10 @@ internal class DerivedData : IEquatable<DerivedData?>
         return other is not null &&
                ReturnType == other.ReturnType &&
                SpanArgumentType == other.SpanArgumentType &&
-               CollectionComparer.GetFor(ParameterInfos).Equals(ParameterInfos, other.ParameterInfos) &&
-               CollectionComparer.GetFor(FixArguments).Equals(FixArguments, other.FixArguments) &&
+               CollectionComparer.GetFor(Parameters).Equals(Parameters, other.Parameters) &&
                ReturnsKind == other.ReturnsKind &&
                CollectionComparer.GetFor(TypeArguments).Equals(TypeArguments, other.TypeArguments) &&
                CollectionComparer.GetFor(TypeConstraints).Equals(TypeConstraints, other.TypeConstraints) &&
-               ArgName == other.ArgName &&
-               ArgNameSpan == other.ArgNameSpan &&
-               ArgNameSpanInput == other.ArgNameSpanInput &&
                MethodName == other.MethodName &&
                IsStatic == other.IsStatic;
     }
@@ -139,14 +144,11 @@ internal class DerivedData : IEquatable<DerivedData?>
         int hashCode = 1919567312;
         hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ReturnType);
         hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(SpanArgumentType);
-        hashCode = hashCode * -1521134295 + CollectionComparer.GetFor(ParameterInfos).GetHashCode(ParameterInfos);
+        hashCode = hashCode * -1521134295 + CollectionComparer.GetFor(Parameters).GetHashCode(Parameters);
         hashCode = hashCode * -1521134295 + CollectionComparer.GetFor(FixArguments).GetHashCode(FixArguments);
         hashCode = hashCode * -1521134295 + ReturnsKind.GetHashCode();
         hashCode = hashCode * -1521134295 + CollectionComparer.GetFor(TypeArguments).GetHashCode(TypeArguments);
         hashCode = hashCode * -1521134295 + CollectionComparer.GetFor(TypeConstraints).GetHashCode(TypeConstraints);
-        hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ArgName);
-        hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ArgNameSpan);
-        hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ArgNameSpanInput);
         hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(MethodName);
         hashCode = hashCode * -1521134295 + IsStatic.GetHashCode();
         return hashCode;

@@ -30,25 +30,25 @@ internal class TestEnvironment
         DefaultOuput = new("ParamsAttribute.g.cs", AttributeImpl);
     }
 
-    public static string GetValidSource([CallerMemberName] string caller = null)
+    public static string GetValidSource([CallerMemberName] string caller = null!)
     {
         var sourcePath = Path.Combine(_validTestDataDirectory, caller, "_source.cs");
         return File.ReadAllText(sourcePath);
     }
 
-    public static string GetInvalidSource([CallerMemberName] string caller = null)
+    public static string GetInvalidSource([CallerMemberName] string caller = null!)
     {
         var sourcePath = Path.Combine(_invalidTestDataDirectory, caller, "_source.cs");
         return File.ReadAllText(sourcePath);
     }
 
-    public static CSharpFile GetCachingSource([CallerMemberName] string caller = null)
+    public static CSharpFile GetCachingSource([CallerMemberName] string caller = null!)
     {
         var sourcePath = Path.Combine(_cachingTestDataDirectory, caller, "_source.cs");
         return new CSharpFile(Path.GetFileName(sourcePath), File.ReadAllText(sourcePath));
     }
 
-    public static CSharpFile[] GetCachingSources([CallerMemberName] string caller = null)
+    public static CSharpFile[] GetCachingSources([CallerMemberName] string caller = null!)
     {
         var sourcePath = Path.Combine(_cachingTestDataDirectory, caller);
         return Directory.EnumerateFiles(sourcePath, "_source*")
@@ -57,17 +57,17 @@ internal class TestEnvironment
             .ToArray();
     }
 
-    public static CSharpFile[] GetOuputs([CallerMemberName] string caller = null)
+    public static CSharpFile[] GetOuputs([CallerMemberName] string caller = null!)
     {
         return GetOuputs(_validTestDataDirectory, caller);
     }
 
-    public static CSharpFile[] GetCachingOuputs([CallerMemberName] string caller = null)
+    public static CSharpFile[] GetCachingOuputs([CallerMemberName] string caller = null!)
     {
         return GetOuputs(_cachingTestDataDirectory, caller);
     }
 
-    public static CSharpFile[] GetOuputs(string baseDirectory, [CallerMemberName] string caller = null)
+    public static CSharpFile[] GetOuputs(string baseDirectory, [CallerMemberName] string caller = null!)
     {
         var basePath = Path.Combine(baseDirectory, caller);
         var sources = new List<CSharpFile>
@@ -88,7 +88,7 @@ internal class TestEnvironment
         return [.. sources];
     }
 
-    private static string FindDirectoryOfFile(string fileExtension, [CallerFilePath] string baseFilePath = null)
+    private static string FindDirectoryOfFile(string fileExtension, [CallerFilePath] string baseFilePath = null!)
     {
         var dir =
             Path.GetDirectoryName(baseFilePath) ?? throw new InvalidOperationException($"Could not get directory from {baseFilePath}");

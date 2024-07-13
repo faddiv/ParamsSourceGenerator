@@ -22,14 +22,14 @@ internal static class SemanticHelpers
         string attributeName,
         SemanticModel semanticModel,
         CancellationToken cancellationToken,
-        out AttributeSyntax value)
+        [NotNullWhen(true)]out AttributeSyntax? value)
     {
         foreach (AttributeListSyntax attributeList in candidate.AttributeLists)
         {
             foreach (AttributeSyntax attribute in attributeList.Attributes)
             {
                 SymbolInfo info = semanticModel.GetSymbolInfo(attribute, cancellationToken);
-                ISymbol symbol = info.Symbol;
+                ISymbol? symbol = info.Symbol;
 
                 if (symbol is IMethodSymbol method
                     && method.ContainingType.ToDisplayString().Equals(attributeName, StringComparison.Ordinal))
@@ -68,7 +68,7 @@ internal static class SemanticHelpers
             if (item.Key != argumentName)
                 continue;
 
-            return (T)item.Value.Value;
+            return (T)item.Value.Value!;
         }
 
         return defaultValue;

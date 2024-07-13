@@ -73,7 +73,7 @@ public class SuccessfulParamsCandidateTests
         var candidate1 = TestData.CreateSuccessfulParamsCandidate();
 
         var candidate2 = TestData.CreateSuccessfulParamsCandidate(
-            derivedData: TestData.CreateDerivedData(argName: "DifferentArgName"));
+            derivedData: TestData.CreateDerivedData(methodName: "DifferentMethod"));
 
         // Act & Assert
         candidate1.Equals(candidate2).Should().BeFalse();

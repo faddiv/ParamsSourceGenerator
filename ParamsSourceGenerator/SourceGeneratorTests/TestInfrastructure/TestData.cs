@@ -23,13 +23,9 @@ namespace SourceGeneratorTests.TestInfrastructure
         }
 
         internal static DerivedData CreateDerivedData(
-            string argName = "foo",
-            string argNameSpan = "fooSpan",
-            string argNameSpanInput = "fooInput",
-            List<string>? fixArguments = null,
             bool isStatic = true,
             string methodName = "Format",
-            List<ParameterInfo>? parameterInfos = null,
+            ParameterInfo[]? parameters = null,
             ReturnKind returnsKind = ReturnKind.ReturnsType,
             string returnType = "object",
             string spanArgumentType = "int",
@@ -38,17 +34,14 @@ namespace SourceGeneratorTests.TestInfrastructure
         {
             return new DerivedData
             {
-                ArgName = argName,
-                ArgNameSpan = argNameSpan,
-                ArgNameSpanInput = argNameSpanInput,
-                FixArguments = fixArguments ?? ["format", "index"],
                 IsStatic = isStatic,
                 MethodName = methodName,
-                ParameterInfos = parameterInfos ??
+                Parameters = parameters ??
                 [
                     new ParameterInfo("string", "foo", RefKind.Ref, true),
-                new ParameterInfo("int", "baz", RefKind.Out, false),
-            ],
+                    new ParameterInfo("int", "baz", RefKind.Out, false),
+                    new ParameterInfo("ReadOnlySpan<T>", "args", RefKind.None, false),
+                ],
                 ReturnsKind = returnsKind,
                 ReturnType = returnType,
                 SpanArgumentType = spanArgumentType,
