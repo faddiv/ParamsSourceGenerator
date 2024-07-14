@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Foxy.Params.SourceGenerator.SourceGenerator
+namespace Foxy.Params.SourceGenerator.Data
 {
     public class CandidateTypeInfo : IEquatable<CandidateTypeInfo?>
     {

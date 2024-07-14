@@ -1,5 +1,4 @@
 ﻿using Foxy.Params.SourceGenerator.Helpers;
-using Foxy.Params.SourceGenerator.SourceGenerator;
 using System;
 using System.Collections.Generic;
 

@@ -1,4 +1,3 @@
-using Foxy.Params.SourceGenerator.SourceGenerator;
 using System;
 
 namespace Foxy.Params.SourceGenerator.Data;

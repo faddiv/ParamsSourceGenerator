@@ -29,15 +29,5 @@ public class TypeConstrainInfo : IEquatable<TypeConstrainInfo?>
         hashCode = hashCode * -1521134295 + EqualityComparer<List<string>>.Default.GetHashCode(Constraints);
         return hashCode;
     }
-
-    public static bool operator ==(TypeConstrainInfo? left, TypeConstrainInfo? right)
-    {
-        return EqualityComparer<TypeConstrainInfo>.Default.Equals(left, right);
-    }
-
-    public static bool operator !=(TypeConstrainInfo? left, TypeConstrainInfo? right)
-    {
-        return !(left == right);
-    }
 }
 

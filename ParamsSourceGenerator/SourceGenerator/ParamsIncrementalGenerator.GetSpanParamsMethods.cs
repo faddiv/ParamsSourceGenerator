@@ -104,7 +104,6 @@ partial class ParamsIncrementalGenerator : IIncrementalGenerator
             MethodInfo = new Data.MethodInfo
             {
                 ReturnType = Data.MethodInfo.CreateReturnTypeFor(methodSymbol),
-                SpanArgumentType = Data.MethodInfo.GetSpanArgumentType(spanParam!),
                 Parameters = parameterInfos,
                 ReturnsKind = SemanticHelpers.GetReturnsKind(methodSymbol),
                 TypeArguments = methodSymbol.TypeArguments.Select(e => e.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)).ToList(),

@@ -11,7 +11,7 @@ internal class MethodInfo : IEquatable<MethodInfo?>
 {
     public required string ReturnType { get; init; }
 
-    public required string SpanArgumentType { get; init; }
+    public string SpanArgumentType => ParamsArgument.GetFirstGenericType();
 
     public required ParameterInfo[] Parameters { get; init; }
 
@@ -84,7 +84,7 @@ internal class MethodInfo : IEquatable<MethodInfo?>
     {
         return methodSymbol.Parameters
             .Select(arg => new ParameterInfo(
-        type: arg.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+        type: TypeInfo.Create(arg.Type),
         name: arg.Name,
         refKind: arg.RefKind,
         isNullable: arg.NullableAnnotation == NullableAnnotation.Annotated))

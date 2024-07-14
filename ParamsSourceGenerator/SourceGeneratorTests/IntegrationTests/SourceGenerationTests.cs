@@ -242,4 +242,12 @@ public class SourceGenerationTests
         await VerifyCS.VerifyGeneratorAsync(code,
             TestEnvironment.GetOuputs());
     }
+
+    [Fact]
+    public async Task Generate_ForEmbeddedGenericArguments()
+    {
+        string code = TestEnvironment.GetValidSource();
+        await VerifyCS.VerifyGeneratorAsync(code,
+            TestEnvironment.GetOuputs());
+    }
 }

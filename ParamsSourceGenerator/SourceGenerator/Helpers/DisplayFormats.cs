@@ -8,4 +8,14 @@ internal class DisplayFormats
         globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.Omitted,
         typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
         genericsOptions: SymbolDisplayGenericsOptions.None);
+
+    public static SymbolDisplayFormat ForRootTypeDisplay =
+        SymbolDisplayFormat.FullyQualifiedFormat
+        .WithGenericsOptions(SymbolDisplayGenericsOptions.None)
+        .AddMiscellaneousOptions(SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier);
+
+    public static SymbolDisplayFormat ForGenericArgumentFormat =
+        SymbolDisplayFormat.FullyQualifiedFormat
+        .AddMiscellaneousOptions(SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier);
+
 }

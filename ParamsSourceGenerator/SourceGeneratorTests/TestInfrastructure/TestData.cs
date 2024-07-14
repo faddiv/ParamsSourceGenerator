@@ -1,7 +1,8 @@
 ﻿using Foxy.Params.SourceGenerator.Data;
-using Foxy.Params.SourceGenerator.SourceGenerator;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
+
+using TypeInfo = Foxy.Params.SourceGenerator.Data.TypeInfo;
 
 namespace SourceGeneratorTests.TestInfrastructure
 {
@@ -28,7 +29,6 @@ namespace SourceGeneratorTests.TestInfrastructure
             ParameterInfo[]? parameters = null,
             ReturnKind returnsKind = ReturnKind.ReturnsType,
             string returnType = "object",
-            string spanArgumentType = "int",
             List<string>? typeArguments = null,
             List<TypeConstrainInfo>? typeConstraints = null)
         {
@@ -38,13 +38,12 @@ namespace SourceGeneratorTests.TestInfrastructure
                 MethodName = methodName,
                 Parameters = parameters ??
                 [
-                    new ParameterInfo("string", "foo", RefKind.Ref, true),
-                    new ParameterInfo("int", "baz", RefKind.Out, false),
-                    new ParameterInfo("ReadOnlySpan<T>", "args", RefKind.None, false),
+                    new ParameterInfo(new TypeInfo("string"), "foo", RefKind.Ref, true),
+                    new ParameterInfo(new TypeInfo("int"), "baz", RefKind.Out, false),
+                    new ParameterInfo(new TypeInfo("ReadOnlySpan", ["T"]), "args", RefKind.None, false),
                 ],
                 ReturnsKind = returnsKind,
                 ReturnType = returnType,
-                SpanArgumentType = spanArgumentType,
                 TypeArguments = typeArguments ?? ["T1", "T2"],
                 TypeConstraints = typeConstraints ??
                 [

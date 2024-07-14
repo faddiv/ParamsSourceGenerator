@@ -5,9 +5,9 @@ using System.Collections.Generic;
 
 namespace Foxy.Params.SourceGenerator.Data;
 
-public class ParameterInfo(string type, string name, RefKind refKind, bool isNullable) : IEquatable<ParameterInfo?>
+public class ParameterInfo(TypeInfo type, string name, RefKind refKind, bool isNullable) : IEquatable<ParameterInfo?>
 {
-    public string Type { get; } = type;
+    public TypeInfo Type { get; } = type;
 
     public string Name { get; } = name;
 
@@ -19,7 +19,12 @@ public class ParameterInfo(string type, string name, RefKind refKind, bool isNul
 
     public string ToParameter()
     {
-        return $"{SemanticHelpers.WithModifiers(Type, RefKind, IsNullable)} {Name}";
+        return $"{SemanticHelpers.WithModifiers(Type.ToString(), RefKind, false)} {Name}";
+    }
+
+    public string GetFirstGenericType()
+    {
+        return SemanticHelpers.WithModifiers(Type.GenericParameters[0], RefKind.None, IsNullable);
     }
 
     public string ToPassParameter()
@@ -51,7 +56,7 @@ public class ParameterInfo(string type, string name, RefKind refKind, bool isNul
     public bool Equals(ParameterInfo? other)
     {
         return other is not null &&
-               Type == other.Type &&
+               Type.Equals(other.Type) &&
                Name == other.Name &&
                RefKind == other.RefKind &&
                IsNullable == other.IsNullable;
@@ -60,7 +65,7 @@ public class ParameterInfo(string type, string name, RefKind refKind, bool isNul
     public override int GetHashCode()
     {
         int hashCode = -1345310773;
-        hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Type);
+        hashCode = hashCode * -1521134295 + EqualityComparer<TypeInfo>.Default.GetHashCode(Type);
         hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Name);
         hashCode = hashCode * -1521134295 + RefKind.GetHashCode();
         hashCode = hashCode * -1521134295 + IsNullable.GetHashCode();
