@@ -5,6 +5,7 @@ using Xunit;
 using SourceGeneratorTests.TestInfrastructure;
 using Foxy.Params.SourceGenerator;
 using static SourceGeneratorTests.TestInfrastructure.CachingTestHelpers;
+using Microsoft.CodeAnalysis;
 
 namespace SourceGeneratorTests.IntegrationTests
 {
@@ -37,9 +38,9 @@ namespace SourceGeneratorTests.IntegrationTests
             var result2 = runner.RunSourceGenerator(compilation2);
 
             AssertRunsEqual(result1, result2, _allTrackingNames);
-            AssertAllStepsCached(result2);
+            AssertAllOutputs(result2, IncrementalStepRunReason.Cached);
             result1.Diagnostics.Should().BeEmpty();
-            AssertOutputs(result1, expected);
+            AssertOutputsMatch(result1, expected);
         }
 
         [Fact]
@@ -60,9 +61,9 @@ namespace SourceGeneratorTests.IntegrationTests
             var result2 = runner.RunSourceGenerator(compilation2);
 
             AssertRunsEqual(result1, result2, _allTrackingNames);
-            AssertAllStepsCached(result2);
+            AssertAllOutputs(result2, IncrementalStepRunReason.Cached);
             result1.Diagnostics.Should().BeEmpty();
-            AssertOutputs(result1, expected);
+            AssertOutputsMatch(result1, expected);
         }
 
         [Fact]
@@ -82,9 +83,9 @@ namespace SourceGeneratorTests.IntegrationTests
 
             var result2 = runner.RunSourceGenerator(compilation2);
 
-            AssertsModifiedOnLastStep(result2);
+            AssertAllOutputs(result2, IncrementalStepRunReason.Modified);
             result2.Diagnostics.Should().BeEmpty();
-            AssertOutputs(result2, expected);
+            AssertOutputsMatch(result2, expected);
         }
 
         [Fact]
@@ -104,9 +105,9 @@ namespace SourceGeneratorTests.IntegrationTests
 
             var result2 = runner.RunSourceGenerator(compilation2);
 
-            AssertsModifiedOnLastStep(result2);
+            AssertAllOutputs(result2, IncrementalStepRunReason.Modified);
             result2.Diagnostics.Should().BeEmpty();
-            AssertOutputs(result2, expected);
+            AssertOutputsMatch(result2, expected);
         }
 
         [Fact]
@@ -126,8 +127,9 @@ namespace SourceGeneratorTests.IntegrationTests
 
             var result2 = runner.RunSourceGenerator(compilation2);
 
-            AssertOutputs(result2, expected);
-            // TODO How to test?
+            AssertOutputsMatch(result2, expected);
+            AssertOutput(result2, "Something.Foo.g.cs", Microsoft.CodeAnalysis.IncrementalStepRunReason.Cached);
+            AssertOutput(result2, "Something.Baz.g.cs", Microsoft.CodeAnalysis.IncrementalStepRunReason.Modified);
         }
     }
 }

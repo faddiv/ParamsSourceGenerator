@@ -5,12 +5,14 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.IO;
+using System.Runtime.CompilerServices;
+using System.Collections;
 
 namespace SourceGeneratorTests.TestInfrastructure;
 
 internal static partial class CachingTestHelpers
 {
-    public static void AssertOutputs(GeneratorDriverRunResult runResult, ICollection<CSharpFile> files)
+    public static void AssertOutputsMatch(GeneratorDriverRunResult runResult, ICollection<CSharpFile> files)
     {
         var actualFileNames = runResult.GeneratedTrees.Select(e => Path.GetFileName(e.FilePath));
         var expectedFileNames = files.Select(e => e.Name);
@@ -25,7 +27,7 @@ internal static partial class CachingTestHelpers
         }
     }
 
-    public static void AssertAllStepsCached(GeneratorDriverRunResult runResult)
+    public static void AssertAllOutputs(GeneratorDriverRunResult runResult, IncrementalStepRunReason reason)
     {
         // verify the second run only generated cached source outputs
         runResult.Results[0]
@@ -33,19 +35,21 @@ internal static partial class CachingTestHelpers
                     .SelectMany(x => x.Value) // step executions
                     .SelectMany(x => x.Outputs) // execution results
                     .Should()
-                    .OnlyContain(x => x.Reason == IncrementalStepRunReason.Cached);
+                    .HaveCountGreaterThan(0)
+                    .And
+                    .OnlyContain(x => x.Reason == reason);
     }
 
-    public static void AssertsModifiedOnLastStep(GeneratorDriverRunResult runResult)
+    public static void AssertOutput(GeneratorDriverRunResult runResult, string outputName, IncrementalStepRunReason reason)
     {
-        // verify the second run only generated cached source outputs
-        runResult.Results[0]
-                    .TrackedOutputSteps
+        var concreteOutputs = runResult.Results[0].TrackedOutputSteps
                     .SelectMany(x => x.Value) // step executions
                     .SelectMany(x => x.Outputs) // execution results
-                    .Last().Reason
-                    .Should()
-                    .Be(IncrementalStepRunReason.Modified);
+                    .Select(x => new { x.Reason, Values = ExtractGeneratedSourceTexts(x) })
+                    .SelectMany(x => x.Values.Select(e => new { x.Reason, Value = e }))
+                    .Where(x => GetDynamicValue<string>(x.Value, "HintName") == outputName)
+                    .ToList();
+        concreteOutputs.Should().HaveCount(1).And.OnlyContain(x => x.Reason == reason);
     }
 
     public static void AssertRunsEqual(
@@ -85,6 +89,30 @@ internal static partial class CachingTestHelpers
                     .ToDictionary(x => x.Key, x => x.Value); // Convert to a dictionary
     }
 
+    private static IEnumerable<object> ExtractGeneratedSourceTexts((object Value, IncrementalStepRunReason Reason) x)
+    {
+        return x.Value is ITuple tuple
+            && tuple[0] is IList list
+            ? list.Cast<object>()
+            : [];
+    }
+
+    private static T? GetDynamicValue<T>(object? value, string propertyName)
+    {
+        if (value is null)
+        {
+            return default;
+        }
+
+        var type = value.GetType();
+        var property = type.GetProperty(propertyName);
+        if (property is null)
+        {
+            throw new ApplicationException($"Property {propertyName} doesn't exists on {type.FullName}");
+        }
+        return (T?)property.GetValue(value);
+    }
+
     private static void AssertEqual(
         ImmutableArray<IncrementalGeneratorRunStep> runSteps1,
         ImmutableArray<IncrementalGeneratorRunStep> runSteps2,
@@ -111,9 +139,6 @@ internal static partial class CachingTestHelpers
                 .OnlyContain(
                     x => x.Reason == IncrementalStepRunReason.Cached || x.Reason == IncrementalStepRunReason.Unchanged,
                     $"{stepName} expected to have reason {IncrementalStepRunReason.Cached} or {IncrementalStepRunReason.Unchanged}");
-
-            // Make sure we're not using anything we shouldn't
-            //AssertObjectGraph(runStep1, stepName);
         }
     }
 }
