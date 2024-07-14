@@ -6,7 +6,7 @@ internal class SuccessfulParams : ParamsCandidate, IEquatable<SuccessfulParams?>
 {
     public override bool HasErrors => false;
 
-    public required DerivedData DerivedData { get; init; }
+    public required MethodInfo MethodInfo { get; init; }
 
     public required int MaxOverrides { get; init; }
 
@@ -22,7 +22,7 @@ internal class SuccessfulParams : ParamsCandidate, IEquatable<SuccessfulParams?>
         return other is not null &&
                MaxOverrides == other.MaxOverrides &&
                HasParams == other.HasParams &&
-               DerivedData.Equals(other.DerivedData);
+               MethodInfo.Equals(other.MethodInfo);
     }
 
     public override int GetHashCode()
@@ -30,7 +30,7 @@ internal class SuccessfulParams : ParamsCandidate, IEquatable<SuccessfulParams?>
         int hashCode = 274651747;
         hashCode = hashCode * -1521134295 + MaxOverrides.GetHashCode();
         hashCode = hashCode * -1521134295 + HasParams.GetHashCode();
-        hashCode = hashCode * -1521134295 + DerivedData.GetHashCode();
+        hashCode = hashCode * -1521134295 + MethodInfo.GetHashCode();
         return hashCode;
     }
 }

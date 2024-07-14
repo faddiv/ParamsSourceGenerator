@@ -27,7 +27,7 @@ public partial class ParamsIncrementalGenerator : IIncrementalGenerator
             .SelectMany((e, c) => e.OfType<SuccessfulParamsCandidate>().GroupBy(x => x.TypeInfo).Select(x => new SuccessfulParamsGroupCandidate 
             {
                 ParamCanditates = x.Select(y => new SuccessfulParams { 
-                    DerivedData = y.DerivedData,
+                    MethodInfo = y.MethodInfo,
                     HasParams = y.HasParams,
                     MaxOverrides = y.MaxOverrides,
                 }).ToImmutableList(),

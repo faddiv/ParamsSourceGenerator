@@ -87,7 +87,7 @@ partial class ParamsIncrementalGenerator : IIncrementalGenerator
             return new FailedParamsCandidate { Diagnostics = diagnostics };
         }
         INamedTypeSymbol containingType = methodSymbol.ContainingType;
-        var parameterInfos = DerivedData.GetArguments(methodSymbol);
+        var parameterInfos = Data.MethodInfo.GetArguments(methodSymbol);
         return new SuccessfulParamsCandidate
         {
             TypeInfo = new CandidateTypeInfo
@@ -101,14 +101,14 @@ partial class ParamsIncrementalGenerator : IIncrementalGenerator
             },
             MaxOverrides = maxOverrides,
             HasParams = SemanticHelpers.GetValue(context.Attributes.First(), "HasParams", true),
-            DerivedData = new DerivedData
+            MethodInfo = new Data.MethodInfo
             {
-                ReturnType = DerivedData.CreateReturnTypeFor(methodSymbol),
-                SpanArgumentType = DerivedData.GetSpanArgumentType(spanParam!),
+                ReturnType = Data.MethodInfo.CreateReturnTypeFor(methodSymbol),
+                SpanArgumentType = Data.MethodInfo.GetSpanArgumentType(spanParam!),
                 Parameters = parameterInfos,
                 ReturnsKind = SemanticHelpers.GetReturnsKind(methodSymbol),
                 TypeArguments = methodSymbol.TypeArguments.Select(e => e.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)).ToList(),
-                TypeConstraints = DerivedData.CreateTypeConstraints(methodSymbol.TypeArguments),
+                TypeConstraints = Data.MethodInfo.CreateTypeConstraints(methodSymbol.TypeArguments),
                 MethodName = methodSymbol.Name,
                 IsStatic = methodSymbol.IsStatic
             }

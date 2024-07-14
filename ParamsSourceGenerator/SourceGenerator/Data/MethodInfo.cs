@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Foxy.Params.SourceGenerator.Data;
 
-internal class DerivedData : IEquatable<DerivedData?>
+internal class MethodInfo : IEquatable<MethodInfo?>
 {
     public required string ReturnType { get; init; }
 
@@ -15,11 +15,7 @@ internal class DerivedData : IEquatable<DerivedData?>
 
     public required ParameterInfo[] Parameters { get; init; }
 
-    public ReadOnlySpan<ParameterInfo> FixedParameters => new(Parameters, 0, Parameters.Length - 1);
-
     public ref ParameterInfo ParamsArgument => ref Parameters[^1];
-
-    public List<string> FixArguments => FixedParameters.ToImmutableArray().Select(e => e.ToParameter()).ToList();
 
     public required ReturnKind ReturnsKind { get; init; }
 
@@ -27,17 +23,36 @@ internal class DerivedData : IEquatable<DerivedData?>
 
     public required List<TypeConstrainInfo> TypeConstraints { get; init; }
 
-    public string ArgName => ParamsArgument.Name;
-
-    public string ArgNameSpan => $"{ParamsArgument.Name}Span";
-
-    public string ArgNameSpanInput => ParamsArgument.IsSpanRefType
-                    ? $"ref {ArgNameSpan}"
-                    : ArgNameSpan;
-
     public required string MethodName { get; init; }
 
     public required bool IsStatic { get; init; }
+
+    public ReadOnlySpan<ParameterInfo> GetFixedParameters()
+    {
+        return new(Parameters, 0, Parameters.Length - 1);
+    }
+
+    public List<string> GetFixArguments()
+    {
+        return GetFixedParameters().ToImmutableArray().Select(e => e.ToParameter()).ToList();
+    }
+
+    public string GetArgName()
+    {
+        return ParamsArgument.Name;
+    }
+
+    public string GetArgNameSpan()
+    {
+        return $"{ParamsArgument.Name}Span";
+    }
+
+    public string GetArgNameSpanInput()
+    {
+        return ParamsArgument.IsRefType
+                    ? $"ref {GetArgNameSpan()}"
+                    : GetArgNameSpan();
+    }
 
     public static string CreateReturnTypeFor(IMethodSymbol methodSymbol)
     {
@@ -123,10 +138,10 @@ internal class DerivedData : IEquatable<DerivedData?>
 
     public override bool Equals(object? obj)
     {
-        return Equals(obj as DerivedData);
+        return Equals(obj as MethodInfo);
     }
 
-    public bool Equals(DerivedData? other)
+    public bool Equals(MethodInfo? other)
     {
         return other is not null &&
                ReturnType == other.ReturnType &&
@@ -145,7 +160,7 @@ internal class DerivedData : IEquatable<DerivedData?>
         hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ReturnType);
         hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(SpanArgumentType);
         hashCode = hashCode * -1521134295 + CollectionComparer.GetFor(Parameters).GetHashCode(Parameters);
-        hashCode = hashCode * -1521134295 + CollectionComparer.GetFor(FixArguments).GetHashCode(FixArguments);
+        hashCode = hashCode * -1521134295 + CollectionComparer.GetFor(GetFixArguments()).GetHashCode(GetFixArguments());
         hashCode = hashCode * -1521134295 + ReturnsKind.GetHashCode();
         hashCode = hashCode * -1521134295 + CollectionComparer.GetFor(TypeArguments).GetHashCode(TypeArguments);
         hashCode = hashCode * -1521134295 + CollectionComparer.GetFor(TypeConstraints).GetHashCode(TypeConstraints);

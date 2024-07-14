@@ -22,7 +22,7 @@ namespace SourceGeneratorTests.TestInfrastructure
             };
         }
 
-        internal static DerivedData CreateDerivedData(
+        internal static MethodInfo CreateDerivedData(
             bool isStatic = true,
             string methodName = "Format",
             ParameterInfo[]? parameters = null,
@@ -32,7 +32,7 @@ namespace SourceGeneratorTests.TestInfrastructure
             List<string>? typeArguments = null,
             List<TypeConstrainInfo>? typeConstraints = null)
         {
-            return new DerivedData
+            return new MethodInfo
             {
                 IsStatic = isStatic,
                 MethodName = methodName,
@@ -59,14 +59,14 @@ namespace SourceGeneratorTests.TestInfrastructure
 
         internal static SuccessfulParamsCandidate CreateSuccessfulParamsCandidate(
         CandidateTypeInfo? typeInfo = null,
-        DerivedData? derivedData = null,
+        MethodInfo? derivedData = null,
         int maxOverrides = 5,
         bool hasParams = true)
         {
             return new SuccessfulParamsCandidate
             {
                 TypeInfo = typeInfo ?? CreateCandidateTypeInfo(),
-                DerivedData = derivedData ?? CreateDerivedData(),
+                MethodInfo = derivedData ?? CreateDerivedData(),
                 MaxOverrides = maxOverrides,
                 HasParams = hasParams
             };

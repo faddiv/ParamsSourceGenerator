@@ -58,7 +58,7 @@ internal static class OverridesGenerator
 
         foreach (var paramsCandidate in paramsCandidates)
         {
-            var data = paramsCandidate.DerivedData;
+            var data = paramsCandidate.MethodInfo;
 
             for (int n = 1; n <= paramsCandidate.MaxOverrides; n++)
             {
@@ -67,8 +67,8 @@ internal static class OverridesGenerator
                     builder.AppendLine();
                 }
 
-                var variableArguments = data.FixArguments.Concat(
-                    Enumerable.Range(0, n).Select(j => $"{data.SpanArgumentType} {data.ArgName}{j}"));
+                var variableArguments = data.GetFixArguments().Concat(
+                    Enumerable.Range(0, n).Select(j => $"{data.SpanArgumentType} {data.GetArgName()}{j}"));
                 GenerateMethodHeaderWithArguments(builder, data, variableArguments);
                 builder.AddBlock(GenerateBodyForOverrideWithNArgs, (data, n));
             }
@@ -76,7 +76,7 @@ internal static class OverridesGenerator
             if (paramsCandidate.HasParams)
             {
                 builder.AppendLine();
-                GenerateMethodHeaderWithArguments(builder, data, data.FixArguments.Append($"params {data.SpanArgumentType}[] {data.ArgName}"));
+                GenerateMethodHeaderWithArguments(builder, data, data.GetFixArguments().Append($"params {data.SpanArgumentType}[] {data.GetArgName()}"));
                 builder.AddBlock(GenerateBodyWithParamsParameter, data);
             }
         }
@@ -104,7 +104,7 @@ internal static class OverridesGenerator
         }
     }
 
-    private static void GenerateMethodHeaderWithArguments(SourceBuilder builder, DerivedData data, IEnumerable<string> arguments)
+    private static void GenerateMethodHeaderWithArguments(SourceBuilder builder, MethodInfo data, IEnumerable<string> arguments)
     {
         builder.Method(
             data.MethodName,
@@ -117,32 +117,32 @@ internal static class OverridesGenerator
 
     private static void GenerateBodyForOverrideWithNArgs(
         SourceBuilder builder,
-        (DerivedData data, int argsCount) args)
+        (MethodInfo data, int argsCount) args)
     {
         GenerateArgumentsVariable(builder, args.data, args.argsCount);
         GenerateSpanVariableForInlineArray(builder, args.data, args.argsCount);
         GenerateCallOriginalMethod(builder, args.data);
     }
 
-    private static void GenerateSpanVariableForInlineArray(SourceBuilder builder, DerivedData data, int argsCount)
+    private static void GenerateSpanVariableForInlineArray(SourceBuilder builder, MethodInfo data, int argsCount)
     {
-        builder.AppendLine($"var {data.ArgNameSpan} = global::System.Runtime.InteropServices.MemoryMarshal.CreateReadOnlySpan(ref {data.ArgName}.arg0, {argsCount});");
+        builder.AppendLine($"var {data.GetArgNameSpan()} = global::System.Runtime.InteropServices.MemoryMarshal.CreateReadOnlySpan(ref {data.GetArgName()}.arg0, {argsCount});");
     }
 
-    private static void GenerateArgumentsVariable(SourceBuilder builder, DerivedData data, int argsCount)
+    private static void GenerateArgumentsVariable(SourceBuilder builder, MethodInfo data, int argsCount)
     {
-        builder.AppendLine($"var {data.ArgName} = new Arguments{argsCount}<{data.SpanArgumentType}>({string.Join(", ", Enumerable.Range(0, argsCount).Select(j => $"{data.ArgName}{j}"))});");
+        builder.AppendLine($"var {data.GetArgName()} = new Arguments{argsCount}<{data.SpanArgumentType}>({string.Join(", ", Enumerable.Range(0, argsCount).Select(j => $"{data.GetArgName()}{j}"))});");
     }
 
-    private static void GenerateBodyWithParamsParameter(SourceBuilder builder, DerivedData data)
+    private static void GenerateBodyWithParamsParameter(SourceBuilder builder, MethodInfo data)
     {
         GenerateSpanVariableForParamsArgument(builder, data);
         GenerateCallOriginalMethod(builder, data);
     }
 
-    private static void GenerateSpanVariableForParamsArgument(SourceBuilder builder, DerivedData data)
+    private static void GenerateSpanVariableForParamsArgument(SourceBuilder builder, MethodInfo data)
     {
-        builder.AppendLine($"var {data.ArgNameSpan} = new global::System.ReadOnlySpan<{data.SpanArgumentType}>({data.ArgName});");
+        builder.AppendLine($"var {data.GetArgNameSpan()} = new global::System.ReadOnlySpan<{data.SpanArgumentType}>({data.GetArgName()});");
     }
 
     private static void GenerateArgumentsClasses(SourceBuilder builder, int maxOverridesMax)
@@ -154,7 +154,7 @@ internal static class OverridesGenerator
         }
     }
 
-    private static void GenerateCallOriginalMethod(SourceBuilder builder, DerivedData data)
+    private static void GenerateCallOriginalMethod(SourceBuilder builder, MethodInfo data)
     {
         var codeLine = builder.StartLine();
         if (data.ReturnsKind != ReturnKind.ReturnsVoid)
@@ -173,8 +173,8 @@ internal static class OverridesGenerator
             codeLine.AddSegment(">");
         }
         codeLine.AddSegment("(");
-        codeLine.AddCommaSeparatedList(data.FixedParameters.Convert(e => e.ToPassParameter()));
-        codeLine.AddSegment($", {data.ArgNameSpanInput})");
+        codeLine.AddCommaSeparatedList(data.GetFixedParameters().Convert(e => e.ToPassParameter()));
+        codeLine.AddSegment($", {data.GetArgNameSpanInput()})");
         codeLine.EndLine();
     }
 

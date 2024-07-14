@@ -15,7 +15,7 @@ public class ParameterInfo(string type, string name, RefKind refKind, bool isNul
 
     public bool IsNullable { get; } = isNullable;
 
-    public bool IsSpanRefType => RefKind is RefKind.Ref or RefKind.RefReadOnlyParameter;
+    public bool IsRefType => RefKind is RefKind.Ref or RefKind.RefReadOnlyParameter;
 
     public string ToParameter()
     {
