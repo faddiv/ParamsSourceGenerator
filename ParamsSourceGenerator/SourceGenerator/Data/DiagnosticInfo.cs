@@ -25,14 +25,14 @@ internal class DiagnosticInfo(DiagnosticDescriptor descriptor, Location location
     {
         return other is not null &&
                EqualityComparer<DiagnosticDescriptor>.Default.Equals(Descriptor, other.Descriptor) &&
-               CollectionComparer.GetFor(Args).Equals(Args, other.Args);
+               CollectionComparer.Equals(Args, other.Args);
     }
 
     public override int GetHashCode()
     {
         int hashCode = 2011230944;
         hashCode = hashCode * -1521134295 + EqualityComparer<DiagnosticDescriptor>.Default.GetHashCode(Descriptor);
-        hashCode = hashCode * -1521134295 + CollectionComparer.GetFor(Args).GetHashCode(Args);
+        hashCode = hashCode * -1521134295 + CollectionComparer.GetHashCode(Args);
         return hashCode;
     }
 

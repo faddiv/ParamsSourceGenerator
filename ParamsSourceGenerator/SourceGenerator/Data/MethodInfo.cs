@@ -146,10 +146,10 @@ internal class MethodInfo : IEquatable<MethodInfo?>
         return other is not null &&
                ReturnType == other.ReturnType &&
                SpanArgumentType == other.SpanArgumentType &&
-               CollectionComparer.GetFor(Parameters).Equals(Parameters, other.Parameters) &&
+               CollectionComparer.Equals(Parameters, other.Parameters) &&
                ReturnsKind == other.ReturnsKind &&
-               CollectionComparer.GetFor(TypeArguments).Equals(TypeArguments, other.TypeArguments) &&
-               CollectionComparer.GetFor(TypeConstraints).Equals(TypeConstraints, other.TypeConstraints) &&
+               CollectionComparer.Equals(TypeArguments, other.TypeArguments) &&
+               CollectionComparer.Equals(TypeConstraints, other.TypeConstraints) &&
                MethodName == other.MethodName &&
                IsStatic == other.IsStatic;
     }
@@ -159,11 +159,10 @@ internal class MethodInfo : IEquatable<MethodInfo?>
         int hashCode = 1919567312;
         hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ReturnType);
         hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(SpanArgumentType);
-        hashCode = hashCode * -1521134295 + CollectionComparer.GetFor(Parameters).GetHashCode(Parameters);
-        hashCode = hashCode * -1521134295 + CollectionComparer.GetFor(GetFixArguments()).GetHashCode(GetFixArguments());
+        hashCode = hashCode * -1521134295 + CollectionComparer.GetHashCode(Parameters);
         hashCode = hashCode * -1521134295 + ReturnsKind.GetHashCode();
-        hashCode = hashCode * -1521134295 + CollectionComparer.GetFor(TypeArguments).GetHashCode(TypeArguments);
-        hashCode = hashCode * -1521134295 + CollectionComparer.GetFor(TypeConstraints).GetHashCode(TypeConstraints);
+        hashCode = hashCode * -1521134295 + CollectionComparer.GetHashCode(TypeArguments);
+        hashCode = hashCode * -1521134295 + CollectionComparer.GetHashCode(TypeConstraints);
         hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(MethodName);
         hashCode = hashCode * -1521134295 + IsStatic.GetHashCode();
         return hashCode;

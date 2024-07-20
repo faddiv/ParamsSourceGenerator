@@ -21,14 +21,14 @@ internal class SuccessfulParamsGroupCandidate : ParamsCandidate, IEquatable<Succ
     {
         return other is not null &&
             TypeInfo.Equals(other.TypeInfo) &&
-            CollectionComparer.GetFor(ParamCanditates).Equals(ParamCanditates, other.ParamCanditates);
+            CollectionComparer.Equals(ParamCanditates, other.ParamCanditates);
     }
 
     public override int GetHashCode()
     {
         int hashCode = -1130635483;
         hashCode = hashCode * -1521134295 + TypeInfo.GetHashCode();
-        hashCode = hashCode * -1521134295 + CollectionComparer.GetFor(ParamCanditates).GetHashCode(ParamCanditates);
+        hashCode = hashCode * -1521134295 + CollectionComparer.GetHashCode(ParamCanditates);
         return hashCode;
     }
 }
