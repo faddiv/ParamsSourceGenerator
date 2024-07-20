@@ -45,7 +45,7 @@ public partial class ParamsIncrementalGenerator : IIncrementalGenerator
 
     private static bool Filter(SyntaxNode s, CancellationToken token)
     {
-        return s is MethodDeclarationSyntax methodDeclarationSyntax;
+        return s is MethodDeclarationSyntax;
     }
 }
 

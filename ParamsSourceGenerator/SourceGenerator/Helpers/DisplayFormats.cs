@@ -17,5 +17,4 @@ internal class DisplayFormats
     public static SymbolDisplayFormat ForGenericArgumentFormat =
         SymbolDisplayFormat.FullyQualifiedFormat
         .AddMiscellaneousOptions(SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier);
-
 }

@@ -5,10 +5,13 @@ using System.Collections.Generic;
 
 namespace Foxy.Params.SourceGenerator.Data;
 
-internal class DiagnosticInfo(DiagnosticDescriptor descriptor, Location location, params object[] args) : IEquatable<DiagnosticInfo?>
+internal class DiagnosticInfo(DiagnosticDescriptor descriptor, Location location, params object[] args) 
+    : IEquatable<DiagnosticInfo?>
 {
     public DiagnosticDescriptor Descriptor { get; } = descriptor;
+    
     public Location Location { get; } = location;
+    
     public object[] Args { get; } = args;
 
     internal static DiagnosticInfo Create(DiagnosticDescriptor descriptor, Location location, params object[] args)

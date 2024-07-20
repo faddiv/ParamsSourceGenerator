@@ -9,13 +9,8 @@ using System.Collections.Generic;
 using Foxy.Params.SourceGenerator.Helpers;
 using Foxy.Params.SourceGenerator.Data;
 using System.Collections.Immutable;
-using System;
 using System.Diagnostics.CodeAnalysis;
-using Foxy.Params.SourceGenerator.SourceGenerator;
-using System.Reflection;
-using ParameterInfo = Foxy.Params.SourceGenerator.Data.ParameterInfo;
 using System.Buffers;
-using System.Runtime.InteropServices;
 
 namespace Foxy.Params.SourceGenerator;
 

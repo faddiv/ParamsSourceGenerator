@@ -34,18 +34,13 @@ public class ParameterInfo(TypeInfo type, string name, RefKind refKind, bool isN
 
     private static RefKind GetPassParameterModifier(RefKind refKind)
     {
-        switch (refKind)
+        return refKind switch
         {
-            case RefKind.Ref:
-                return RefKind.Ref;
-            case RefKind.Out:
-                return RefKind.Out;
-            case RefKind.In:
-            case RefKind.RefReadOnlyParameter:
-                return RefKind.In;
-            default:
-                return RefKind.None;
-        }
+            RefKind.Ref => RefKind.Ref,
+            RefKind.Out => RefKind.Out,
+            RefKind.In or RefKind.RefReadOnlyParameter => RefKind.In,
+            _ => RefKind.None,
+        };
     }
 
     public override bool Equals(object? obj)

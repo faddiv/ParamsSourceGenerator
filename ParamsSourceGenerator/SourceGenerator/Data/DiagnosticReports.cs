@@ -53,5 +53,4 @@ public class DiagnosticReports
         Category,
         DiagnosticSeverity.Warning,
         isEnabledByDefault: true);
-
 }

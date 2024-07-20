@@ -1,5 +1,3 @@
-using System.Collections.Immutable;
-using System.Linq;
 using Microsoft.CodeAnalysis;
 using Foxy.Params.SourceGenerator.Helpers;
 using Foxy.Params.SourceGenerator.Data;
@@ -18,20 +16,18 @@ partial class ParamsIncrementalGenerator : IIncrementalGenerator
                 context.ReportDiagnostic(diagnostic.ToDiagnostics());
             }
         }
-        else if (typeSymbols is SuccessfulParamsGroupCandidate ts)
+        else if (typeSymbols is SuccessfulParamsGroupCandidate group)
         {
-            CandidateTypeInfo typeInfo = ts.TypeInfo;
+            CandidateTypeInfo typeInfo = group.TypeInfo;
             context.AddSource(
                 SemanticHelpers.CreateFileName(typeInfo.TypeName),
-                OverridesGenerator.Execute(typeInfo, ts.ParamCanditates));
+                OverridesGenerator.Execute(typeInfo, group.ParamCanditates));
         } else
         {
             string diagnosticMessage = $"Invalid ParamsCanditate: {typeSymbols.GetType().Name}";
             Diagnostic diagnostic = Diagnostic.Create(DiagnosticReports.InternalError, null, diagnosticMessage);
             context.ReportDiagnostic(diagnostic);
         }
-
-
     }
 }
 
