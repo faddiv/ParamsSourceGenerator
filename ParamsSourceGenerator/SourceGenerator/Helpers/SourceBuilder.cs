@@ -61,7 +61,7 @@ internal class SourceBuilder
         AddIntend();
         string className = _scope.Peek();
         _builder.Append($"public {className}(");
-        CommaSeparatedItemList(args);
+        AddCommaSeparatedList(args);
         _builder.AppendLine(")");
     }
 
@@ -85,11 +85,11 @@ internal class SourceBuilder
         if (typeArguments.Count > 0)
         {
             _builder.Append($"<");
-            CommaSeparatedItemList(typeArguments);
+            AddCommaSeparatedList(typeArguments);
             _builder.Append($">");
         }
         _builder.Append($"(");
-        CommaSeparatedItemList(args);
+        AddCommaSeparatedList(args);
         _builder.AppendLine(")");
         AddTypeConstraints(typeConstraintsList);
     }
@@ -168,7 +168,7 @@ internal class SourceBuilder
         _scope.Clear();
     }
 
-    public class SourceLine
+    public readonly ref struct SourceLine
     {
         private readonly SourceBuilder _builder;
 
@@ -180,23 +180,33 @@ internal class SourceBuilder
 
         public void Returns()
         {
-            _builder._builder.Append("return ");
+            _builder.AppendInternal("return ");
         }
 
         public void AddSegment(string segment)
         {
-            _builder._builder.Append(segment);
+            _builder.AppendInternal(segment);
         }
 
         public void AddCommaSeparatedList(IEnumerable<string> elements)
         {
-            _builder._builder.Append(string.Join(", ", elements));
+            _builder.AddCommaSeparatedList(elements);
         }
 
         public void EndLine()
         {
-            _builder._builder.AppendLine(";");
+            _builder.AppendLineInternal(";");
         }
+    }
+
+    private void AppendLineInternal(string text)
+    {
+        _builder.AppendLine(text);
+    }
+
+    private void AppendInternal(string text)
+    {
+        _builder.Append(text);
     }
 
     private void AddTypeConstraints(List<TypeConstrainInfo> typeConstraintsList)
@@ -209,7 +219,7 @@ internal class SourceBuilder
         {
             AddIntend();
             _builder.Append($"where {typeConstraints.Type} : ");
-            CommaSeparatedItemList(typeConstraints.Constraints);
+            AddCommaSeparatedList(typeConstraints.Constraints);
             _builder.AppendLine();
         }
         DecreaseIntend();
@@ -229,22 +239,8 @@ internal class SourceBuilder
         }
     }
 
-    private void CommaSeparatedItemList(IEnumerable<string> args)
+    private void AddCommaSeparatedList(IEnumerable<string> args)
     {
-        ItemList(", ", args);
-    }
-
-    private void ItemList(string separator, IEnumerable<string> args)
-    {
-        var more = false;
-        foreach (var item in args)
-        {
-            if (more)
-            {
-                _builder.Append(separator);
-            }
-            more = true;
-            _builder.Append(item);
-        }
+        _builder.AppendJoin(", ", args);
     }
 }

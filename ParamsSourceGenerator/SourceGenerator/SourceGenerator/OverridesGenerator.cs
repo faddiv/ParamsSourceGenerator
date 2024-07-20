@@ -131,7 +131,17 @@ internal static class OverridesGenerator
 
     private static void GenerateArgumentsVariable(SourceBuilder builder, MethodInfo data, int argsCount)
     {
-        builder.AppendLine($"var {data.GetArgName()} = new Arguments{argsCount}<{data.SpanArgumentType}>({string.Join(", ", Enumerable.Range(0, argsCount).Select(j => $"{data.GetArgName()}{j}"))});");
+        var line = builder.StartLine();
+        line.AddSegment("var ");
+        line.AddSegment(data.GetArgName());
+        line.AddSegment(" = new Arguments");
+        line.AddSegment(argsCount.ToString());
+        line.AddSegment("<");
+        line.AddSegment(data.SpanArgumentType);
+        line.AddSegment(">(");
+        line.AddCommaSeparatedList(Enumerable.Range(0, argsCount).Select(j => $"{data.GetArgName()}{j}"));
+        line.AddSegment(")");
+        line.EndLine();
     }
 
     private static void GenerateBodyWithParamsParameter(SourceBuilder builder, MethodInfo data)
