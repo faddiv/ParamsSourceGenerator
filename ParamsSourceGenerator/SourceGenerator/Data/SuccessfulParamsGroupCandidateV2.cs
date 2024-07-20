@@ -1,27 +1,34 @@
 ﻿using Foxy.Params.SourceGenerator.Helpers;
+using Foxy.Params.SourceGenerator.NewData;
+using Foxy.Params.SourceGenerator.Rendering;
 using System;
 using System.Collections.Generic;
 
 namespace Foxy.Params.SourceGenerator.Data;
 
-internal class SuccessfulParamsGroupCandidate : ParamsCandidate, IEquatable<SuccessfulParamsGroupCandidate?>
+internal class SuccessfulParamsGroupCandidateV2 : ParamsCandidate, IEquatable<SuccessfulParamsGroupCandidateV2?>, IElement
 {
     public override bool HasErrors => false;
 
-    public required CandidateTypeInfo TypeInfo { get; init; }
+    public required ClassTypeElement TypeInfo { get; init; }
 
-    public required IReadOnlyList<SuccessfulParams> ParamCanditates { get; init; }
+    public required IReadOnlyList<SuccessfulParamsV2> ParamCanditates { get; init; }
 
     public override bool Equals(object? obj)
     {
-        return Equals(obj as SuccessfulParamsGroupCandidate);
+        return Equals(obj as SuccessfulParamsGroupCandidateV2);
     }
 
-    public bool Equals(SuccessfulParamsGroupCandidate? other)
+    public bool Equals(SuccessfulParamsGroupCandidateV2? other)
     {
         return other is not null &&
             TypeInfo.Equals(other.TypeInfo) &&
             CollectionComparer.Equals(ParamCanditates, other.ParamCanditates);
+    }
+
+    public void ExecuteRenderer<TRenderOutput>(RendererBase<TRenderOutput> renderer, TRenderOutput output) where TRenderOutput : IRenderOutput
+    {
+        renderer.Render(this, output);
     }
 
     public override int GetHashCode()

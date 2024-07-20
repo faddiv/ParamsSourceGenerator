@@ -19,14 +19,14 @@ public class TypeConstrainInfo : IEquatable<TypeConstrainInfo?>
     {
         return other is not null &&
                Type == other.Type &&
-               CollectionComparer.GetFor(Constraints).Equals(Constraints, other.Constraints);
+               CollectionComparer.Equals(Constraints, other.Constraints);
     }
 
     public override int GetHashCode()
     {
         int hashCode = 1814578080;
         hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Type);
-        hashCode = hashCode * -1521134295 + EqualityComparer<List<string>>.Default.GetHashCode(Constraints);
+        hashCode = hashCode * -1521134295 + CollectionComparer.GetHashCode(Constraints);
         return hashCode;
     }
 }

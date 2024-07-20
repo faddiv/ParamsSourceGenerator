@@ -2,19 +2,15 @@
 
 namespace Foxy.Params.SourceGenerator.Helpers;
 
-public class CollectionComparer<TList, TElement> : 
+public class CollectionComparer<TList, TElement>(
+    IEqualityComparer<TElement>? elementComparer = null) :
     CollectionComparer,
     IEqualityComparer<TList>
     where TList : IReadOnlyCollection<TElement>
 {
     public static CollectionComparer<TList, TElement> Default = new();
 
-    public CollectionComparer(IEqualityComparer<TElement>? elementComparer = null)
-    {
-        ElementComparer = elementComparer ?? EqualityComparer<TElement>.Default;
-    }
-
-    public IEqualityComparer<TElement> ElementComparer { get; }
+    public IEqualityComparer<TElement> ElementComparer { get; } = elementComparer ?? EqualityComparer<TElement>.Default;
 
     public bool Equals(TList? x, TList? y)
     {

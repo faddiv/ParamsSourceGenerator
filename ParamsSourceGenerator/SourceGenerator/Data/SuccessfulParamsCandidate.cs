@@ -1,3 +1,4 @@
+using Foxy.Params.SourceGenerator.NewData;
 using System;
 
 namespace Foxy.Params.SourceGenerator.Data;
@@ -27,4 +28,3 @@ internal class SuccessfulParamsCandidate : SuccessfulParams, IEquatable<Successf
         return hashCode;
     }
 }
-

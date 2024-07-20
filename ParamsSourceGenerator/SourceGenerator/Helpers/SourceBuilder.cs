@@ -2,10 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Foxy.Params.SourceGenerator.Data;
+using Foxy.Params.SourceGenerator.Rendering;
 
 namespace Foxy.Params.SourceGenerator.Helpers;
 
-internal class SourceBuilder
+internal class SourceBuilder : IRenderOutput
 {
     private readonly StringBuilder _builder = new();
     public string Intend { get; set; } = "    ";
@@ -131,13 +132,20 @@ internal class SourceBuilder
         _builder.AppendLine(text);
     }
 
+    public void AppendLine(char text)
+    {
+        AddIntend();
+        _builder.Append(text);
+        _builder.AppendLine();
+    }
+
     public void OpenBlock()
     {
         AddLineInternal("{");
         IncreaseIntend();
     }
 
-    private void IncreaseIntend()
+    public void IncreaseIntend()
     {
         _intendLevel++;
     }
@@ -151,7 +159,7 @@ internal class SourceBuilder
         _scope.Pop();
     }
 
-    private void DecreaseIntend()
+    public void DecreaseIntend()
     {
         _intendLevel--;
     }
@@ -221,7 +229,7 @@ internal class SourceBuilder
         _builder.AppendLine(text);
     }
 
-    private void AddIntend()
+    public void AddIntend()
     {
         for (int i = 0; i < _intendLevel; i++)
         {
@@ -246,5 +254,30 @@ internal class SourceBuilder
             more = true;
             _builder.Append(item);
         }
+    }
+
+    internal void Append(char v)
+    {
+        _builder.Append(v);
+    }
+
+    internal void Append(string v)
+    {
+        _builder.Append(v);
+    }
+
+    internal void StartBlock()
+    {
+        AppendLine();
+        Append('{');
+        IncreaseIntend();
+        AddIntend();
+    }
+
+    internal void EndBlock()
+    {
+        AppendLine();
+        DecreaseIntend();
+        AppendLine('}');
     }
 }

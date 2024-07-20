@@ -9,13 +9,10 @@ using System.Collections.Generic;
 using Foxy.Params.SourceGenerator.Helpers;
 using Foxy.Params.SourceGenerator.Data;
 using System.Collections.Immutable;
-using System;
 using System.Diagnostics.CodeAnalysis;
-using Foxy.Params.SourceGenerator.SourceGenerator;
-using System.Reflection;
-using ParameterInfo = Foxy.Params.SourceGenerator.Data.ParameterInfo;
 using System.Buffers;
-using System.Runtime.InteropServices;
+using Foxy.Params.SourceGenerator.NewData;
+using Foxy.Params.SourceGenerator.SymbolProcessors;
 
 namespace Foxy.Params.SourceGenerator;
 
@@ -88,6 +85,7 @@ partial class ParamsIncrementalGenerator : IIncrementalGenerator
         }
         INamedTypeSymbol containingType = methodSymbol.ContainingType;
         var parameterInfos = Data.MethodInfo.GetArguments(methodSymbol);
+        var m = methodSymbol.Accept(SymbolToElementVisitors.MainVisitor).As<MethodElement>();
         return new SuccessfulParamsCandidate
         {
             TypeInfo = new CandidateTypeInfo
@@ -111,6 +109,81 @@ partial class ParamsIncrementalGenerator : IIncrementalGenerator
                 MethodName = methodSymbol.Name,
                 IsStatic = methodSymbol.IsStatic
             }
+        };
+    }
+    private ParamsCandidate? GetSpanParamsMethodsV2(GeneratorAttributeSyntaxContext context, CancellationToken cancellationToken)
+    {
+        SyntaxNode targetNode = context.TargetNode;
+        Debug.Assert(targetNode is MethodDeclarationSyntax);
+        var decl = Unsafe.As<MethodDeclarationSyntax>(targetNode);
+
+        if (!(context.SemanticModel.GetDeclaredSymbol(decl, cancellationToken) is IMethodSymbol methodSymbol)
+            || !SemanticHelpers.TryGetAttribute(decl, _attributeName, context.SemanticModel, cancellationToken, out var attributeSyntax))
+        {
+            return null;
+        }
+
+        if (HasErrorType(methodSymbol) ||
+            HasDuplication(methodSymbol.Parameters))
+        {
+            return null;
+        }
+
+        var diagnostics = new List<DiagnosticInfo>();
+        if (!IsContainingTypesArePartial(targetNode, out var typeName))
+        {
+            diagnostics.Add(DiagnosticInfo.Create(
+                DiagnosticReports.PartialIsMissingDescriptor,
+                attributeSyntax.GetLocation(),
+                typeName,
+                methodSymbol.Name));
+        }
+
+        int maxOverrides = SemanticHelpers.GetValue(context.Attributes.First(), "MaxOverrides", 3);
+        var spanParam = methodSymbol.Parameters.LastOrDefault();
+        if (spanParam is null ||
+            spanParam?.Type is not INamedTypeSymbol spanType)
+        {
+            diagnostics.Add(DiagnosticInfo.Create(
+                DiagnosticReports.ParameterMissingDescriptor,
+                attributeSyntax.GetLocation(),
+                methodSymbol.Name));
+        }
+        else if (!IsReadOnlySpan(spanType))
+        {
+            diagnostics.Add(DiagnosticInfo.Create(
+                DiagnosticReports.ParameterMismatchDescriptor,
+                attributeSyntax.GetLocation(),
+                methodSymbol.Name, spanParam.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat)));
+        }
+        else if (IsOutParameter(spanParam))
+        {
+            diagnostics.Add(DiagnosticInfo.Create(
+                DiagnosticReports.OutModifierNotAllowedDescriptor,
+                attributeSyntax.GetLocation(),
+                methodSymbol.Name, spanParam.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat)));
+        }
+
+        if (HasNameCollision(methodSymbol.Parameters, maxOverrides, out string? unusableParameters))
+        {
+            diagnostics.Add(DiagnosticInfo.Create(
+                DiagnosticReports.ParameterCollisionDescriptor,
+                attributeSyntax.GetLocation(),
+                methodSymbol.Name, unusableParameters));
+        }
+
+        if (diagnostics.Count > 0)
+        {
+            return new FailedParamsCandidate { Diagnostics = diagnostics };
+        }
+
+        var m = methodSymbol.Accept(SymbolToElementVisitors.MainVisitor).As<MethodElement>();
+        bool hasParams = SemanticHelpers.GetValue(context.Attributes.First(), "HasParams", true);
+        return new SuccessfulParamsCandidateV2
+        {
+            MaxOverrides = maxOverrides,
+            HasParams = hasParams,
+            MethodInfo = m
         };
     }
 

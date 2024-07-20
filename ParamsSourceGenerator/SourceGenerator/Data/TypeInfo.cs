@@ -33,14 +33,14 @@ public class TypeInfo(string typeName, string[]? genericParameters = null) : IEq
     {
         return other is not null &&
                TypeName == other.TypeName &&
-               CollectionComparer.GetFor(GenericParameters).Equals(GenericParameters, other.GenericParameters);
+               CollectionComparer.Equals(GenericParameters, other.GenericParameters);
     }
 
     public override int GetHashCode()
     {
         int hashCode = 1224272728;
         hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(TypeName);
-        hashCode = hashCode * -1521134295 + CollectionComparer.GetFor(GenericParameters).GetHashCode(GenericParameters);
+        hashCode = hashCode * -1521134295 + CollectionComparer.GetHashCode(GenericParameters);
         return hashCode;
     }
 
