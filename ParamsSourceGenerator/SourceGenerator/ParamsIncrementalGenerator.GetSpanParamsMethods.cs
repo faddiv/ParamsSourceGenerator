@@ -14,14 +14,17 @@ namespace Foxy.Params.SourceGenerator;
 
 partial class ParamsIncrementalGenerator : IIncrementalGenerator
 {
-    private ParamsCandidate? GetSpanParamsMethods(GeneratorAttributeSyntaxContext context, CancellationToken cancellationToken)
+    private ParamsCandidate? GetSpanParamsMethods(
+        GeneratorAttributeSyntaxContext context,
+        CancellationToken cancellationToken)
     {
         SyntaxNode targetNode = context.TargetNode;
         Debug.Assert(targetNode is MethodDeclarationSyntax);
         var decl = Unsafe.As<MethodDeclarationSyntax>(targetNode);
 
         if (!(context.SemanticModel.GetDeclaredSymbol(decl, cancellationToken) is IMethodSymbol methodSymbol)
-            || !SemanticHelpers.TryGetAttribute(decl, _attributeName, context.SemanticModel, cancellationToken, out var attributeSyntax))
+            || !SemanticHelpers.TryGetAttribute(
+                decl, _attributeName, context.SemanticModel, cancellationToken, out var attributeSyntax))
         {
             return null;
         }
@@ -80,7 +83,7 @@ partial class ParamsIncrementalGenerator : IIncrementalGenerator
             return new FailedParamsCandidate { Diagnostics = diagnostics };
         }
         INamedTypeSymbol containingType = methodSymbol.ContainingType;
-        var parameterInfos = Data.MethodInfo.GetArguments(methodSymbol);
+        var parameterInfos = MethodInfo.GetArguments(methodSymbol);
         return new SuccessfulParamsCandidate
         {
             TypeInfo = new CandidateTypeInfo
@@ -94,13 +97,15 @@ partial class ParamsIncrementalGenerator : IIncrementalGenerator
             },
             MaxOverrides = maxOverrides,
             HasParams = SemanticHelpers.GetValue(context.Attributes.First(), "HasParams", true),
-            MethodInfo = new Data.MethodInfo
+            MethodInfo = new MethodInfo
             {
-                ReturnType = Data.MethodInfo.CreateReturnTypeFor(methodSymbol),
+                ReturnType = MethodInfo.CreateReturnTypeFor(methodSymbol),
                 Parameters = parameterInfos,
                 ReturnsKind = SemanticHelpers.GetReturnsKind(methodSymbol),
-                TypeArguments = methodSymbol.TypeArguments.Select(e => e.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)).ToList(),
-                TypeConstraints = Data.MethodInfo.CreateTypeConstraints(methodSymbol.TypeArguments),
+                TypeArguments = methodSymbol.TypeArguments
+                    .Select(e => e.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat))
+                    .ToList(),
+                TypeConstraints = MethodInfo.CreateTypeConstraints(methodSymbol.TypeArguments),
                 MethodName = methodSymbol.Name,
                 IsStatic = methodSymbol.IsStatic
             }
