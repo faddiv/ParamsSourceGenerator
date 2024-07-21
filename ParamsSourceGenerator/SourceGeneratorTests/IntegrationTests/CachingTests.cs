@@ -6,6 +6,9 @@ using SourceGeneratorTests.TestInfrastructure;
 using Foxy.Params.SourceGenerator;
 using static SourceGeneratorTests.TestInfrastructure.CachingTestHelpers;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Testing;
+using Foxy.Params;
+using System.Text;
 
 namespace SourceGeneratorTests.IntegrationTests
 {
@@ -13,7 +16,7 @@ namespace SourceGeneratorTests.IntegrationTests
     {
 
         // A collection of all the tracking names. I'll show how to simplify this later
-        private static string[] _allTrackingNames = [TrackingNames.GetSpanParamsMethods, TrackingNames.NotNullFilter];
+        private static readonly string[] _allTrackingNames = [TrackingNames.GetSpanParamsMethods, TrackingNames.NotNullFilter];
 
         public CachingTests()
         {
@@ -23,11 +26,9 @@ namespace SourceGeneratorTests.IntegrationTests
         [Fact]
         public async Task Caches_When_Nothing_Changes()
         {
-            var runner = new SourceGeneratorTestRunner<ParamsIncrementalGenerator>();
+            var runner = await CreateTestRunner();
             var input = TestEnvironment.GetCachingSource();
             var expected = TestEnvironment.GetCachingOuputs();
-
-            await runner.LoadCSharpAssemblies();
 
             var compilation = runner.CompileSources(input);
 
@@ -46,11 +47,9 @@ namespace SourceGeneratorTests.IntegrationTests
         [Fact]
         public async Task Caches_When_MethodBody_Changes()
         {
-            var runner = new SourceGeneratorTestRunner<ParamsIncrementalGenerator>();
+            var runner = await CreateTestRunner();
             var inputs = TestEnvironment.GetCachingSources();
             var expected = TestEnvironment.GetCachingOuputs();
-
-            await runner.LoadCSharpAssemblies();
 
             var compilation = runner.CompileSources(inputs[0]);
 
@@ -69,11 +68,9 @@ namespace SourceGeneratorTests.IntegrationTests
         [Fact]
         public async Task Regenerate_When_MaxOverrides_Changes()
         {
-            var runner = new SourceGeneratorTestRunner<ParamsIncrementalGenerator>();
+            var runner = await CreateTestRunner();
             var inputs = TestEnvironment.GetCachingSources();
             var expected = TestEnvironment.GetCachingOuputs();
-
-            await runner.LoadCSharpAssemblies();
 
             var compilation = runner.CompileSources(inputs[0]);
 
@@ -91,11 +88,9 @@ namespace SourceGeneratorTests.IntegrationTests
         [Fact]
         public async Task Regenerate_When_HasParams_Changes()
         {
-            var runner = new SourceGeneratorTestRunner<ParamsIncrementalGenerator>();
+            var runner = await CreateTestRunner();
             var inputs = TestEnvironment.GetCachingSources();
             var expected = TestEnvironment.GetCachingOuputs();
-
-            await runner.LoadCSharpAssemblies();
 
             var compilation = runner.CompileSources(inputs[0]);
 
@@ -113,11 +108,9 @@ namespace SourceGeneratorTests.IntegrationTests
         [Fact]
         public async Task Caches_When_OtherFileChanges()
         {
-            var runner = new SourceGeneratorTestRunner<ParamsIncrementalGenerator>();
+            var runner = await CreateTestRunner();
             var inputs = TestEnvironment.GetCachingSources();
             var expected = TestEnvironment.GetCachingOuputs();
-
-            await runner.LoadCSharpAssemblies();
 
             var compilation = runner.CompileSources(inputs[0], inputs[1]);
 
@@ -130,6 +123,14 @@ namespace SourceGeneratorTests.IntegrationTests
             AssertOutputsMatch(result2, expected);
             AssertOutput(result2, "Something.Foo.g.cs", Microsoft.CodeAnalysis.IncrementalStepRunReason.Cached);
             AssertOutput(result2, "Something.Baz.g.cs", Microsoft.CodeAnalysis.IncrementalStepRunReason.Modified);
+        }
+
+        private static async Task<SourceGeneratorTestRunner<ParamsIncrementalGenerator>> CreateTestRunner()
+        {
+            var runner = new SourceGeneratorTestRunner<ParamsIncrementalGenerator>();
+            await runner.LoadCSharpAssemblies();
+            runner.AddAdditionalReference(typeof(ParamsAttribute).Assembly);
+            return runner;
         }
     }
 }

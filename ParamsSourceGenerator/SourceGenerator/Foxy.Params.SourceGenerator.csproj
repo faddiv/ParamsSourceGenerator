@@ -10,6 +10,7 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Authors>Viktor Faddi</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<Description>This source generator automatically creates method overrides to enable allocation-free usage of methods with a variable number of arguments.</Description>
   </PropertyGroup>
   
   <ItemGroup>
@@ -17,7 +18,9 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.10.0" />
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.10.0">
+			<PrivateAssets>all</PrivateAssets>
+		</PackageReference>
     <PackageReference Include="PolySharp" Version="1.14.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -26,5 +29,12 @@
 
   <ItemGroup>
     <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+		<None Include="$(OutputPath)\Foxy.Params.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+		<None Include="$(OutputPath)\Foxy.Params.dll" Pack="true" PackagePath="lib/netstandard2.0" Visible="true" />
+		<None Include="$(OutputPath)\Foxy.Params.xml" Pack="true" PackagePath="lib/netstandard2.0" Visible="true" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Foxy.Params\Foxy.Params.csproj" PrivateAssets="All" />
   </ItemGroup>
 </Project>

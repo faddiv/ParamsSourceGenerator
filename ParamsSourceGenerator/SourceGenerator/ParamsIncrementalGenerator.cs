@@ -16,7 +16,7 @@ public partial class ParamsIncrementalGenerator : IIncrementalGenerator
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        context.RegisterPostInitializationOutput(AddParamsAttribute);
+        //context.RegisterPostInitializationOutput(AddParamsAttribute);
         var declarations = context.SyntaxProvider.ForAttributeWithMetadataName(
             _attributeName,
             predicate: Filter,

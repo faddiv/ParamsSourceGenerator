@@ -17,6 +17,8 @@ internal class TestEnvironment
 
     public static readonly CSharpFile DefaultOuput;
 
+    public static readonly CSharpFile[] DefaultOuputs = [];
+
     public static readonly string AttributeImpl;
 
     static TestEnvironment()
@@ -72,7 +74,6 @@ internal class TestEnvironment
         var basePath = Path.Combine(baseDirectory, caller);
         var sources = new List<CSharpFile>
         {
-            DefaultOuput
         };
 
         foreach (var filePath in Directory.GetFiles(basePath, "*.cs", SearchOption.TopDirectoryOnly))

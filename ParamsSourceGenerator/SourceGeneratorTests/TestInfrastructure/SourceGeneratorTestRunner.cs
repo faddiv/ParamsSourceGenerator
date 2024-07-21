@@ -7,6 +7,7 @@ using System.Threading;
 using Microsoft.CodeAnalysis.Testing;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace SourceGeneratorTests.TestInfrastructure;
 
@@ -17,7 +18,7 @@ public class SourceGeneratorTestRunner
 {
     private readonly ReferenceAssemblies _referenceAssemblies;
     private CSharpGeneratorDriver _driver;
-    private ImmutableArray<MetadataReference> _references;
+    private readonly MetadataReferenceCollection _references;
     private ImmutableArray<ISourceGenerator> _sourceGenerators;
 
     public SourceGeneratorTestRunner(
@@ -26,6 +27,7 @@ public class SourceGeneratorTestRunner
     {
         _referenceAssemblies = referenceAssemblies ?? ReferenceAssemblies.Net.Net80;
         _sourceGenerators = CreateSourceGenerators(sourceGeneratorTypes);
+        _references = [];
 
         // ⚠ Tell the driver to track all the incremental generator outputs
         // without this, you'll have no tracked outputs!
@@ -37,17 +39,21 @@ public class SourceGeneratorTestRunner
 
     public string AssemblyName { get; set; } = "TestingAssambly";
 
-    public async Task LoadCSharpAssemblies(CancellationToken cancellation = default)
+    public async Task LoadCSharpAssemblies(
+        CancellationToken cancellation = default)
     {
-        _references = await _referenceAssemblies.ResolveAsync("csharp", cancellation);
+        _references.AddRange(await _referenceAssemblies.ResolveAsync("csharp", cancellation));
+    }
+
+    public SourceGeneratorTestRunner AddAdditionalReference(Assembly assembly)
+    {
+        _references.Add(assembly);
+        return this;
     }
 
     public CSharpCompilation CompileSourceTexts(params string[] sourceTexts)
     {
-        if (_references.Length == 0)
-        {
-            throw new Exception("No references are loaded.");
-        }
+        EnsureReferencesLoaded();
 
         // Convert the source files to SyntaxTrees
         IEnumerable<SyntaxTree> syntaxTrees = sourceTexts.Select(static x => CSharpSyntaxTree.ParseText(x));
@@ -65,10 +71,7 @@ public class SourceGeneratorTestRunner
 
     public CSharpCompilation CompileSources(params CSharpFile[] sources)
     {
-        if (_references.Length == 0)
-        {
-            throw new Exception("No references are loaded.");
-        }
+        EnsureReferencesLoaded();
 
         // Convert the source files to SyntaxTrees
         IEnumerable<SyntaxTree> syntaxTrees = sources.Select(static x => CSharpSyntaxTree.ParseText(x.Content, path: x.Name));
@@ -88,6 +91,14 @@ public class SourceGeneratorTestRunner
     {
         _driver = (CSharpGeneratorDriver)_driver.RunGenerators(compilation, cancellation);
         return _driver.GetRunResult();
+    }
+
+    private void EnsureReferencesLoaded()
+    {
+        if (_references.Count == 0)
+        {
+            throw new Exception("No references are loaded.");
+        }
     }
 
     private static ImmutableArray<ISourceGenerator> CreateSourceGenerators(

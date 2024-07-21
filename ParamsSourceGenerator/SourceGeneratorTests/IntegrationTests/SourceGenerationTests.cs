@@ -9,14 +9,14 @@ using VerifyCS = CSharpSourceGeneratorVerifier<ParamsIncrementalGenerator>;
 
 public class SourceGenerationTests
 {
-    [Fact]
+    /*[Fact]
     public async Task Always_Generate_ParamsAttribute()
     {
         string code = @"";
 
         await VerifyCS.VerifyGeneratorAsync(code,
             TestEnvironment.DefaultOuput);
-    }
+    }*/
 
     [Fact]
     public async Task Generate_OverridesFor_ReadOnlySpan_WithDefaultParameters()

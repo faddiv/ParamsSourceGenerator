@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Testing;
 using Microsoft.CodeAnalysis.Text;
 using SourceGeneratorTests.TestInfrastructure;
+using Foxy.Params;
 
 namespace SourceGeneratorTests;
 
@@ -67,6 +68,7 @@ partial class CSharpSourceGeneratorVerifier<TSourceGenerator>
             TestState =
             {
                 Sources = { source },
+                AdditionalReferences = { typeof(ParamsAttribute).Assembly.Location }
             },
             ReferenceAssemblies = ReferenceAssemblies.Net.Net80,
         };
