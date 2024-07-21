@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 
 namespace Foxy.Params;
 
@@ -9,6 +10,7 @@ namespace Foxy.Params;
 /// The method must have ReadOnlySpan{T} as the last parameter.
 /// </remarks>
 [AttributeUsage(validOn: AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
+[Conditional("INCLUDE_PARAMS_ATTRIBUTE")]
 public sealed class ParamsAttribute : Attribute
 {
     /// <summary>
