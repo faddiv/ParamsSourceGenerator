@@ -27,7 +27,11 @@ internal static class OverridesGenerator
         return SourceText.From(_sourceBuilder.ToString(), Encoding.UTF8);
     }
 
-    private static void GenerateNamespace(SourceBuilder builder, CandidateTypeInfo _typeInfo, IEnumerable<SuccessfulParams> paramsCandidates, int maxOverridesMax)
+    private static void GenerateNamespace(
+        SourceBuilder builder,
+        CandidateTypeInfo _typeInfo,
+        IEnumerable<SuccessfulParams> paramsCandidates,
+        int maxOverridesMax)
     {
         if (_typeInfo.InGlobalNamespace)
         {
@@ -48,63 +52,55 @@ internal static class OverridesGenerator
         IEnumerable<SuccessfulParams> paramsCandidates,
         int maxOverridesMax) args)
     {
-        GeneratePartialClass(builder, args.typeInfo, args.paramsCandidates);
+        GeneratePartialClass(builder, (args.typeInfo, args.paramsCandidates, 0));
         GenerateArgumentsClasses(builder, args.maxOverridesMax);
     }
 
-    private static void GeneratePartialClass(SourceBuilder builder, CandidateTypeInfo _typeInfo, IEnumerable<SuccessfulParams> paramsCandidates)
+    private static void GeneratePartialClass(
+        SourceBuilder builder, 
+        (CandidateTypeInfo typeInfo, IEnumerable<SuccessfulParams> paramsCandidates, int level) args)
     {
-        var nestLevel = CreateClasses(_typeInfo, builder);
-
-        foreach (var paramsCandidate in paramsCandidates)
+        var (typeInfo, paramsCandidates, level) = args;
+        if (level < typeInfo.TypeHierarchy.Length)
         {
-            var data = paramsCandidate.MethodInfo;
-
-            for (int n = 1; n <= paramsCandidate.MaxOverrides; n++)
+            builder.AddClassHeader(typeInfo.TypeHierarchy[level]);
+            builder.AddBlock(GeneratePartialClass, (typeInfo, paramsCandidates, level + 1));
+        }
+        else
+        {
+            foreach (var paramsCandidate in paramsCandidates)
             {
-                if (n > 1)
+                var data = paramsCandidate.MethodInfo;
+
+                for (int n = 1; n <= paramsCandidate.MaxOverrides; n++)
                 {
-                    builder.AppendLine();
+                    if (n > 1)
+                    {
+                        builder.AppendLine();
+                    }
+
+                    var variableArguments = data.GetFixArguments().Concat(
+                        Enumerable.Range(0, n).Select(j => $"{data.SpanArgumentType} {data.GetArgName()}{j}"));
+                    GenerateMethodHeaderWithArguments(builder, data, variableArguments);
+                    builder.AddBlock(GenerateBodyForOverrideWithNArgs, (data, n));
                 }
 
-                var variableArguments = data.GetFixArguments().Concat(
-                    Enumerable.Range(0, n).Select(j => $"{data.SpanArgumentType} {data.GetArgName()}{j}"));
-                GenerateMethodHeaderWithArguments(builder, data, variableArguments);
-                builder.AddBlock(GenerateBodyForOverrideWithNArgs, (data, n));
-            }
-
-            if (paramsCandidate.HasParams)
-            {
-                builder.AppendLine();
-                GenerateMethodHeaderWithArguments(builder, data, data.GetFixArguments().Append($"params {data.SpanArgumentType}[] {data.GetArgName()}"));
-                builder.AddBlock(GenerateBodyWithParamsParameter, data);
+                if (paramsCandidate.HasParams)
+                {
+                    builder.AppendLine();
+                    var paramsArguments = data.GetFixArguments()
+                        .Append($"params {data.SpanArgumentType}[] {data.GetArgName()}");
+                    GenerateMethodHeaderWithArguments(builder, data, paramsArguments);
+                    builder.AddBlock(GenerateBodyWithParamsParameter, data);
+                }
             }
         }
-
-        CloseTimes(builder, nestLevel);
     }
 
-    private static int CreateClasses(CandidateTypeInfo typeInfo, SourceBuilder sb)
-    {
-        var items = typeInfo.TypeHierarchy;
-        foreach (var item in items)
-        {
-            sb.AddClassHeader(item);
-            sb.OpenBlock();
-        }
-
-        return items.Length;
-    }
-
-    private static void CloseTimes(SourceBuilder sb, int nestLevel)
-    {
-        for (int i = 0; i < nestLevel; i++)
-        {
-            sb.CloseBlock();
-        }
-    }
-
-    private static void GenerateMethodHeaderWithArguments(SourceBuilder builder, MethodInfo data, IEnumerable<string> arguments)
+    private static void GenerateMethodHeaderWithArguments(
+        SourceBuilder builder,
+        MethodInfo data,
+        IEnumerable<string> arguments)
     {
         builder.Method(
             data.MethodName,
@@ -126,7 +122,15 @@ internal static class OverridesGenerator
 
     private static void GenerateSpanVariableForInlineArray(SourceBuilder builder, MethodInfo data, int argsCount)
     {
-        builder.AppendLine($"var {data.GetArgNameSpan()} = global::System.Runtime.InteropServices.MemoryMarshal.CreateReadOnlySpan(ref {data.GetArgName()}.arg0, {argsCount});");
+        var line = builder.StartLine();
+        line.AddSegment("var ");
+        AddArgNameSpan(data, line);
+        line.AddSegment(" = global::System.Runtime.InteropServices.MemoryMarshal.CreateReadOnlySpan(ref ");
+        line.AddSegment(data.GetArgName());
+        line.AddSegment(".arg0, ");
+        line.AddSegment(argsCount.ToString());
+        line.AddSegment(")");
+        line.EndLine();
     }
 
     private static void GenerateArgumentsVariable(SourceBuilder builder, MethodInfo data, int argsCount)
@@ -152,7 +156,21 @@ internal static class OverridesGenerator
 
     private static void GenerateSpanVariableForParamsArgument(SourceBuilder builder, MethodInfo data)
     {
-        builder.AppendLine($"var {data.GetArgNameSpan()} = new global::System.ReadOnlySpan<{data.SpanArgumentType}>({data.GetArgName()});");
+        var line = builder.StartLine();
+        line.AddSegment("var ");
+        AddArgNameSpan(data, line);
+        line.AddSegment(" = new global::System.ReadOnlySpan<");
+        line.AddSegment(data.SpanArgumentType);
+        line.AddSegment(">(");
+        line.AddSegment(data.GetArgName());
+        line.AddSegment(")");
+        line.EndLine();
+    }
+
+    private static void AddArgNameSpan(MethodInfo data, SourceBuilder.SourceLine line)
+    {
+        line.AddSegment(data.GetArgName());
+        line.AddSegment("Span");
     }
 
     private static void GenerateArgumentsClasses(SourceBuilder builder, int maxOverridesMax)
