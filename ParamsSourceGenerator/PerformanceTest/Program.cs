@@ -16,10 +16,15 @@ c.OnlyOneFileChanges();
 c.OnlyOneFileChanges();
 c.OnlyOneFileChanges();*/
 
+/*
+var c = new SourceBuilderBenchmark();
+Console.WriteLine(c.InterpolatedStringHandler());
+/**/
+
 var config = new ManualConfig()
     .WithOptions(ConfigOptions.DisableOptimizationsValidator)
     .AddValidator(JitOptimizationsValidator.FailOnError)
     .AddLogger(ConsoleLogger.Default)
     .AddColumnProvider(DefaultColumnProviders.Instance);
 
-BenchmarkRunner.Run<ChangeTrackingBenchmark>(config);
+BenchmarkRunner.Run<SourceBuilderBenchmark>(config);

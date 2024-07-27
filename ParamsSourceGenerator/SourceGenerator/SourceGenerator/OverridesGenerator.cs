@@ -225,10 +225,10 @@ internal static class OverridesGenerator
 
     private static void ArgumentsConstructorBody(SourceBuilder builder, int length)
     {
-        builder.AppendLine($"arg0 = value0;");
+        builder.AppendV3($"arg0 = value0;");
         for (int i = 1; i < length; i++)
         {
-            builder.AppendLine($"this[{i}] = value{i};");
+            builder.AppendV3($"this[{i}] = value{i};");
         }
     }
 }
