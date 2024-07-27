@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Xml.Linq;
 
 namespace Foxy.Params.SourceGenerator.SourceGenerator;
 
@@ -40,7 +41,7 @@ internal static class OverridesGenerator
         else
         {
             string namespaceName = _typeInfo.Namespace;
-            builder.AddNamespaceHeader(namespaceName);
+            builder.AppendLine($"namespace {namespaceName}");
             builder.AddBlock(GenerateNamespaceMembers,
                 (_typeInfo, paramsCandidates, maxOverridesMax));
         }
@@ -63,7 +64,7 @@ internal static class OverridesGenerator
         var (typeInfo, paramsCandidates, level) = args;
         if (level < typeInfo.TypeHierarchy.Length)
         {
-            builder.AddClassHeader(typeInfo.TypeHierarchy[level]);
+            builder.AppendLine($"partial class {typeInfo.TypeHierarchy[level]}");
             builder.AddBlock(GeneratePartialClass, (typeInfo, paramsCandidates, level + 1));
         }
         else
@@ -122,30 +123,16 @@ internal static class OverridesGenerator
 
     private static void GenerateSpanVariableForInlineArray(SourceBuilder builder, MethodInfo data, int argsCount)
     {
-        var line = builder.StartLine();
-        line.AddSegment("var ");
-        AddArgNameSpan(data, line);
-        line.AddSegment(" = global::System.Runtime.InteropServices.MemoryMarshal.CreateReadOnlySpan(ref ");
-        line.AddSegment(data.GetArgName());
-        line.AddSegment(".arg0, ");
-        line.AddSegment(argsCount.ToString());
-        line.AddSegment(")");
-        line.EndLine();
+        builder.AppendLine(
+            $"var {data.GetArgName()}Span = " +
+            $"global::System.Runtime.InteropServices.MemoryMarshal.CreateReadOnlySpan(ref {data.GetArgName()}.arg0, {argsCount});");
     }
 
     private static void GenerateArgumentsVariable(SourceBuilder builder, MethodInfo data, int argsCount)
     {
-        var line = builder.StartLine();
-        line.AddSegment("var ");
-        line.AddSegment(data.GetArgName());
-        line.AddSegment(" = new Arguments");
-        line.AddSegment(argsCount.ToString());
-        line.AddSegment("<");
-        line.AddSegment(data.SpanArgumentType);
-        line.AddSegment(">(");
-        line.AddCommaSeparatedList(Enumerable.Range(0, argsCount).Select(j => $"{data.GetArgName()}{j}"));
-        line.AddSegment(")");
-        line.EndLine();
+        builder.AppendLine(
+            $"var {data.GetArgName()} = new Arguments{argsCount}<{data.SpanArgumentType}>" +
+            $"({Enumerable.Range(0, argsCount).Select(j => $"{data.GetArgName()}{j}")});");
     }
 
     private static void GenerateBodyWithParamsParameter(SourceBuilder builder, MethodInfo data)
@@ -156,15 +143,9 @@ internal static class OverridesGenerator
 
     private static void GenerateSpanVariableForParamsArgument(SourceBuilder builder, MethodInfo data)
     {
-        var line = builder.StartLine();
-        line.AddSegment("var ");
-        AddArgNameSpan(data, line);
-        line.AddSegment(" = new global::System.ReadOnlySpan<");
-        line.AddSegment(data.SpanArgumentType);
-        line.AddSegment(">(");
-        line.AddSegment(data.GetArgName());
-        line.AddSegment(")");
-        line.EndLine();
+        builder.AppendLine(
+            $"var {data.GetArgName()}Span = new global::System.ReadOnlySpan" +
+            $"<{data.SpanArgumentType}>({data.GetArgName()});");
     }
 
     private static void AddArgNameSpan(MethodInfo data, SourceBuilder.SourceLine line)
@@ -208,24 +189,23 @@ internal static class OverridesGenerator
 
     private static void CreateArguments(SourceBuilder sb, int length)
     {
-        sb.Attribute($"System.Runtime.CompilerServices.InlineArray({length})");
-        string name = $"Arguments{length}";
-        sb.AddGenericStruct(name, "T");
-        sb.AddNamedBlock(name, CreateArgumentsMembers, length);
+        sb.AppendLine($"[global::System.Runtime.CompilerServices.InlineArray({length})]");
+        sb.AppendLine($"file struct Arguments{length}<T>");
+        sb.AddBlock(CreateArgumentsMembers, length);
 
     }
 
     private static void CreateArgumentsMembers(SourceBuilder sb, int length)
     {
-        sb.Field("T", "arg0");
+        sb.AppendTextLine("public T arg0;");
         sb.AppendLine();
-        sb.AddConstructorHeader(Enumerable.Range(0, length).Select(e => $"T value{e}"));
+        sb.AppendLine($"public Arguments{length}({Enumerable.Range(0, length).Select(e => $"T value{e}")})");
         sb.AddBlock(ArgumentsConstructorBody, length);
     }
 
     private static void ArgumentsConstructorBody(SourceBuilder builder, int length)
     {
-        builder.AppendLine($"arg0 = value0;");
+        builder.AppendTextLine("arg0 = value0;");
         for (int i = 1; i < length; i++)
         {
             builder.AppendLine($"this[{i}] = value{i};");
