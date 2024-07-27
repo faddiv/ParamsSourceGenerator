@@ -24,6 +24,14 @@ Decreased memoory allocations by using static generator. (c7da5bf2699cbaaa231f73
 |------------- |---------:|--------:|--------:|--------:|--------:|----------:|
 | RunGenerator | 564.7 us | 6.02 us | 6.69 us | 42.9688 | 11.7188 |  190.9 KB |
 
+### Using InterpolatedStringHandler for optimalization
+
+This further reduce memory usage by avoiding creating strings when not needed by take advantage of InterpolatedStringHandlerAttribute. Some code seems become slower tough.
+
+| Method       | Mean     | Error    | StdDev   | Gen0    | Gen1   | Allocated |
+|------------- |---------:|---------:|---------:|--------:|-------:|----------:|
+| RunGenerator | 658.9 us | 12.89 us | 14.33 us | 39.0625 | 7.8125 | 169.25 KB |
+
 ## Incremental pipeline improvements
 
 These test measures the improvements on the incremental pipeline changes.
@@ -32,12 +40,24 @@ Testing if separating file grouping during pipeline make optimizations.
 
 For this 1000 file is used. All has one method that needs source generated. After generation, let's change only one file. Before, the .Collect() is used, which process all the file in one go, after change, only the changed file is sent for the source generator.
 
-Calculating all output together:
+###Calculating all output together
+
 | Method             | Mean     | Error   | StdDev  | Gen0       | Gen1      | Allocated |
 |------------------- |---------:|--------:|--------:|-----------:|----------:|----------:|
 | OnlyOneFileChanges | 247.4 ms | 3.88 ms | 3.63 ms | 17000.0000 | 6000.0000 | 104.55 MB |
 
+### Grouping outputs
+
 Grouping outputs recalculate only the changed groups:
+
 | Method             | Mean     | Error   | StdDev  | Gen0      | Gen1      | Allocated |
 |------------------- |---------:|--------:|--------:|----------:|----------:|----------:|
 | OnlyOneFileChanges | 198.8 ms | 3.74 ms | 7.65 ms | 3000.0000 | 1000.0000 |  21.89 MB |
+
+### Using InterpolatedStringHandler for optimalization
+
+In case of changing one file in 1000 source, the gain is small.
+
+| Method             | Mean     | Error   | StdDev  | Gen0      | Gen1      | Allocated |
+|------------------- |---------:|--------:|--------:|----------:|----------:|----------:|
+| OnlyOneFileChanges | 184.5 ms | 3.62 ms | 5.31 ms | 3000.0000 | 1000.0000 |   21.8 MB |

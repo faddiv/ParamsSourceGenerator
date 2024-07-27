@@ -6,6 +6,12 @@ using BenchmarkDotNet.Running;
 using BenchmarkDotNet.Validators;
 using PerformanceTest;
 
+var config = new ManualConfig()
+    .WithOptions(ConfigOptions.DisableOptimizationsValidator)
+    .AddValidator(JitOptimizationsValidator.FailOnError)
+    .AddLogger(ConsoleLogger.Default)
+    .AddColumnProvider(DefaultColumnProviders.Instance);
+
 /*var c = new CodeGenerationBenchmark();
 c.CreateBaseSource();
 c.RunGenerator();*/
@@ -21,10 +27,4 @@ var c = new SourceBuilderBenchmark();
 Console.WriteLine(c.InterpolatedStringHandler());
 /**/
 
-var config = new ManualConfig()
-    .WithOptions(ConfigOptions.DisableOptimizationsValidator)
-    .AddValidator(JitOptimizationsValidator.FailOnError)
-    .AddLogger(ConsoleLogger.Default)
-    .AddColumnProvider(DefaultColumnProviders.Instance);
-
-BenchmarkRunner.Run<SourceBuilderBenchmark>(config);
+BenchmarkRunner.Run<ChangeTrackingBenchmark>(config);
