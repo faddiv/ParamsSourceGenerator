@@ -8,7 +8,7 @@ public static class SourceBuilderExtensions
         "Style",
         "IDE0060:Remove unused parameter",
         Justification = "Used by InterpolatedStringHandler")]
-    internal static void AppendV3(
+    internal static void AppendLine(
         this SourceBuilder builder,
         [InterpolatedStringHandlerArgument("builder")]in SourceBuilder.InterpolatedStringHandler input)
     {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace Foxy.Params.SourceGenerator.Helpers;
@@ -47,6 +48,11 @@ internal partial class SourceBuilder
             {
                 _builder.Append(arg.Value);
             }
+        }
+
+        public readonly void AppendFormatted(IEnumerable<string> args)
+        {
+            _builder.AddCommaSeparatedList(args);
         }
 
         internal void FinishLine()
