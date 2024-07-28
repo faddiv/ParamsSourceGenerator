@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace Foxy.Params.SourceGenerator.Helpers;
@@ -14,7 +13,7 @@ internal partial class SourceBuilder
         public InterpolatedStringHandler(int literalLength, int formattedCount, SourceBuilder builder)
         {
             _builder = builder;
-            _builder.EnsureCapacity(literalLength + (formattedCount << 4));
+            _builder.EnsureCapacity(_builder._builder.Length + literalLength + (formattedCount << 4));
             _builder.AddIntend();
         }
 

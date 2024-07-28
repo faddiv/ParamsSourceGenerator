@@ -9,7 +9,7 @@ internal partial class SourceBuilder(string intend = "    ")
 {
     private int _intendLevel = 0;
 
-    private readonly StringBuilder _builder = new();
+    private readonly StringBuilder _builder = new(2048);
 
     public string Intend { get; } = intend;
 

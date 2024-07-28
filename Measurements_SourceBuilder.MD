@@ -55,6 +55,10 @@ builder.AddBlock(static (sb, args) =>
 }, (_argName, _spanArgumentType));
 ```
 
+### Using object pool
+
+Using object pool for source builder and ensure initial capacity to be enough.
+
 ## Measurement results
 
 | Method                            | Mean     | Error   | StdDev  | Gen0   | Allocated |
@@ -63,3 +67,4 @@ builder.AddBlock(static (sb, args) =>
 | AppendLineWithStringInterpolation | 226.4 ns | 2.84 ns | 2.66 ns | 0.2255 |     944 B |
 | PassStringInterpolationToBuilder  | 269.4 ns | 5.12 ns | 5.03 ns | 0.2103 |     880 B |
 | InterpolatedStringHandler         | 113.0 ns | 0.70 ns | 0.66 ns | 0.1396 |     584 B |
+| ObjectPooling                     | 76.18 ns | 0.77 ns | 0.64 ns | 0.0440 |     184 B |

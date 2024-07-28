@@ -14,11 +14,6 @@ internal partial class SourceBuilder
             _builder.AddIntend();
         }
 
-        public void Returns()
-        {
-            _builder.AppendInternal("return ");
-        }
-
         public void AddSegment(string segment)
         {
             _builder.AppendInternal(segment);

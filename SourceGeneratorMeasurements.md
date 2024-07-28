@@ -32,6 +32,14 @@ This further reduce memory usage by avoiding creating strings when not needed by
 |------------- |---------:|---------:|---------:|--------:|-------:|----------:|
 | RunGenerator | 658.9 us | 12.89 us | 14.33 us | 39.0625 | 7.8125 | 169.25 KB |
 
+### Using object pool
+
+Using object pool for source builder and ensure initial capacity to be enough.
+
+| Method       | Mean     | Error   | StdDev  | Gen0    | Gen1   | Allocated |
+|------------- |---------:|--------:|--------:|--------:|-------:|----------:|
+| RunGenerator | 555.6 us | 9.51 us | 7.94 us | 31.2500 | 7.8125 | 137.13 KB |
+
 ## Incremental pipeline improvements
 
 These test measures the improvements on the incremental pipeline changes.
@@ -61,3 +69,11 @@ In case of changing one file in 1000 source, the gain is small.
 | Method             | Mean     | Error   | StdDev  | Gen0      | Gen1      | Allocated |
 |------------------- |---------:|--------:|--------:|----------:|----------:|----------:|
 | OnlyOneFileChanges | 184.5 ms | 3.62 ms | 5.31 ms | 3000.0000 | 1000.0000 |   21.8 MB |
+
+### Using object pool
+
+Using object pool for source builder and ensure initial capacity to be enough.
+
+| Method             | Mean     | Error   | StdDev  | Gen0      | Gen1      | Allocated |
+|------------------- |---------:|--------:|--------:|----------:|----------:|----------:|
+| OnlyOneFileChanges | 184.5 ms | 3.54 ms | 4.48 ms | 3000.0000 | 1000.0000 |  21.77 MB |

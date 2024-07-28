@@ -12,11 +12,18 @@ public class SourceBuilderBenchmark
     [Benchmark]
     public string InterpolatedStringHandler()
     {
-        var builder = new SourceBuilder();
-        builder.AddBlock(static (sb, args) =>
+        var builder = SourceBuilderPool.Instance.Get();
+        try
         {
-            sb.AppendLine($"var {args._argName}Span = new global::System.ReadOnlySpan<{args._spanArgumentType}>({args._argName});");
-        }, (_argName, _spanArgumentType));
-        return builder.ToString();
+            builder.AddBlock(static (sb, args) =>
+            {
+                sb.AppendLine($"var {args._argName}Span = new global::System.ReadOnlySpan<{args._spanArgumentType}>({args._argName});");
+            }, (_argName, _spanArgumentType));
+            return builder.ToString();
+        }
+        finally
+        {
+            SourceBuilderPool.Instance.Return(builder);
+        }
     }
 }
