@@ -27,14 +27,14 @@ internal class MethodInfo : IEquatable<MethodInfo?>
 
     public required bool IsStatic { get; init; }
 
-    public ReadOnlySpan<ParameterInfo> GetFixedParameters()
+    public IEnumerable<ParameterInfo> GetFixedParameters()
     {
-        return new(Parameters, 0, Parameters.Length - 1);
+        return Parameters.Take(Parameters.Length - 1);
     }
 
-    public List<string> GetFixArguments()
+    public IEnumerable<string> GetFixArguments()
     {
-        return GetFixedParameters().ToImmutableArray().Select(e => e.ToParameter()).ToList();
+        return GetFixedParameters().Select(e => e.ToParameter()).ToList();
     }
 
     public string GetArgName()

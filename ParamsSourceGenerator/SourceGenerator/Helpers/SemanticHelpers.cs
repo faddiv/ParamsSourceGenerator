@@ -98,6 +98,7 @@ internal static class SemanticHelpers
         list.Reverse();
         return list;
     }
+
     public static string CreateFileName(string containingType)
     {
         return $"{containingType}.g.cs";

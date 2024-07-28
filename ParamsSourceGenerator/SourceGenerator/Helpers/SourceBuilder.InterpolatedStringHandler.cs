@@ -20,12 +20,24 @@ internal partial class SourceBuilder
 
         public readonly void AppendLiteral(string s)
         {
-            _builder._builder.Append(s);
+            _builder.Append(s);
         }
 
         public readonly void AppendFormatted<T>(T? t)
         {
-            _builder.AppendFormatted(t);
+            if(t is null)
+            {
+                return;
+            }
+
+            if (t is IEnumerable<string> strings)
+            {
+                AppendFormatted(strings);
+            }
+            else
+            {
+                _builder.AppendFormatted(t);
+            }
         }
 
         public readonly void AppendFormatted(string? arg)

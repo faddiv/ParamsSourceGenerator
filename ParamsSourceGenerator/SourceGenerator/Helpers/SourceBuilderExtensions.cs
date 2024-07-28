@@ -14,4 +14,14 @@ public static class SourceBuilderExtensions
     {
         input.FinishLine();
     }
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Style",
+        "IDE0060:Remove unused parameter",
+        Justification = "Used by InterpolatedStringHandler")]
+    internal static void AddFormatted(
+        this SourceBuilder.SourceLine builder,
+        [InterpolatedStringHandlerArgument("builder")] in SourceBuilder.SourceLine.InterpolatedStringHandler input)
+    {
+    }
 }

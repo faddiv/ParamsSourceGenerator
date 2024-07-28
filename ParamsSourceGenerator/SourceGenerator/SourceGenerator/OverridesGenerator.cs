@@ -109,13 +109,29 @@ internal static class OverridesGenerator
         MethodInfo data,
         IEnumerable<string> arguments)
     {
-        builder.Method(
-            data.MethodName,
-            arguments,
-            data.IsStatic,
-            data.ReturnType,
-            data.TypeArguments,
-            data.TypeConstraints);
+        var line = builder.StartLine();
+        line.AddSegment("public");
+        if (data.IsStatic)
+        {
+            line.AddSegment(" static");
+
+        }
+        line.AddFormatted($" {data.ReturnType} {data.MethodName}");
+        if (data.TypeArguments.Count > 0)
+        {
+            line.AddFormatted($"<{data.TypeArguments}>");
+        }
+        line.AddFormatted($"({arguments})");
+        line.FinishLine();
+        if (data.TypeConstraints.Count <= 0)
+            return;
+        builder.AddIndented(static (builder, args) =>
+        {
+            foreach (var typeConstraints in args)
+            {
+                builder.AppendLine($"where {typeConstraints.Type} : {typeConstraints.Constraints}");
+            }
+        }, data.TypeConstraints);
     }
 
     private static void GenerateBodyForOverrideWithNArgs(
@@ -171,26 +187,24 @@ internal static class OverridesGenerator
 
     private static void GenerateCallOriginalMethod(SourceBuilder builder, MethodInfo data)
     {
-        var codeLine = builder.StartLine();
+        var line = builder.StartLine();
         if (data.ReturnsKind != ReturnKind.ReturnsVoid)
         {
-            codeLine.AddSegment("return ");
+            line.AddSegment("return ");
         }
         if (data.ReturnsKind == ReturnKind.ReturnsRef)
         {
-            codeLine.AddSegment("ref ");
+            line.AddSegment("ref ");
         }
-        codeLine.AddSegment(data.MethodName);
+        line.AddSegment(data.MethodName);
         if (data.TypeArguments.Count > 0)
         {
-            codeLine.AddSegment("<");
-            codeLine.AddCommaSeparatedList(data.TypeArguments);
-            codeLine.AddSegment(">");
+            line.AddFormatted($"<{data.TypeArguments}>");
         }
-        codeLine.AddSegment("(");
-        codeLine.AddCommaSeparatedList(data.GetFixedParameters().Convert(e => e.ToPassParameter()));
-        codeLine.AddSegment($", {data.GetArgNameSpanInput()})");
-        codeLine.EndLine();
+
+        var fixedParameters = data.GetFixedParameters().Select(e => e.ToPassParameter());
+        line.AddFormatted($"({fixedParameters}, {data.GetArgNameSpanInput()});");
+        line.FinishLine();
     }
 
     private static void CreateArguments(SourceBuilder sb, int length)

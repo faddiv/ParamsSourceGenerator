@@ -40,6 +40,14 @@ Using object pool for source builder and ensure initial capacity to be enough.
 |------------- |---------:|--------:|--------:|--------:|-------:|----------:|
 | RunGenerator | 555.6 us | 9.51 us | 7.94 us | 31.2500 | 7.8125 | 137.13 KB |
 
+### SourceLine readibility improvements
+
+The SourceLine readibility improvements shouldn't change anything, but running the thests again and again reveals, the Allocated memory isn't measured consistently.
+
+| Method       | Mean     | Error    | StdDev   | Gen0    | Gen1   | Allocated |
+|------------- |---------:|---------:|---------:|--------:|-------:|----------:|
+| RunGenerator | 550.5 us | 10.67 us | 14.95 us | 31.2500 | 7.8125 | 136.81 KB |
+
 ## Incremental pipeline improvements
 
 These test measures the improvements on the incremental pipeline changes.
@@ -77,3 +85,11 @@ Using object pool for source builder and ensure initial capacity to be enough.
 | Method             | Mean     | Error   | StdDev  | Gen0      | Gen1      | Allocated |
 |------------------- |---------:|--------:|--------:|----------:|----------:|----------:|
 | OnlyOneFileChanges | 184.5 ms | 3.54 ms | 4.48 ms | 3000.0000 | 1000.0000 |  21.77 MB |
+
+### SourceLine readibility improvements
+
+(Inconsistent memory readings.)
+
+| Method             | Mean     | Error   | StdDev  | Gen0      | Gen1      | Allocated |
+|------------------- |---------:|--------:|--------:|----------:|----------:|----------:|
+| OnlyOneFileChanges | 182.9 ms | 3.65 ms | 6.30 ms | 3000.0000 | 1000.0000 |  21.85 MB |

@@ -1,12 +1,10 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Text;
 
 namespace Foxy.Params.SourceGenerator.Helpers;
 
@@ -59,7 +57,7 @@ internal static class Validators
             return false;
         }
 
-        var spanParameterName = parameters[parameters.Length - 1].Name;
+        var spanParameterName = parameters[^1].Name;
         var collisionParameters = new List<string>
         {
             $"{spanParameterName}Span"

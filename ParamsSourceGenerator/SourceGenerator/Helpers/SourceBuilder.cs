@@ -32,33 +32,11 @@ internal partial class SourceBuilder(string intend = "    ")
         CloseBlock();
     }
 
-    internal void Method(
-        string name,
-        IEnumerable<string> args,
-        bool isStatic,
-        string returnType,
-        List<string> typeArguments,
-        List<TypeConstrainInfo> typeConstraintsList)
+    public void AddIndented<TArg1>(Action<SourceBuilder, TArg1> buidler, in TArg1 arg1)
     {
-        AddIntend();
-        _builder.Append("public");
-        if (isStatic)
-        {
-            _builder.Append(" static");
-
-        }
-        _builder.Append(" ").Append(returnType);
-        _builder.Append($" {name}");
-        if (typeArguments.Count > 0)
-        {
-            _builder.Append($"<");
-            AddCommaSeparatedList(typeArguments);
-            _builder.Append($">");
-        }
-        _builder.Append($"(");
-        AddCommaSeparatedList(args);
-        _builder.AppendLine(")");
-        AddTypeConstraints(typeConstraintsList);
+        IncreaseIntend();
+        buidler(this, arg1);
+        DecreaseIntend();
     }
 
     public void Field(string type, string name)
@@ -90,7 +68,7 @@ internal partial class SourceBuilder(string intend = "    ")
     public void AppendTextLine(string text)
     {
         AddIntend();
-        AppendLineInternal(text);
+        _builder.AppendLine(text);
     }
 
     public SourceLine StartLine()
@@ -120,30 +98,9 @@ internal partial class SourceBuilder(string intend = "    ")
         _intendLevel--;
     }
 
-    private void AppendLineInternal(string text)
-    {
-        _builder.AppendLine(text);
-    }
-
     private void AppendInternal(string text)
     {
         _builder.Append(text);
-    }
-
-    private void AddTypeConstraints(List<TypeConstrainInfo> typeConstraintsList)
-    {
-        if (typeConstraintsList.Count <= 0)
-            return;
-
-        IncreaseIntend();
-        foreach (var typeConstraints in typeConstraintsList)
-        {
-            AddIntend();
-            _builder.Append($"where {typeConstraints.Type} : ");
-            AddCommaSeparatedList(typeConstraints.Constraints);
-            _builder.AppendLine();
-        }
-        DecreaseIntend();
     }
 
     private void AddLineInternal(string text)
