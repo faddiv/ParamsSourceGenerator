@@ -27,4 +27,12 @@ var c = new SourceBuilderBenchmark();
 Console.WriteLine(c.InterpolatedStringHandler());
 /**/
 
-BenchmarkRunner.Run<ChangeTrackingBenchmark>(config);
+/*
+var c = new SemanticHelpersBenchmark();
+c.Setup();
+Console.WriteLine(string.Join(", ", c.GetTypeHierarchyV1()));
+Console.WriteLine(string.Join(", ", c.GetTypeHierarchyV2()));
+Console.WriteLine(string.Join(", ", c.GetTypeHierarchyV3()));
+/**/
+
+BenchmarkRunner.Run<SemanticHelpersBenchmark>(config);

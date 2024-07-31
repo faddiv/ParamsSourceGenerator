@@ -49,31 +49,25 @@ internal static class SemanticHelpers
         if (symbol is null ||
             symbol.ContainingNamespace.IsGlobalNamespace)
             return "";
-        var nameSpacesParts = symbol.ContainingNamespace.ToDisplayParts(SymbolDisplayFormat.FullyQualifiedFormat);
-        var nameSpace = string.Join("", nameSpacesParts.Skip(2));
-        return nameSpace;
+        return symbol.ContainingNamespace.ToDisplayString(DisplayFormats.ForFileName);
     }
 
-    public static string GetNameSpaceGlobal(IMethodSymbol methodSymbol)
+    public static T GetAttributeValue<T>(GeneratorAttributeSyntaxContext context, string argumentName, T defaultValue)
     {
-        if (methodSymbol.ContainingNamespace.IsGlobalNamespace)
-            return "";
-        return methodSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-    }
-
-    public static T GetValue<T>(AttributeData attributeSyntax, string argumentName, T defaultValue)
-    {
-        foreach (var item in attributeSyntax.NamedArguments)
+        foreach (var attribute in context.Attributes)
         {
-            if (item.Key != argumentName)
-                continue;
+            foreach (var item in attribute.NamedArguments)
+            {
+                if (item.Key != argumentName)
+                    continue;
 
-            return (T)item.Value.Value!;
+                return (T)item.Value.Value!;
+            }
         }
 
         return defaultValue;
     }
-
+    
     public static ReturnKind GetReturnsKind(IMethodSymbol methodSymbol)
     {
         if(methodSymbol.ReturnsVoid)
@@ -87,16 +81,34 @@ internal static class SemanticHelpers
         return ReturnKind.ReturnsType;
     }
 
-    public static List<INamedTypeSymbol> GetTypeHierarchy(INamedTypeSymbol? containingType)
+    public static string[] GetTypeHierarchy(INamedTypeSymbol symbol)
     {
-        var list = new List<INamedTypeSymbol>();
-        while (containingType is not null)
+        var nestLevel = CountTypeNesting(symbol);
+        return CreateTypeHierarchyInternal(symbol, nestLevel);
+
+        static string[] CreateTypeHierarchyInternal(INamedTypeSymbol? symbol, int level)
         {
-            list.Add(containingType);
-            containingType = containingType.ContainingType;
+            var count = 1;
+            string[] container = new string[level];
+            while (symbol is not null)
+            {
+                container[^count] = symbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
+                symbol = symbol.ContainingType;
+                count++;
+            }
+            return container;
         }
-        list.Reverse();
-        return list;
+
+        static int CountTypeNesting(INamedTypeSymbol? symbol)
+        {
+            var count = 0;
+            while (symbol is not null)
+            {
+                symbol = symbol.ContainingType;
+                count++;
+            }
+            return count;
+        }
     }
 
     public static string CreateFileName(string containingType)

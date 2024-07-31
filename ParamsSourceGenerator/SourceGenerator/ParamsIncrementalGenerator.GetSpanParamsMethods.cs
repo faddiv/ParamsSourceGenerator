@@ -45,7 +45,6 @@ partial class ParamsIncrementalGenerator : IIncrementalGenerator
                 methodSymbol.Name));
         }
 
-        int maxOverrides = SemanticHelpers.GetValue(context.Attributes.First(), "MaxOverrides", 3);
         var spanParam = methodSymbol.Parameters.LastOrDefault();
         if (spanParam is null ||
             spanParam?.Type is not INamedTypeSymbol spanType)
@@ -70,6 +69,8 @@ partial class ParamsIncrementalGenerator : IIncrementalGenerator
                 methodSymbol.Name, spanParam.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat)));
         }
 
+        bool hasParams = SemanticHelpers.GetAttributeValue(context, "HasParams", true);
+        int maxOverrides = SemanticHelpers.GetAttributeValue(context, "MaxOverrides", 3);
         if (Validators.HasNameCollision(methodSymbol.Parameters, maxOverrides, out string? unusableParameters))
         {
             diagnostics.Add(DiagnosticInfo.Create(
@@ -82,6 +83,7 @@ partial class ParamsIncrementalGenerator : IIncrementalGenerator
         {
             return new FailedParamsCandidate { Diagnostics = diagnostics };
         }
+
         INamedTypeSymbol containingType = methodSymbol.ContainingType;
         var parameterInfos = MethodInfo.GetArguments(methodSymbol);
         return new SuccessfulParamsCandidate
@@ -89,14 +91,12 @@ partial class ParamsIncrementalGenerator : IIncrementalGenerator
             TypeInfo = new CandidateTypeInfo
             { 
                 TypeName = containingType.ToDisplayString(DisplayFormats.ForFileName),
-                TypeHierarchy = SemanticHelpers.GetTypeHierarchy(containingType)
-                    .Select(e => e.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat))
-                    .ToArray(),
+                TypeHierarchy = SemanticHelpers.GetTypeHierarchy(containingType),
                 InGlobalNamespace = containingType.ContainingNamespace.IsGlobalNamespace,
                 Namespace = SemanticHelpers.GetNameSpaceNoGlobal(containingType)
             },
             MaxOverrides = maxOverrides,
-            HasParams = SemanticHelpers.GetValue(context.Attributes.First(), "HasParams", true),
+            HasParams = hasParams,
             MethodInfo = new MethodInfo
             {
                 ReturnType = MethodInfo.CreateReturnTypeFor(methodSymbol),
