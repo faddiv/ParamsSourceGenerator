@@ -1,14 +1,10 @@
-using System.Diagnostics;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
 using Foxy.Params.SourceGenerator.Helpers;
 using Foxy.Params.SourceGenerator.Data;
-using System.Buffers;
 
 namespace Foxy.Params.SourceGenerator;
 
@@ -16,11 +12,10 @@ partial class ParamsIncrementalGenerator : IIncrementalGenerator
 {
     private ParamsCandidate? GetSpanParamsMethods(
         GeneratorAttributeSyntaxContext context,
-        CancellationToken cancellationToken)
+        CancellationToken cancel)
     {
         if (context.TargetNode is not MethodDeclarationSyntax methodDeclarationSyntax ||
-            context.TargetSymbol is not IMethodSymbol methodSymbol ||
-            !SemanticHelpers.TryGetAttribute(methodDeclarationSyntax, _attributeName, context.SemanticModel, cancellationToken, out var attributeSyntax))
+            context.TargetSymbol is not IMethodSymbol methodSymbol)
         {
             return null;
         }
@@ -30,13 +25,13 @@ partial class ParamsIncrementalGenerator : IIncrementalGenerator
         {
             return null;
         }
-
+        
         var diagnostics = new List<DiagnosticInfo>();
         if (!Validators.IsContainingTypesArePartial(methodDeclarationSyntax, out var typeName))
         {
             diagnostics.Add(DiagnosticInfo.Create(
                 DiagnosticReports.PartialIsMissingDescriptor,
-                attributeSyntax.GetLocation(),
+                context.GetAttributeLocation(cancel),
                 typeName,
                 methodSymbol.Name));
         }
@@ -47,21 +42,21 @@ partial class ParamsIncrementalGenerator : IIncrementalGenerator
         {
             diagnostics.Add(DiagnosticInfo.Create(
                 DiagnosticReports.ParameterMissingDescriptor,
-                attributeSyntax.GetLocation(),
+                context.GetAttributeLocation(cancel),
                 methodSymbol.Name));
         }
         else if (!Validators.IsReadOnlySpan(spanType))
         {
             diagnostics.Add(DiagnosticInfo.Create(
                 DiagnosticReports.ParameterMismatchDescriptor,
-                attributeSyntax.GetLocation(),
+                context.GetAttributeLocation(cancel),
                 methodSymbol.Name, spanParam.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat)));
         }
         else if (Validators.IsOutParameter(spanParam))
         {
             diagnostics.Add(DiagnosticInfo.Create(
                 DiagnosticReports.OutModifierNotAllowedDescriptor,
-                attributeSyntax.GetLocation(),
+                context.GetAttributeLocation(cancel),
                 methodSymbol.Name, spanParam.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat)));
         }
 
@@ -71,7 +66,7 @@ partial class ParamsIncrementalGenerator : IIncrementalGenerator
         {
             diagnostics.Add(DiagnosticInfo.Create(
                 DiagnosticReports.ParameterCollisionDescriptor,
-                attributeSyntax.GetLocation(),
+                context.GetAttributeLocation(cancel),
                 methodSymbol.Name, unusableParameters));
         }
 

@@ -1,10 +1,9 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Threading;
 using Foxy.Params.SourceGenerator.Data;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Foxy.Params.SourceGenerator.Helpers;
@@ -17,22 +16,40 @@ internal static class SemanticHelpers
             throw new ArgumentNullException(nameof(typeInfo));
     }
 
-    public static bool TryGetAttribute(
+    public static Location GetAttributeLocation(
+        this GeneratorAttributeSyntaxContext context,
+        CancellationToken cancel)
+    {
+        if (context.TargetNode is MethodDeclarationSyntax methodDeclarationSyntax &&
+            TryGetAttributeSyntax(
+                methodDeclarationSyntax,
+                context.Attributes[0],
+                context.SemanticModel,
+                cancel,
+                out var attributeSyntax
+            ))
+        {
+            return attributeSyntax.GetLocation();
+        }
+
+        return context.TargetNode.GetLocation();
+    }
+
+    public static bool TryGetAttributeSyntax(
         MemberDeclarationSyntax candidate,
-        string attributeName,
+        AttributeData attributeData,
         SemanticModel semanticModel,
         CancellationToken cancellationToken,
-        [NotNullWhen(true)]out AttributeSyntax? value)
+        [NotNullWhen(true)] out AttributeSyntax? value)
     {
         foreach (AttributeListSyntax attributeList in candidate.AttributeLists)
         {
             foreach (AttributeSyntax attribute in attributeList.Attributes)
             {
-                SymbolInfo info = semanticModel.GetSymbolInfo(attribute, cancellationToken);
-                ISymbol? symbol = info.Symbol;
+                var symbolInfo = semanticModel.GetSymbolInfo(attribute, cancellationToken);
 
-                if (symbol is IMethodSymbol method
-                    && method.ContainingType.ToDisplayString().Equals(attributeName, StringComparison.Ordinal))
+                if (symbolInfo.Symbol is not null &&
+                    ReferenceEquals(attributeData.AttributeConstructor, symbolInfo.Symbol))
                 {
                     value = attribute;
                     return true;
@@ -67,14 +84,14 @@ internal static class SemanticHelpers
 
         return defaultValue;
     }
-    
+
     public static ReturnKind GetReturnsKind(IMethodSymbol methodSymbol)
     {
-        if(methodSymbol.ReturnsVoid)
+        if (methodSymbol.ReturnsVoid)
         {
             return ReturnKind.ReturnsVoid;
         }
-        if(methodSymbol.ReturnsByRef || methodSymbol.ReturnsByRefReadonly)
+        if (methodSymbol.ReturnsByRef || methodSymbol.ReturnsByRefReadonly)
         {
             return ReturnKind.ReturnsRef;
         }
