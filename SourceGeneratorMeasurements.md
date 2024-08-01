@@ -2,7 +2,7 @@
 
 ## SyntaxFactory
 
-This test measures how the source generation performs on simple case when the SytaxFactory is used:
+This test measures how the source generation performs on simple case when the SyntaxFactory is used:
 
 | Method       | Mean     | Error    | StdDev   | Gen0     | Gen1     | Allocated |
 |------------- |---------:|---------:|---------:|---------:|---------:|----------:|
@@ -48,6 +48,14 @@ The SourceLine readibility improvements shouldn't change anything, but running t
 |------------- |---------:|---------:|---------:|--------:|-------:|----------:|
 | RunGenerator | 550.5 us | 10.67 us | 14.95 us | 31.2500 | 7.8125 | 136.81 KB |
 
+### Improvig Transform
+
+Removed the AttributeSyntax calculation when it doesn't needed and GetSemanticModel since thecontext has it anyway.
+
+| Method       | Mean     | Error   | StdDev   | Gen0    | Gen1   | Allocated |
+|------------- |---------:|--------:|---------:|--------:|-------:|----------:|
+| RunGenerator | 505.4 us | 9.17 us | 10.19 us | 31.2500 | 3.9063 |  133.2 KB |
+
 ## Incremental pipeline improvements
 
 These test measures the improvements on the incremental pipeline changes.
@@ -56,7 +64,7 @@ Testing if separating file grouping during pipeline make optimizations.
 
 For this 1000 file is used. All has one method that needs source generated. After generation, let's change only one file. Before, the .Collect() is used, which process all the file in one go, after change, only the changed file is sent for the source generator.
 
-###Calculating all output together
+### Calculating all output together
 
 | Method             | Mean     | Error   | StdDev  | Gen0       | Gen1      | Allocated |
 |------------------- |---------:|--------:|--------:|-----------:|----------:|----------:|
@@ -80,8 +88,6 @@ In case of changing one file in 1000 source, the gain is small.
 
 ### Using object pool
 
-Using object pool for source builder and ensure initial capacity to be enough.
-
 | Method             | Mean     | Error   | StdDev  | Gen0      | Gen1      | Allocated |
 |------------------- |---------:|--------:|--------:|----------:|----------:|----------:|
 | OnlyOneFileChanges | 184.5 ms | 3.54 ms | 4.48 ms | 3000.0000 | 1000.0000 |  21.77 MB |
@@ -93,3 +99,11 @@ Using object pool for source builder and ensure initial capacity to be enough.
 | Method             | Mean     | Error   | StdDev  | Gen0      | Gen1      | Allocated |
 |------------------- |---------:|--------:|--------:|----------:|----------:|----------:|
 | OnlyOneFileChanges | 182.9 ms | 3.65 ms | 6.30 ms | 3000.0000 | 1000.0000 |  21.85 MB |
+
+### Improvig Transform
+
+As suspected, every transform optimalization has greater effect on caching.
+
+| Method             | Mean     | Error   | StdDev  | Gen0      | Gen1      | Allocated |
+|------------------- |---------:|--------:|--------:|----------:|----------:|----------:|
+| OnlyOneFileChanges | 161.6 ms | 3.18 ms | 4.66 ms | 3000.0000 | 1000.0000 |  18.67 MB |
