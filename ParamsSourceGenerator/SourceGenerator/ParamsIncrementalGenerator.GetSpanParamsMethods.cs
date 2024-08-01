@@ -18,13 +18,9 @@ partial class ParamsIncrementalGenerator : IIncrementalGenerator
         GeneratorAttributeSyntaxContext context,
         CancellationToken cancellationToken)
     {
-        SyntaxNode targetNode = context.TargetNode;
-        Debug.Assert(targetNode is MethodDeclarationSyntax);
-        var decl = Unsafe.As<MethodDeclarationSyntax>(targetNode);
-
-        if (!(context.SemanticModel.GetDeclaredSymbol(decl, cancellationToken) is IMethodSymbol methodSymbol)
-            || !SemanticHelpers.TryGetAttribute(
-                decl, _attributeName, context.SemanticModel, cancellationToken, out var attributeSyntax))
+        if (context.TargetNode is not MethodDeclarationSyntax methodDeclarationSyntax ||
+            context.TargetSymbol is not IMethodSymbol methodSymbol ||
+            !SemanticHelpers.TryGetAttribute(methodDeclarationSyntax, _attributeName, context.SemanticModel, cancellationToken, out var attributeSyntax))
         {
             return null;
         }
@@ -36,7 +32,7 @@ partial class ParamsIncrementalGenerator : IIncrementalGenerator
         }
 
         var diagnostics = new List<DiagnosticInfo>();
-        if (!Validators.IsContainingTypesArePartial(targetNode, out var typeName))
+        if (!Validators.IsContainingTypesArePartial(methodDeclarationSyntax, out var typeName))
         {
             diagnostics.Add(DiagnosticInfo.Create(
                 DiagnosticReports.PartialIsMissingDescriptor,

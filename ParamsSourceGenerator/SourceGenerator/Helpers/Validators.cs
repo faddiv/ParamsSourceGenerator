@@ -10,7 +10,6 @@ namespace Foxy.Params.SourceGenerator.Helpers;
 
 internal static class Validators
 {
-
     public static bool HasDuplication(ImmutableArray<IParameterSymbol> parameters)
     {
         for (int i = 0; i < parameters.Length; i++)
