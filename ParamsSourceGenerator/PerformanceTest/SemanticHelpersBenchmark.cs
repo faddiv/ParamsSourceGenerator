@@ -2,29 +2,24 @@
 using Foxy.Params.SourceGenerator.Helpers;
 using Microsoft.CodeAnalysis;
 using PerformanceTest.Helpers;
+using SourceGeneratorTests.TestInfrastructure;
 
 namespace PerformanceTest;
 
 [MemoryDiagnoser]
 public class SemanticHelpersBenchmark
 {
-    private NamedTypeSymbol _containingType = null!;
+    private INamedTypeSymbol _containingType = null!;
 
     [GlobalSetup]
     public void Setup()
     {
-        _containingType = new NamedTypeSymbol
-        {
-            Name = "gamma",
-            ContainingType = new NamedTypeSymbol
-            {
-                Name = "beta",
-                ContainingType = new NamedTypeSymbol
-                {
-                    Name = "alfa"
-                }
-            }
-        };
+        var runner = new SourceGeneratorTestRunner();
+        runner.LoadCSharpAssemblies().GetAwaiter().GetResult();
+        var paramsAttribute = TestEnvironment.GetFile("ParamsAttribute.cs");
+        var sourceFile = TestEnvironment.GetFile("SourceFile.cs");
+        var compilation = runner.CompileSources(paramsAttribute, sourceFile);
+        _containingType = TestEnvironment.FindGamma(compilation.Assembly);
     }
     
     [Benchmark]

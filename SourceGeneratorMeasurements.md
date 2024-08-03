@@ -56,6 +56,14 @@ Removed the AttributeSyntax calculation when it doesn't needed and GetSemanticMo
 |------------- |---------:|--------:|---------:|--------:|-------:|----------:|
 | RunGenerator | 505.4 us | 9.17 us | 10.19 us | 31.2500 | 3.9063 |  133.2 KB |
 
+### Optimizing on Generic arguments
+
+The memory and time save at this point is insignificant, and inprecise. It varies rune by run.
+
+| Method       | Mean     | Error   | StdDev  | Gen0    | Gen1   | Allocated |
+|------------- |---------:|--------:|--------:|--------:|-------:|----------:|
+| RunGenerator | 495.2 us | 4.99 us | 4.43 us | 31.2500 | 3.9063 |  133.3 KB |
+
 ## Incremental pipeline improvements
 
 These test measures the improvements on the incremental pipeline changes.
@@ -107,3 +115,11 @@ As suspected, every transform optimalization has greater effect on caching.
 | Method             | Mean     | Error   | StdDev  | Gen0      | Gen1      | Allocated |
 |------------------- |---------:|--------:|--------:|----------:|----------:|----------:|
 | OnlyOneFileChanges | 161.6 ms | 3.18 ms | 4.66 ms | 3000.0000 | 1000.0000 |  18.67 MB |
+
+### Optimizing on Generic arguments
+
+Affect on caching is more time, than memory.
+
+| Method             | Mean     | Error   | StdDev  | Gen0      | Gen1      | Allocated |
+|------------------- |---------:|--------:|--------:|----------:|----------:|----------:|
+| OnlyOneFileChanges | 156.6 ms | 3.09 ms | 4.52 ms | 3000.0000 | 1000.0000 |  18.55 MB |

@@ -117,21 +117,30 @@ internal static class OverridesGenerator
 
         }
         line.AddFormatted($" {data.ReturnType} {data.MethodName}");
-        if (data.TypeArguments.Count > 0)
-        {
-            line.AddFormatted($"<{data.TypeArguments}>");
-        }
+        AddTypeConstraints(data, line);
         line.AddFormatted($"({arguments})");
         line.FinishLine();
-        if (data.TypeConstraints.Count <= 0)
-            return;
         builder.AddIndented(static (builder, args) =>
         {
             foreach (var typeConstraints in args)
             {
-                builder.AppendLine($"where {typeConstraints.Type} : {typeConstraints.Constraints}");
+                typeConstraints.WriteTo(builder);
             }
         }, data.TypeConstraints);
+    }
+
+    private static void AddTypeConstraints(in MethodInfo data, in SourceBuilder.SourceLine line)
+    {
+        if (data.TypeConstraints.Length > 0)
+        {
+            line.AddSegment("<");
+            var commaSeparatedList = line.StartCommaSeparatedList();
+            foreach (var item in data.TypeConstraints)
+            {
+                commaSeparatedList.AddElement(item.Type);
+            }
+            line.AddSegment(">");
+        }
     }
 
     private static void GenerateBodyForOverrideWithNArgs(
@@ -197,11 +206,7 @@ internal static class OverridesGenerator
             line.AddSegment("ref ");
         }
         line.AddSegment(data.MethodName);
-        if (data.TypeArguments.Count > 0)
-        {
-            line.AddFormatted($"<{data.TypeArguments}>");
-        }
-
+        AddTypeConstraints(data, line);
         var fixedParameters = data.GetFixedParameters().Select(e => e.ToPassParameter());
         line.AddFormatted($"({fixedParameters}, {data.GetArgNameSpanInput()});");
         line.FinishLine();

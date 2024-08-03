@@ -19,9 +19,7 @@ internal class MethodInfo : IEquatable<MethodInfo?>
 
     public required ReturnKind ReturnsKind { get; init; }
 
-    public required List<string> TypeArguments { get; init; }
-
-    public required List<TypeConstrainInfo> TypeConstraints { get; init; }
+    public required GenericTypeInfo[] TypeConstraints { get; init; }
 
     public required string MethodName { get; init; }
 
@@ -91,47 +89,19 @@ internal class MethodInfo : IEquatable<MethodInfo?>
             .ToArray();
     }
 
-    public static List<TypeConstrainInfo> CreateTypeConstraints(ImmutableArray<ITypeSymbol> typeArguments)
+    public static GenericTypeInfo[] CreateTypeConstraints(ImmutableArray<ITypeSymbol> typeArguments)
     {
-        var typeConstraintsList = new List<TypeConstrainInfo>();
-        foreach (var typeArg in typeArguments.Cast<ITypeParameterSymbol>())
+        var typeConstraintsList = new GenericTypeInfo[typeArguments.Length];
+        for (int i = 0; i < typeArguments.Length; i++)
         {
-            var typeConstraints = new List<string>();
-            if (typeArg.HasUnmanagedTypeConstraint)
+            var typeArg = (ITypeParameterSymbol)typeArguments[i];
+            typeConstraintsList[i] = new GenericTypeInfo
             {
-                typeConstraints.Add("unmanaged");
-            }
-            else if (typeArg.HasValueTypeConstraint)
-            {
-                typeConstraints.Add("struct");
-            }
-            else if (typeArg.HasReferenceTypeConstraint)
-            {
-                typeConstraints.Add("class");
-            }
-            else if (typeArg.HasNotNullConstraint)
-            {
-                typeConstraints.Add("notnull");
-            }
-            if (typeArg.ConstraintTypes.Length > 0)
-            {
-                foreach (var item in typeArg.ConstraintTypes)
-                {
-                    typeConstraints.Add(item.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
-                }
-            }
-            if (typeArg.HasConstructorConstraint)
-            {
-                typeConstraints.Add("new()");
-            }
-            if (typeConstraints.Count > 0)
-            {
-                typeConstraintsList.Add(new TypeConstrainInfo
-                {
-                    Type = typeArg.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-                    Constraints = typeConstraints
-                });
-            }
+                Type = typeArg.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                ConstraintType = SemanticHelpers.GetConstraintType(typeArg),
+                ConstraintTypes = typeArg.ConstraintTypes.Select(e => e.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)).ToArray(),
+                HasConstructorConstraint = typeArg.HasConstructorConstraint
+            };
         }
         return typeConstraintsList;
     }
@@ -148,7 +118,6 @@ internal class MethodInfo : IEquatable<MethodInfo?>
                SpanArgumentType == other.SpanArgumentType &&
                CollectionComparer.Equals(Parameters, other.Parameters) &&
                ReturnsKind == other.ReturnsKind &&
-               CollectionComparer.Equals(TypeArguments, other.TypeArguments) &&
                CollectionComparer.Equals(TypeConstraints, other.TypeConstraints) &&
                MethodName == other.MethodName &&
                IsStatic == other.IsStatic;
@@ -161,7 +130,6 @@ internal class MethodInfo : IEquatable<MethodInfo?>
         hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(SpanArgumentType);
         hashCode = hashCode * -1521134295 + CollectionComparer.GetHashCode(Parameters);
         hashCode = hashCode * -1521134295 + ReturnsKind.GetHashCode();
-        hashCode = hashCode * -1521134295 + CollectionComparer.GetHashCode(TypeArguments);
         hashCode = hashCode * -1521134295 + CollectionComparer.GetHashCode(TypeConstraints);
         hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(MethodName);
         hashCode = hashCode * -1521134295 + IsStatic.GetHashCode();

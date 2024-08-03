@@ -35,4 +35,10 @@ Console.WriteLine(string.Join(", ", c.GetTypeHierarchyV2()));
 Console.WriteLine(string.Join(", ", c.GetTypeHierarchyV3()));
 /**/
 
-BenchmarkRunner.Run<SemanticHelpersBenchmark>(config);
+/*var c = new SuccessfulParamsCandidateCreationBenchmark();
+c.Setup();
+var result = c.CreateSuccessfulParamsCandidate();
+Console.WriteLine(result);
+*/
+
+BenchmarkRunner.Run<SuccessfulParamsCandidateCreationBenchmark>(config);

@@ -93,9 +93,6 @@ partial class ParamsIncrementalGenerator : IIncrementalGenerator
                 ReturnType = MethodInfo.CreateReturnTypeFor(methodSymbol),
                 Parameters = parameterInfos,
                 ReturnsKind = SemanticHelpers.GetReturnsKind(methodSymbol),
-                TypeArguments = methodSymbol.TypeArguments
-                    .Select(e => e.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat))
-                    .ToList(),
                 TypeConstraints = MethodInfo.CreateTypeConstraints(methodSymbol.TypeArguments),
                 MethodName = methodSymbol.Name,
                 IsStatic = methodSymbol.IsStatic

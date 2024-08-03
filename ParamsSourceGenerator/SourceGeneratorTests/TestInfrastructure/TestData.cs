@@ -30,7 +30,7 @@ namespace SourceGeneratorTests.TestInfrastructure
             ReturnKind returnsKind = ReturnKind.ReturnsType,
             string returnType = "object",
             List<string>? typeArguments = null,
-            List<TypeConstrainInfo>? typeConstraints = null)
+            GenericTypeInfo[]? typeConstraints = null)
         {
             return new MethodInfo
             {
@@ -44,14 +44,15 @@ namespace SourceGeneratorTests.TestInfrastructure
                 ],
                 ReturnsKind = returnsKind,
                 ReturnType = returnType,
-                TypeArguments = typeArguments ?? ["T1", "T2"],
                 TypeConstraints = typeConstraints ??
                 [
-                    new TypeConstrainInfo
-                {
-                    Type = "T1",
-                    Constraints = ["class", "new()"]
-                }
+                    new GenericTypeInfo
+                    {
+                        Type = "T1",
+                        ConstraintType = ConstraintType.Class,
+                        HasConstructorConstraint = true,
+                        ConstraintTypes = []
+                    }
                 ]
             };
         }

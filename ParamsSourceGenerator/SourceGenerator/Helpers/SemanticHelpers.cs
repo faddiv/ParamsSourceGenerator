@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using Foxy.Params.SourceGenerator.Data;
@@ -152,6 +153,27 @@ internal static class SemanticHelpers
                 }
                 return $"{typeName}?";
         }
+    }
+
+    public static ConstraintType GetConstraintType(ITypeParameterSymbol typeArg)
+    {
+        if (typeArg.HasUnmanagedTypeConstraint)
+        {
+            return ConstraintType.Unmanaged;
+        }
+        else if (typeArg.HasValueTypeConstraint)
+        {
+            return ConstraintType.Struct;
+        }
+        else if (typeArg.HasReferenceTypeConstraint)
+        {
+            return ConstraintType.Class;
+        }
+        else if (typeArg.HasNotNullConstraint)
+        {
+            return ConstraintType.NotNull;
+        }
+        return ConstraintType.None;
     }
 
     private static string GetNullableModifier(bool isNullable)
