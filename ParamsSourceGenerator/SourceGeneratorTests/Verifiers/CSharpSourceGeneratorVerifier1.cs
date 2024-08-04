@@ -19,45 +19,45 @@ partial class CSharpSourceGeneratorVerifier<TSourceGenerator>
     public static DiagnosticResult Diagnostic(DiagnosticDescriptor descriptor) => new(descriptor);
 
     public static async Task VerifyGeneratorAsync(
-        string source,
+        CSharpFile source,
         CSharpFile generatedSource)
         => await VerifyGeneratorAsync(source, DiagnosticResult.EmptyDiagnosticResults, [generatedSource]);
 
     public static async Task VerifyGeneratorAsync(
-        string source,
+        CSharpFile source,
         params CSharpFile[] generatedSources)
         => await VerifyGeneratorAsync(source, DiagnosticResult.EmptyDiagnosticResults, generatedSources);
 
     public static async Task VerifyGeneratorAsync(
-        string source,
+        CSharpFile source,
         DiagnosticResult diagnostic)
         => await VerifyGeneratorAsync(source, [diagnostic], _emptyGeneratedSources);
 
     public static async Task VerifyGeneratorAsync(
-        string source,
+        CSharpFile source,
         params DiagnosticResult[] diagnostics)
         => await VerifyGeneratorAsync(source, diagnostics, _emptyGeneratedSources);
 
     public static async Task VerifyGeneratorAsync(
-        string source,
+        CSharpFile source,
         DiagnosticResult diagnostic,
         CSharpFile generatedSource)
         => await VerifyGeneratorAsync(source, [diagnostic], [generatedSource]);
 
     public static async Task VerifyGeneratorAsync(
-        string source,
+        CSharpFile source,
         DiagnosticResult[] diagnostics,
         CSharpFile generatedSource)
         => await VerifyGeneratorAsync(source, diagnostics, [generatedSource]);
 
     public static async Task VerifyGeneratorAsync(
-        string source,
+        CSharpFile source,
         DiagnosticResult diagnostic,
         CSharpFile[] generatedSources)
         => await VerifyGeneratorAsync(source, [diagnostic], generatedSources);
 
     public static async Task VerifyGeneratorAsync(
-        string source,
+        CSharpFile source,
         DiagnosticResult[] diagnostics,
         CSharpFile[] generatedSources,
         CancellationToken cancellation = default)
@@ -66,7 +66,7 @@ partial class CSharpSourceGeneratorVerifier<TSourceGenerator>
         {
             TestState =
             {
-                Sources = { source },
+                Sources = { (source.Name, source.Content) },
             },
             ReferenceAssemblies = ReferenceAssemblies.Net.Net80,
         };

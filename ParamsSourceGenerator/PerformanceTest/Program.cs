@@ -30,8 +30,6 @@ Console.WriteLine(c.InterpolatedStringHandler());
 /*
 var c = new SemanticHelpersBenchmark();
 c.Setup();
-Console.WriteLine(string.Join(", ", c.GetTypeHierarchyV1()));
-Console.WriteLine(string.Join(", ", c.GetTypeHierarchyV2()));
 Console.WriteLine(string.Join(", ", c.GetTypeHierarchyV3()));
 /**/
 
@@ -41,4 +39,4 @@ var result = c.CreateSuccessfulParamsCandidate();
 Console.WriteLine(result);
 */
 
-BenchmarkRunner.Run<SuccessfulParamsCandidateCreationBenchmark>(config);
+BenchmarkRunner.Run<CodeGenerationBenchmark>(config);

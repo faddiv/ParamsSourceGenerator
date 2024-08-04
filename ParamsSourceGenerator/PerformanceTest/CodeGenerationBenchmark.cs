@@ -2,7 +2,6 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis;
 using Foxy.Params.SourceGenerator;
-using System.Collections.Immutable;
 using System.Reflection;
 
 namespace PerformanceTest;

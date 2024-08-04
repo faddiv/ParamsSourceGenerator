@@ -1,40 +1,17 @@
 ﻿using Microsoft.CodeAnalysis;
-using System.Runtime.CompilerServices;
 
 namespace SourceGeneratorTests.TestInfrastructure;
 
 internal static class TestEnvironment
 {
-    private static string _testFilesPath;
+    private static readonly EnvironmentProvider _environment = new();
+    private static readonly string _subDirectory = "TestFiles";
 
-    static TestEnvironment()
-    {
-        var projectDirectory = FindDirectoryOfFile(".csproj");
-        _testFilesPath = Path.Combine(projectDirectory, "TestFiles");
-    }
+    public static CSharpFile GetParamsAttribute()
+        => _environment.GetFile(_subDirectory, "ParamsAttribute.cs");
 
-    public static CSharpFile GetFile(string name)
-    {
-        var filePath = Path.Combine(_testFilesPath, name);
-        return new CSharpFile(name, File.ReadAllText(filePath));
-    }
-
-    private static string FindDirectoryOfFile(string fileExtension, [CallerFilePath] string baseFilePath = null!)
-    {
-        var dir =
-            Path.GetDirectoryName(baseFilePath) ?? throw new InvalidOperationException($"Could not get directory from {baseFilePath}");
-
-        while (Directory.GetFiles(dir, $"*{fileExtension}", SearchOption.TopDirectoryOnly).Length == 0)
-        {
-            dir = Path.GetDirectoryName(dir);
-            if (dir == null)
-            {
-                throw new InvalidOperationException($"Could not find directory from file {baseFilePath}");
-            }
-        }
-
-        return dir;
-    }
+    public static CSharpFile GetNestedSourceFile()
+        => _environment.GetFile(_subDirectory, "NestedSourceFile.cs");
 
     public static INamedTypeSymbol FindGamma(IAssemblySymbol symbol)
     {

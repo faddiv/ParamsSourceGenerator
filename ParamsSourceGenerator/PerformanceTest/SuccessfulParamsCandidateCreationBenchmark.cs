@@ -20,8 +20,8 @@ public class SuccessfulParamsCandidateCreationBenchmark
     {
         var runner = new SourceGeneratorTestRunner();
         runner.LoadCSharpAssemblies().GetAwaiter().GetResult();
-        var paramsAttribute = TestEnvironment.GetFile("ParamsAttribute.cs");
-        var sourceFile = TestEnvironment.GetFile("SourceFile.cs");
+        var paramsAttribute = TestEnvironment.GetParamsAttribute();
+        var sourceFile = TestEnvironment.GetNestedSourceFile();
         var compilation = runner.CompileSources(paramsAttribute, sourceFile);
         _methodSymbol = TestEnvironment.FindFormat(compilation.Assembly);
     }

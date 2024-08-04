@@ -33,5 +33,6 @@
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\SourceGenerator\Foxy.Params.SourceGenerator.csproj" />
+		<ProjectReference Include="..\Test.Infrastructure\Test.Infrastructure.csproj" />
 	</ItemGroup>
 </Project>

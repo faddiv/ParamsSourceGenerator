@@ -14,7 +14,7 @@ public class ErrorReportingTests
     [Fact]
     public async Task Reports_NoPartialKeyword()
     {
-        string code = TestEnvironment.GetInvalidSource();
+        var code = TestEnvironment.GetInvalidSource();
 
         var expected = VerifyCS
             .Diagnostic(DiagnosticReports.PartialIsMissingDescriptor)
@@ -27,7 +27,7 @@ public class ErrorReportingTests
     [Fact]
     public async Task Reports_NoPartialKeywordOnParentClass()
     {
-        string code = TestEnvironment.GetInvalidSource();
+        var code = TestEnvironment.GetInvalidSource();
 
         var expected = VerifyCS
             .Diagnostic(DiagnosticReports.PartialIsMissingDescriptor)
@@ -40,7 +40,7 @@ public class ErrorReportingTests
     [Fact]
     public async Task Reports_NoParameter()
     {
-        string code = TestEnvironment.GetInvalidSource();
+        var code = TestEnvironment.GetInvalidSource();
 
         var expected = VerifyCS
             .Diagnostic(DiagnosticReports.ParameterMissingDescriptor)
@@ -53,7 +53,7 @@ public class ErrorReportingTests
     [Fact]
     public async Task Reports_NonReadOnlySpanParameter()
     {
-        string code = TestEnvironment.GetInvalidSource();
+        var code = TestEnvironment.GetInvalidSource();
 
         var expected = VerifyCS
             .Diagnostic(DiagnosticReports.ParameterMismatchDescriptor)
@@ -66,7 +66,7 @@ public class ErrorReportingTests
     [Fact]
     public async Task DoesntGenerateOnFaultyMethodParameter()
     {
-        string code = TestEnvironment.GetInvalidSource();
+        var code = TestEnvironment.GetInvalidSource();
 
         var expected = VerifyCS
             .Diagnostic("CS0246", DiagnosticSeverity.Error)
@@ -79,7 +79,7 @@ public class ErrorReportingTests
     [Fact]
     public async Task DoesntGenerateOnFaultyReturnType()
     {
-        string code = TestEnvironment.GetInvalidSource();
+        var code = TestEnvironment.GetInvalidSource();
 
         var expected = VerifyCS
             .Diagnostic("CS0246", DiagnosticSeverity.Error)
@@ -92,7 +92,7 @@ public class ErrorReportingTests
     [Fact]
     public async Task Reports_OutReadOnlySpanParameter()
     {
-        string code = TestEnvironment.GetInvalidSource();
+        var code = TestEnvironment.GetInvalidSource();
 
         var expected = VerifyCS
             .Diagnostic(DiagnosticReports.OutModifierNotAllowedDescriptor)
@@ -105,7 +105,7 @@ public class ErrorReportingTests
     [Fact]
     public async Task DoesntGenerateOnNameDuplication()
     {
-        string code = TestEnvironment.GetInvalidSource();
+        var code = TestEnvironment.GetInvalidSource();
 
         var expected = VerifyCS
             .Diagnostic("CS0100", DiagnosticSeverity.Error)
@@ -118,7 +118,7 @@ public class ErrorReportingTests
     [Fact]
     public async Task Reports_OnNameCollision()
     {
-        string code = TestEnvironment.GetInvalidSource();
+        var code = TestEnvironment.GetInvalidSource();
 
         var expected = VerifyCS
             .Diagnostic(DiagnosticReports.ParameterCollisionDescriptor)

@@ -1,70 +1,53 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace SourceGeneratorTests.TestInfrastructure;
 
 internal class TestEnvironment
 {
+    private static readonly EnvironmentProvider _environment = new();
 
-    private static readonly string _validTestDataDirectory;
-
-    private static readonly string _cachingTestDataDirectory;
-
-    private static readonly string _invalidTestDataDirectory;
+    private static readonly string _validTests = "IntegrationTests\\SourceGenerationTestCases";
+    private static readonly string _invalidTests = "IntegrationTests\\ErrorReportingTestCases";
+    private static readonly string _cachingTests = "IntegrationTests\\CachingTestCases";
 
     public static readonly CSharpFile DefaultOuput;
 
-    public static readonly string AttributeImpl;
-
     static TestEnvironment()
     {
-        var projectDirectory = FindDirectoryOfFile(".csproj");
-        var integrartionTestPath = Path.Combine(projectDirectory, "IntegrationTests");
-        _validTestDataDirectory = Path.Combine(integrartionTestPath, "SourceGenerationTestCases");
-        _invalidTestDataDirectory = Path.Combine(integrartionTestPath, "ErrorReportingTestCases");
-        _cachingTestDataDirectory = Path.Combine(integrartionTestPath, "CachingTestCases");
-        AttributeImpl = File.ReadAllText(Path.Combine(_validTestDataDirectory, "Attribute.cs"));
-        DefaultOuput = new("ParamsAttribute.g.cs", AttributeImpl);
+        DefaultOuput = _environment.GetFile(_validTests, "ParamsAttribute.g.cs");
     }
 
-    public static string GetValidSource([CallerMemberName] string caller = null!)
+    public static CSharpFile GetValidSource([CallerMemberName] string caller = null!)
     {
-        var sourcePath = Path.Combine(_validTestDataDirectory, caller, "_source.cs");
-        return File.ReadAllText(sourcePath);
+        return _environment.GetFile(_validTests, caller, "_source.cs");
     }
 
-    public static string GetInvalidSource([CallerMemberName] string caller = null!)
+    public static CSharpFile GetInvalidSource([CallerMemberName] string caller = null!)
     {
-        var sourcePath = Path.Combine(_invalidTestDataDirectory, caller, "_source.cs");
-        return File.ReadAllText(sourcePath);
+        return _environment.GetFile(_invalidTests, caller, "_source.cs");
     }
 
     public static CSharpFile GetCachingSource([CallerMemberName] string caller = null!)
     {
-        var sourcePath = Path.Combine(_cachingTestDataDirectory, caller, "_source.cs");
-        return new CSharpFile(Path.GetFileName(sourcePath), File.ReadAllText(sourcePath));
+        return _environment.GetFile(_cachingTests, caller, "_source.cs");
     }
 
     public static CSharpFile[] GetCachingSources([CallerMemberName] string caller = null!)
     {
-        var sourcePath = Path.Combine(_cachingTestDataDirectory, caller);
-        return Directory.EnumerateFiles(sourcePath, "_source*")
-            .OrderBy(x => x)
-            .Select(e => new CSharpFile(Path.GetFileName(e), File.ReadAllText(e)))
-            .ToArray();
+        return _environment.GetFiles(_cachingTests, caller, "_source*");
     }
 
     public static CSharpFile[] GetOuputs([CallerMemberName] string caller = null!)
     {
-        return GetOuputs(_validTestDataDirectory, caller);
+        return GetOuputs(_environment.GetBasePath(_validTests), caller);
     }
 
     public static CSharpFile[] GetCachingOuputs([CallerMemberName] string caller = null!)
     {
-        return GetOuputs(_cachingTestDataDirectory, caller);
+        return GetOuputs(_environment.GetBasePath(_cachingTests), caller);
     }
 
     public static CSharpFile[] GetOuputs(string baseDirectory, [CallerMemberName] string caller = null!)
