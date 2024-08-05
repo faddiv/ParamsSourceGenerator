@@ -39,4 +39,4 @@ var result = c.CreateSuccessfulParamsCandidate();
 Console.WriteLine(result);
 */
 
-BenchmarkRunner.Run<SemanticHelpersBenchmark>(config);
+BenchmarkRunner.Run<GenericTypeInfoBenchmark>(config);

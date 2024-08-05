@@ -10,7 +10,7 @@ public class SourceBuilderBenchmark
     private readonly string _spanArgumentType = "object";
 
     [Benchmark]
-    public string InterpolatedStringHandler()
+    public void InterpolatedStringHandler()
     {
         var builder = SourceBuilderPool.Instance.Get();
         try
@@ -19,7 +19,6 @@ public class SourceBuilderBenchmark
             {
                 sb.AppendLine($"var {args._argName}Span = new global::System.ReadOnlySpan<{args._spanArgumentType}>({args._argName});");
             }, (_argName, _spanArgumentType));
-            return builder.ToString();
         }
         finally
         {
