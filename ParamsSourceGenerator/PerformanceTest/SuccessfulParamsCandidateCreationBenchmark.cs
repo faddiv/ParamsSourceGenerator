@@ -2,7 +2,6 @@
 using Foxy.Params.SourceGenerator.Data;
 using Foxy.Params.SourceGenerator.Helpers;
 using Microsoft.CodeAnalysis;
-using PerformanceTest.Helpers;
 using SourceGeneratorTests.TestInfrastructure;
 using MethodInfo = Foxy.Params.SourceGenerator.Data.MethodInfo;
 
@@ -18,12 +17,12 @@ public class SuccessfulParamsCandidateCreationBenchmark
     [GlobalSetup]
     public void Setup()
     {
-        var runner = new SourceGeneratorTestRunner();
+        var runner = new CompilerRunner();
         runner.LoadCSharpAssemblies().GetAwaiter().GetResult();
         var paramsAttribute = TestEnvironment.GetParamsAttribute();
         var sourceFile = TestEnvironment.GetNestedSourceFile();
         var compilation = runner.CompileSources(paramsAttribute, sourceFile);
-        _methodSymbol = TestEnvironment.FindFormat(compilation.Assembly);
+        _methodSymbol = TestEnvironment.FindMethodByName(compilation.Assembly, "Gamma", "Format");
     }
 
     [Benchmark]

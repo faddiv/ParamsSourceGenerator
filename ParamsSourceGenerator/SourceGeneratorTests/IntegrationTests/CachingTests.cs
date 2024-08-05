@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using FluentAssertions;
+﻿using FluentAssertions;
 using Foxy.Params.SourceGenerator.Data;
 using Xunit;
 using SourceGeneratorTests.TestInfrastructure;
@@ -14,22 +13,22 @@ namespace SourceGeneratorTests.IntegrationTests
 
         // A collection of all the tracking names. I'll show how to simplify this later
         private static string[] _allTrackingNames = [TrackingNames.GetSpanParamsMethods, TrackingNames.NotNullFilter];
+        private readonly CompilerRunner _compilerRunner;
 
         public CachingTests()
         {
             GlobalSetup.Run();
+            _compilerRunner = TestEnvironment.Compiler;
         }
 
         [Fact]
-        public async Task Caches_When_Nothing_Changes()
+        public void Caches_When_Nothing_Changes()
         {
-            var runner = new SourceGeneratorTestRunner<ParamsIncrementalGenerator>();
+            var runner = new SourceGeneratorRunner<ParamsIncrementalGenerator>();
             var input = TestEnvironment.GetCachingSource();
             var expected = TestEnvironment.GetCachingOuputs();
 
-            await runner.LoadCSharpAssemblies();
-
-            var compilation = runner.CompileSources(input);
+            var compilation = _compilerRunner.CompileSources(input);
 
             var result1 = runner.RunSourceGenerator(compilation);
 
@@ -44,19 +43,17 @@ namespace SourceGeneratorTests.IntegrationTests
         }
 
         [Fact]
-        public async Task Caches_When_MethodBody_Changes()
+        public void Caches_When_MethodBody_Changes()
         {
-            var runner = new SourceGeneratorTestRunner<ParamsIncrementalGenerator>();
+            var runner = new SourceGeneratorRunner<ParamsIncrementalGenerator>();
             var inputs = TestEnvironment.GetCachingSources();
             var expected = TestEnvironment.GetCachingOuputs();
 
-            await runner.LoadCSharpAssemblies();
-
-            var compilation = runner.CompileSources(inputs[0]);
+            var compilation = _compilerRunner.CompileSources(inputs[0]);
 
             var result1 = runner.RunSourceGenerator(compilation);
 
-            var compilation2 = runner.CompileSources(inputs[1]);
+            var compilation2 = _compilerRunner.CompileSources(inputs[1]);
 
             var result2 = runner.RunSourceGenerator(compilation2);
 
@@ -67,19 +64,17 @@ namespace SourceGeneratorTests.IntegrationTests
         }
 
         [Fact]
-        public async Task Regenerate_When_MaxOverrides_Changes()
+        public void Regenerate_When_MaxOverrides_Changes()
         {
-            var runner = new SourceGeneratorTestRunner<ParamsIncrementalGenerator>();
+            var runner = new SourceGeneratorRunner<ParamsIncrementalGenerator>();
             var inputs = TestEnvironment.GetCachingSources();
             var expected = TestEnvironment.GetCachingOuputs();
 
-            await runner.LoadCSharpAssemblies();
-
-            var compilation = runner.CompileSources(inputs[0]);
+            var compilation = _compilerRunner.CompileSources(inputs[0]);
 
             var result1 = runner.RunSourceGenerator(compilation);
 
-            var compilation2 = runner.CompileSources(inputs[1]);
+            var compilation2 = _compilerRunner.CompileSources(inputs[1]);
 
             var result2 = runner.RunSourceGenerator(compilation2);
 
@@ -89,19 +84,17 @@ namespace SourceGeneratorTests.IntegrationTests
         }
 
         [Fact]
-        public async Task Regenerate_When_HasParams_Changes()
+        public void Regenerate_When_HasParams_Changes()
         {
-            var runner = new SourceGeneratorTestRunner<ParamsIncrementalGenerator>();
+            var runner = new SourceGeneratorRunner<ParamsIncrementalGenerator>();
             var inputs = TestEnvironment.GetCachingSources();
             var expected = TestEnvironment.GetCachingOuputs();
 
-            await runner.LoadCSharpAssemblies();
-
-            var compilation = runner.CompileSources(inputs[0]);
+            var compilation = _compilerRunner.CompileSources(inputs[0]);
 
             var result1 = runner.RunSourceGenerator(compilation);
 
-            var compilation2 = runner.CompileSources(inputs[1]);
+            var compilation2 = _compilerRunner.CompileSources(inputs[1]);
 
             var result2 = runner.RunSourceGenerator(compilation2);
 
@@ -111,19 +104,17 @@ namespace SourceGeneratorTests.IntegrationTests
         }
 
         [Fact]
-        public async Task Caches_When_OtherFileChanges()
+        public void Caches_When_OtherFileChanges()
         {
-            var runner = new SourceGeneratorTestRunner<ParamsIncrementalGenerator>();
+            var runner = new SourceGeneratorRunner<ParamsIncrementalGenerator>();
             var inputs = TestEnvironment.GetCachingSources();
             var expected = TestEnvironment.GetCachingOuputs();
 
-            await runner.LoadCSharpAssemblies();
-
-            var compilation = runner.CompileSources(inputs[0], inputs[1]);
+            var compilation = _compilerRunner.CompileSources(inputs[0], inputs[1]);
 
             var result1 = runner.RunSourceGenerator(compilation);
 
-            var compilation2 = runner.CompileSources(inputs[0], inputs[2]);
+            var compilation2 = _compilerRunner.CompileSources(inputs[0], inputs[2]);
 
             var result2 = runner.RunSourceGenerator(compilation2);
 

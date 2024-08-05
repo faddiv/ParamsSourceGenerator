@@ -1,7 +1,6 @@
 ﻿using BenchmarkDotNet.Attributes;
 using Foxy.Params.SourceGenerator.Helpers;
 using Microsoft.CodeAnalysis;
-using PerformanceTest.Helpers;
 using SourceGeneratorTests.TestInfrastructure;
 
 namespace PerformanceTest;
@@ -14,12 +13,12 @@ public class SemanticHelpersBenchmark
     [GlobalSetup]
     public void Setup()
     {
-        var runner = new SourceGeneratorTestRunner();
+        var runner = new CompilerRunner();
         runner.LoadCSharpAssemblies().GetAwaiter().GetResult();
         var paramsAttribute = TestEnvironment.GetParamsAttribute();
         var sourceFile = TestEnvironment.GetNestedSourceFile();
         var compilation = runner.CompileSources(paramsAttribute, sourceFile);
-        _containingType = TestEnvironment.FindGamma(compilation.Assembly);
+        _containingType = TestEnvironment.FindGamma(compilation.Assembly, "Gamma");
     }
     
     [Benchmark]

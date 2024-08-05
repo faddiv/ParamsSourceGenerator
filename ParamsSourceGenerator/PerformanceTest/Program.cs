@@ -39,4 +39,4 @@ var result = c.CreateSuccessfulParamsCandidate();
 Console.WriteLine(result);
 */
 
-BenchmarkRunner.Run<CodeGenerationBenchmark>(config);
+BenchmarkRunner.Run<SemanticHelpersBenchmark>(config);

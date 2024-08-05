@@ -1,27 +1,14 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.Testing;
+﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
-using System.Collections.Immutable;
-using SourceGeneratorTests.TestInfrastructure;
+using Microsoft.CodeAnalysis.Testing;
+using Microsoft.CodeAnalysis.CSharp;
 
-namespace PerformanceTest.Helpers;
+namespace SourceGeneratorTests.TestInfrastructure;
 
-public class SourceGeneratorTestRunner
+public class CompilerRunner(ReferenceAssemblies? referenceAssemblies = null)
 {
-    private readonly ReferenceAssemblies _referenceAssemblies;
+    private readonly ReferenceAssemblies _referenceAssemblies = referenceAssemblies ?? ReferenceAssemblies.Net.Net80;
     private ImmutableArray<MetadataReference> _references;
-
-    public SourceGeneratorTestRunner(
-        ReferenceAssemblies? referenceAssemblies = null)
-    {
-        _referenceAssemblies = referenceAssemblies ?? ReferenceAssemblies.Net.Net80;
-
-        // ⚠ Tell the driver to track all the incremental generator outputs
-        // without this, you'll have no tracked outputs!
-        var opts = new GeneratorDriverOptions(
-            disabledOutputs: IncrementalGeneratorOutputKind.None,
-            trackIncrementalGeneratorSteps: true);
-    }
 
     public string AssemblyName { get; set; } = "TestingAssambly";
 
@@ -47,7 +34,7 @@ public class SourceGeneratorTestRunner
             syntaxTrees,
             _references,
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
-        
+
         return compilation;
     }
 }

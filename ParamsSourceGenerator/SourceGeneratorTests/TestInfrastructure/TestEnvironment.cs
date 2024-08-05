@@ -15,9 +15,13 @@ internal class TestEnvironment
 
     public static readonly CSharpFile DefaultOuput;
 
+    public static CompilerRunner Compiler {get;}
+
     static TestEnvironment()
     {
         DefaultOuput = _environment.GetFile(_validTests, "ParamsAttribute.g.cs");
+        Compiler = new CompilerRunner();
+        Compiler.LoadCSharpAssemblies().GetAwaiter().GetResult();
     }
 
     public static CSharpFile GetValidSource([CallerMemberName] string caller = null!)
