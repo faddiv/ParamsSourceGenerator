@@ -1,7 +1,8 @@
 ﻿using BenchmarkDotNet.Attributes;
 using Foxy.Params.SourceGenerator.Helpers;
 using Microsoft.CodeAnalysis;
-using SourceGeneratorTests.TestInfrastructure;
+using PerformanceTest.Helpers;
+using Test.Infrastructure;
 
 namespace PerformanceTest;
 

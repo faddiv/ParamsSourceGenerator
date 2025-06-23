@@ -5,7 +5,7 @@ using Foxy.Params.SourceGenerator.SourceGenerator;
 
 namespace Foxy.Params.SourceGenerator;
 
-partial class ParamsIncrementalGenerator : IIncrementalGenerator
+partial class ParamsIncrementalGenerator
 {
     private static void GenerateSource(SourceProductionContext context, ParamsCandidate typeSymbols)
     {
@@ -24,7 +24,7 @@ partial class ParamsIncrementalGenerator : IIncrementalGenerator
                 OverridesGenerator.Execute(typeInfo, group.ParamCanditates));
         } else
         {
-            string diagnosticMessage = $"Invalid ParamsCanditate: {typeSymbols.GetType().Name}";
+            string diagnosticMessage = $"Invalid ParamsCandidate: {typeSymbols.GetType().Name}";
             Diagnostic diagnostic = Diagnostic.Create(DiagnosticReports.InternalError, null, diagnosticMessage);
             context.ReportDiagnostic(diagnostic);
         }

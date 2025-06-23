@@ -7,15 +7,16 @@ using System.Linq;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Collections;
+using Test.Infrastructure;
 
 namespace SourceGeneratorTests.TestInfrastructure;
 
-internal static partial class CachingTestHelpers
+internal static class CachingTestHelpers
 {
     public static void AssertOutputsMatch(GeneratorDriverRunResult runResult, ICollection<CSharpFile> files)
     {
-        var actualFileNames = runResult.GeneratedTrees.Select(e => Path.GetFileName(e.FilePath));
-        var expectedFileNames = files.Select(e => e.Name);
+        var actualFileNames = runResult.GeneratedTrees.Select(e => Path.GetFileName(e.FilePath)).ToArray();
+        var expectedFileNames = files.Select(e => e.Name).ToArray();
 
         actualFileNames.Should().Contain(expectedFileNames);
         expectedFileNames.Should().Contain(actualFileNames);
@@ -59,7 +60,7 @@ internal static partial class CachingTestHelpers
     {
         // We're given all the tracking names, but not all the
         // stages will necessarily execute, so extract all the 
-        // output steps, and filter to ones we know about
+        // output steps and filter to ones we know about
         var trackedSteps1 = GetTrackedSteps(runResult1, trackingNames);
         var trackedSteps2 = GetTrackedSteps(runResult2, trackingNames);
 
@@ -134,7 +135,7 @@ internal static partial class CachingTestHelpers
 
             // Therefore, on the second run the results should always be cached or unchanged!
             // - Unchanged is when the _input_ has changed, but the output hasn't
-            // - Cached is when the the input has not changed, so the cached output is used 
+            // - Cached is when the input has not changed, so the cached output is used 
             runStep2.Outputs.Should()
                 .OnlyContain(
                     x => x.Reason == IncrementalStepRunReason.Cached || x.Reason == IncrementalStepRunReason.Unchanged,

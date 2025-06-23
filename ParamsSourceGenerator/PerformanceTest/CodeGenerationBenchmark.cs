@@ -51,7 +51,7 @@ public partial class Foo
     [Benchmark]
     public Compilation RunGenerator()
     {
-        _driver.RunGeneratorsAndUpdateCompilation(_compilation, out var outputCompilation, out var generateDiagnostics);
+        _driver.RunGeneratorsAndUpdateCompilation(_compilation, out var outputCompilation, out _);
 
         return outputCompilation;
     }

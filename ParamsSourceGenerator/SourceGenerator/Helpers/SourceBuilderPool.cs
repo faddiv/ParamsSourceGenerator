@@ -7,16 +7,11 @@ internal class SourceBuilderPool
 {
     public static SourceBuilderPool Instance { get; } = new();
 
-    private readonly int _maxCapacity;
+    private readonly int _maxCapacity = 8 - 1; // -1 to account for _fastItem
     private int _numItems;
 
     private readonly ConcurrentQueue<SourceBuilder> _items = new();
     private SourceBuilder? _fastItem;
-
-    public SourceBuilderPool()
-    {
-        _maxCapacity = 8 - 1;  // -1 to account for _fastItem
-    }
 
     public SourceBuilder Get()
     {
@@ -40,17 +35,16 @@ internal class SourceBuilderPool
     {
         obj.Clear();
 
-        if (_fastItem != null || Interlocked.CompareExchange(ref _fastItem, obj, null) != null)
-        {
-            if (Interlocked.Increment(ref _numItems) <= _maxCapacity)
-            {
-                _items.Enqueue(obj);
-                return;
-            }
+        if (_fastItem == null && Interlocked.CompareExchange(ref _fastItem, obj, null) == null)
+            return;
 
-            // no room, clean up the count and drop the object on the floor
-            Interlocked.Decrement(ref _numItems);
+        if (Interlocked.Increment(ref _numItems) <= _maxCapacity)
+        {
+            _items.Enqueue(obj);
             return;
         }
+
+        // no room, clean up the count and drop the object on the floor
+        Interlocked.Decrement(ref _numItems);
     }
 }

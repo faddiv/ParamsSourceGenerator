@@ -1,16 +1,16 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Testing;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Testing;
 
-namespace SourceGeneratorTests.TestInfrastructure;
+namespace Test.Infrastructure;
 
 public class CompilerRunner(ReferenceAssemblies? referenceAssemblies = null)
 {
     private readonly ReferenceAssemblies _referenceAssemblies = referenceAssemblies ?? ReferenceAssemblies.Net.Net80;
     private ImmutableArray<MetadataReference> _references;
 
-    public string AssemblyName { get; set; } = "TestingAssambly";
+    private string AssemblyName { get; set; } = "TestingAssembly";
 
     public async Task LoadCSharpAssemblies(CancellationToken cancellation = default)
     {

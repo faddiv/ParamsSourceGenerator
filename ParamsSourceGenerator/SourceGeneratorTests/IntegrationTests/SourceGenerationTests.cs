@@ -2,6 +2,8 @@ using System.Threading.Tasks;
 using Foxy.Params.SourceGenerator;
 using Xunit;
 using SourceGeneratorTests.TestInfrastructure;
+using SourceGeneratorTests.TestInfrastructure.Verifiers;
+using Test.Infrastructure;
 
 namespace SourceGeneratorTests.IntegrationTests;
 
@@ -23,7 +25,7 @@ public class SourceGenerationTests
     {
         var code = TestEnvironment.GetValidSource();
         await VerifyCS.VerifyGeneratorAsync(code,
-            TestEnvironment.GetOuputs());
+            TestEnvironment.GetOutputs());
     }
 
 
@@ -32,7 +34,7 @@ public class SourceGenerationTests
     {
         var code = TestEnvironment.GetValidSource();
         await VerifyCS.VerifyGeneratorAsync(code,
-            TestEnvironment.GetOuputs());
+            TestEnvironment.GetOutputs());
     }
 
     [Fact]
@@ -40,7 +42,7 @@ public class SourceGenerationTests
     {
         var code = TestEnvironment.GetValidSource();
         await VerifyCS.VerifyGeneratorAsync(code,
-            TestEnvironment.GetOuputs());
+            TestEnvironment.GetOutputs());
     }
 
     [Fact]
@@ -48,7 +50,7 @@ public class SourceGenerationTests
     {
         var code = TestEnvironment.GetValidSource();
         await VerifyCS.VerifyGeneratorAsync(code,
-            TestEnvironment.GetOuputs());
+            TestEnvironment.GetOutputs());
     }
 
     [Fact]
@@ -56,7 +58,7 @@ public class SourceGenerationTests
     {
         var code = TestEnvironment.GetValidSource();
         await VerifyCS.VerifyGeneratorAsync(code,
-            TestEnvironment.GetOuputs());
+            TestEnvironment.GetOutputs());
     }
 
     [Fact]
@@ -64,7 +66,7 @@ public class SourceGenerationTests
     {
         var code = TestEnvironment.GetValidSource();
         await VerifyCS.VerifyGeneratorAsync(code,
-            TestEnvironment.GetOuputs());
+            TestEnvironment.GetOutputs());
     }
 
     [Fact]
@@ -72,7 +74,7 @@ public class SourceGenerationTests
     {
         var code = TestEnvironment.GetValidSource();
         await VerifyCS.VerifyGeneratorAsync(code,
-            TestEnvironment.GetOuputs());
+            TestEnvironment.GetOutputs());
     }
 
     [Fact]
@@ -80,7 +82,7 @@ public class SourceGenerationTests
     {
         var code = TestEnvironment.GetValidSource();
         await VerifyCS.VerifyGeneratorAsync(code,
-            TestEnvironment.GetOuputs());
+            TestEnvironment.GetOutputs());
     }
 
     [Fact]
@@ -88,7 +90,7 @@ public class SourceGenerationTests
     {
         var code = TestEnvironment.GetValidSource();
         await VerifyCS.VerifyGeneratorAsync(code,
-            TestEnvironment.GetOuputs());
+            TestEnvironment.GetOutputs());
     }
 
     [Fact]
@@ -96,7 +98,7 @@ public class SourceGenerationTests
     {
         var code = TestEnvironment.GetValidSource();
         await VerifyCS.VerifyGeneratorAsync(code,
-            TestEnvironment.GetOuputs());
+            TestEnvironment.GetOutputs());
     }
 
     [Fact]
@@ -104,7 +106,7 @@ public class SourceGenerationTests
     {
         var code = TestEnvironment.GetValidSource();
         await VerifyCS.VerifyGeneratorAsync(code,
-            TestEnvironment.GetOuputs());
+            TestEnvironment.GetOutputs());
     }
 
     [Fact]
@@ -112,7 +114,7 @@ public class SourceGenerationTests
     {
         var code = TestEnvironment.GetValidSource();
         await VerifyCS.VerifyGeneratorAsync(code,
-            TestEnvironment.GetOuputs());
+            TestEnvironment.GetOutputs());
     }
 
     [Fact]
@@ -120,7 +122,7 @@ public class SourceGenerationTests
     {
         var code = TestEnvironment.GetValidSource();
         await VerifyCS.VerifyGeneratorAsync(code,
-            TestEnvironment.GetOuputs());
+            TestEnvironment.GetOutputs());
     }
 
     [Fact]
@@ -128,7 +130,7 @@ public class SourceGenerationTests
     {
         var code = TestEnvironment.GetValidSource();
         await VerifyCS.VerifyGeneratorAsync(code,
-            TestEnvironment.GetOuputs());
+            TestEnvironment.GetOutputs());
     }
 
     [Fact]
@@ -136,7 +138,7 @@ public class SourceGenerationTests
     {
         var code = TestEnvironment.GetValidSource();
         await VerifyCS.VerifyGeneratorAsync(code,
-            TestEnvironment.GetOuputs());
+            TestEnvironment.GetOutputs());
     }
 
     [Fact]
@@ -144,7 +146,7 @@ public class SourceGenerationTests
     {
         var code = TestEnvironment.GetValidSource();
         await VerifyCS.VerifyGeneratorAsync(code,
-            TestEnvironment.GetOuputs());
+            TestEnvironment.GetOutputs());
     }
 
     [Fact]
@@ -152,7 +154,7 @@ public class SourceGenerationTests
     {
         var code = TestEnvironment.GetValidSource();
         await VerifyCS.VerifyGeneratorAsync(code,
-            TestEnvironment.GetOuputs());
+            TestEnvironment.GetOutputs());
     }
 
     [Fact]
@@ -160,7 +162,7 @@ public class SourceGenerationTests
     {
         var code = TestEnvironment.GetValidSource();
         await VerifyCS.VerifyGeneratorAsync(code,
-            TestEnvironment.GetOuputs());
+            TestEnvironment.GetOutputs());
     }
 
     [Fact]
@@ -168,7 +170,7 @@ public class SourceGenerationTests
     {
         var code = TestEnvironment.GetValidSource();
         await VerifyCS.VerifyGeneratorAsync(code,
-            TestEnvironment.GetOuputs());
+            TestEnvironment.GetOutputs());
     }
 
     [Fact]
@@ -176,7 +178,7 @@ public class SourceGenerationTests
     {
         var code = TestEnvironment.GetValidSource();
         await VerifyCS.VerifyGeneratorAsync(code,
-            TestEnvironment.GetOuputs());
+            TestEnvironment.GetOutputs());
     }
 
     [Fact]
@@ -184,7 +186,7 @@ public class SourceGenerationTests
     {
         var code = TestEnvironment.GetValidSource();
         await VerifyCS.VerifyGeneratorAsync(code,
-            TestEnvironment.GetOuputs());
+            TestEnvironment.GetOutputs());
     }
 
     [Fact]
@@ -192,7 +194,7 @@ public class SourceGenerationTests
     {
         var code = TestEnvironment.GetValidSource();
         await VerifyCS.VerifyGeneratorAsync(code,
-            TestEnvironment.GetOuputs());
+            TestEnvironment.GetOutputs());
     }
 
     [Fact]
@@ -200,7 +202,7 @@ public class SourceGenerationTests
     {
         var code = TestEnvironment.GetValidSource();
         await VerifyCS.VerifyGeneratorAsync(code,
-            TestEnvironment.GetOuputs());
+            TestEnvironment.GetOutputs());
     }
 
     [Fact]
@@ -208,7 +210,7 @@ public class SourceGenerationTests
     {
         var code = TestEnvironment.GetValidSource();
         await VerifyCS.VerifyGeneratorAsync(code,
-            TestEnvironment.GetOuputs());
+            TestEnvironment.GetOutputs());
     }
 
     [Fact]
@@ -216,7 +218,7 @@ public class SourceGenerationTests
     {
         var code = TestEnvironment.GetValidSource();
         await VerifyCS.VerifyGeneratorAsync(code,
-            TestEnvironment.GetOuputs());
+            TestEnvironment.GetOutputs());
     }
 
     [Fact]
@@ -224,7 +226,7 @@ public class SourceGenerationTests
     {
         var code = TestEnvironment.GetValidSource();
         await VerifyCS.VerifyGeneratorAsync(code,
-            TestEnvironment.GetOuputs());
+            TestEnvironment.GetOutputs());
     }
 
     [Fact]
@@ -232,7 +234,7 @@ public class SourceGenerationTests
     {
         var code = TestEnvironment.GetValidSource();
         await VerifyCS.VerifyGeneratorAsync(code,
-            TestEnvironment.GetOuputs());
+            TestEnvironment.GetOutputs());
     }
 
     [Fact]
@@ -240,7 +242,7 @@ public class SourceGenerationTests
     {
         var code = TestEnvironment.GetValidSource();
         await VerifyCS.VerifyGeneratorAsync(code,
-            TestEnvironment.GetOuputs());
+            TestEnvironment.GetOutputs());
     }
 
     [Fact]
@@ -248,7 +250,7 @@ public class SourceGenerationTests
     {
         var code = TestEnvironment.GetValidSource();
         await VerifyCS.VerifyGeneratorAsync(code,
-            TestEnvironment.GetOuputs());
+            TestEnvironment.GetOutputs());
     }
 
     [Fact]
@@ -256,6 +258,6 @@ public class SourceGenerationTests
     {
         var code = TestEnvironment.GetValidSource();
         await VerifyCS.VerifyGeneratorAsync(code,
-            TestEnvironment.GetOuputs());
+            TestEnvironment.GetOutputs());
     }
 }

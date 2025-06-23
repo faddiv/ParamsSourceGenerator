@@ -8,7 +8,7 @@ using Foxy.Params.SourceGenerator.Data;
 
 namespace Foxy.Params.SourceGenerator;
 
-partial class ParamsIncrementalGenerator : IIncrementalGenerator
+partial class ParamsIncrementalGenerator
 {
     private ParamsCandidate? GetSpanParamsMethods(
         GeneratorAttributeSyntaxContext context,
@@ -37,8 +37,7 @@ partial class ParamsIncrementalGenerator : IIncrementalGenerator
         }
 
         var spanParam = methodSymbol.Parameters.LastOrDefault();
-        if (spanParam is null ||
-            spanParam?.Type is not INamedTypeSymbol spanType)
+        if (spanParam?.Type is not INamedTypeSymbol spanType)
         {
             diagnostics.Add(DiagnosticInfo.Create(
                 DiagnosticReports.ParameterMissingDescriptor,

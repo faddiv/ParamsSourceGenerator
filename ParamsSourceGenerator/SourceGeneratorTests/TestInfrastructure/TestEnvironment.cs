@@ -1,7 +1,7 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
+using Test.Infrastructure;
 
 namespace SourceGeneratorTests.TestInfrastructure;
 
@@ -44,17 +44,17 @@ internal class TestEnvironment
         return _environment.GetFiles(_cachingTests, caller, "_source*");
     }
 
-    public static CSharpFile[] GetOuputs([CallerMemberName] string caller = null!)
+    public static CSharpFile[] GetOutputs([CallerMemberName] string caller = null!)
     {
-        return GetOuputs(_environment.GetBasePath(_validTests), caller);
+        return GetOutputsFor(_environment.GetBasePath(_validTests), caller);
     }
 
-    public static CSharpFile[] GetCachingOuputs([CallerMemberName] string caller = null!)
+    public static CSharpFile[] GetCachingOutputs([CallerMemberName] string caller = null!)
     {
-        return GetOuputs(_environment.GetBasePath(_cachingTests), caller);
+        return GetOutputsFor(_environment.GetBasePath(_cachingTests), caller);
     }
 
-    public static CSharpFile[] GetOuputs(string baseDirectory, [CallerMemberName] string caller = null!)
+    public static CSharpFile[] GetOutputsFor(string baseDirectory, [CallerMemberName] string caller = null!)
     {
         var basePath = Path.Combine(baseDirectory, caller);
         var sources = new List<CSharpFile>
@@ -73,22 +73,5 @@ internal class TestEnvironment
         }
 
         return [.. sources];
-    }
-
-    private static string FindDirectoryOfFile(string fileExtension, [CallerFilePath] string baseFilePath = null!)
-    {
-        var dir =
-            Path.GetDirectoryName(baseFilePath) ?? throw new InvalidOperationException($"Could not get directory from {baseFilePath}");
-
-        while (Directory.GetFiles(dir, $"*{fileExtension}", SearchOption.TopDirectoryOnly).Length == 0)
-        {
-            dir = Path.GetDirectoryName(dir);
-            if (dir == null)
-            {
-                throw new InvalidOperationException($"Could not find directory from file {baseFilePath}");
-            }
-        }
-
-        return dir;
     }
 }

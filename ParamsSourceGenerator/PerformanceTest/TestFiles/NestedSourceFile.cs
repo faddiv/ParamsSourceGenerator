@@ -1,6 +1,5 @@
-﻿using Foxy.Params;
-
-namespace Foo.Bar.Baz
+﻿// ReSharper disable All
+namespace PerformanceTest.TestFiles
 {
     public partial class Alfa
     {

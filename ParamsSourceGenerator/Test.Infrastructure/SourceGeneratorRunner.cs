@@ -2,25 +2,24 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
-namespace SourceGeneratorTests.TestInfrastructure;
+namespace Test.Infrastructure;
 public class SourceGeneratorRunner<T>() : SourceGeneratorRunner([typeof(T)]);
 
 public class SourceGeneratorRunner
 {
     private CSharpGeneratorDriver _driver;
-    private ImmutableArray<ISourceGenerator> _sourceGenerators;
 
-    public SourceGeneratorRunner(
+    protected SourceGeneratorRunner(
         ImmutableArray<Type> sourceGeneratorTypes)
     {
-        _sourceGenerators = CreateSourceGenerators(sourceGeneratorTypes);
+        var sourceGenerators = CreateSourceGenerators(sourceGeneratorTypes);
 
         // ⚠ Tell the driver to track all the incremental generator outputs
         // without this, you'll have no tracked outputs!
         var opts = new GeneratorDriverOptions(
             disabledOutputs: IncrementalGeneratorOutputKind.None,
             trackIncrementalGeneratorSteps: true);
-        _driver = CSharpGeneratorDriver.Create(_sourceGenerators, driverOptions: opts);
+        _driver = CSharpGeneratorDriver.Create(sourceGenerators, driverOptions: opts);
     }
 
     public GeneratorDriverRunResult RunSourceGenerator(

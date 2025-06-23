@@ -43,8 +43,6 @@ internal class GenericTypeInfo : IEquatable<GenericTypeInfo?>
             case ConstraintType.NotNull:
                 commaSeparatedList.AddElement("notnull");
                 break;
-            default:
-                break;
         }
 
         if (ConstraintTypes.Length > 0)

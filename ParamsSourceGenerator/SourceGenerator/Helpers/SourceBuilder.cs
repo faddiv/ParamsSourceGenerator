@@ -1,13 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Foxy.Params.SourceGenerator.Data;
 
 namespace Foxy.Params.SourceGenerator.Helpers;
 
 internal partial class SourceBuilder(string intend = "    ")
 {
-    private int _intendLevel = 0;
+    private int _intendLevel;
 
     private readonly StringBuilder _builder = new(2048);
 

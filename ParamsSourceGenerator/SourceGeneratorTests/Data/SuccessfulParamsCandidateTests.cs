@@ -20,9 +20,6 @@ public class SuccessfulParamsCandidateTests
     public void Equals_WithEqualObject_ShouldReturnTrue()
     {
         // Arrange
-        var typeInfo = TestData.CreateCandidateTypeInfo();
-        var derivedData = TestData.CreateDerivedData();
-
         var candidate1 = TestData.CreateSuccessfulParamsCandidate();
 
         var candidate2 = TestData.CreateSuccessfulParamsCandidate();

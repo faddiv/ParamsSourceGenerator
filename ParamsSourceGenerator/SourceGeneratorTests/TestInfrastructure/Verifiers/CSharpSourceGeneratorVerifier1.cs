@@ -1,17 +1,15 @@
 using System.Text;
-using System.Threading.Tasks;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Testing;
 using Microsoft.CodeAnalysis.Text;
-using SourceGeneratorTests.TestInfrastructure;
+using Test.Infrastructure;
 
-namespace SourceGeneratorTests;
+namespace SourceGeneratorTests.TestInfrastructure.Verifiers;
 
 partial class CSharpSourceGeneratorVerifier<TSourceGenerator>
 {
-    private static readonly CSharpFile[] _emptyGeneratedSources = [];
-
     public static DiagnosticResult Diagnostic() => new DiagnosticResult();
 
     public static DiagnosticResult Diagnostic(string id, DiagnosticSeverity severity) => new(id, severity);
@@ -31,12 +29,12 @@ partial class CSharpSourceGeneratorVerifier<TSourceGenerator>
     public static async Task VerifyGeneratorAsync(
         CSharpFile source,
         DiagnosticResult diagnostic)
-        => await VerifyGeneratorAsync(source, [diagnostic], _emptyGeneratedSources);
+        => await VerifyGeneratorAsync(source, [diagnostic], generatedSources: []);
 
     public static async Task VerifyGeneratorAsync(
         CSharpFile source,
         params DiagnosticResult[] diagnostics)
-        => await VerifyGeneratorAsync(source, diagnostics, _emptyGeneratedSources);
+        => await VerifyGeneratorAsync(source, diagnostics, generatedSources: []);
 
     public static async Task VerifyGeneratorAsync(
         CSharpFile source,

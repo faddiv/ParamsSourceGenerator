@@ -1,14 +1,9 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
-using System.Reflection;
-using Foxy.Params.SourceGenerator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Xunit;
 
-namespace SourceGeneratorTests.Verifiers;
+namespace SourceGeneratorTests.TestInfrastructure.Verifiers;
 
 internal static class CSharpVerifierHelper
 {

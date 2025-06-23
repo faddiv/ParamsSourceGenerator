@@ -2,7 +2,8 @@
 using Foxy.Params.SourceGenerator.Data;
 using Foxy.Params.SourceGenerator.Helpers;
 using Microsoft.CodeAnalysis;
-using SourceGeneratorTests.TestInfrastructure;
+using PerformanceTest.Helpers;
+using Test.Infrastructure;
 using MethodInfo = Foxy.Params.SourceGenerator.Data.MethodInfo;
 
 namespace PerformanceTest;

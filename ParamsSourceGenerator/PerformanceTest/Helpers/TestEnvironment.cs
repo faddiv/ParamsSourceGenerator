@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
+using Test.Infrastructure;
 
-namespace SourceGeneratorTests.TestInfrastructure;
+namespace PerformanceTest.Helpers;
 
 internal static class TestEnvironment
 {

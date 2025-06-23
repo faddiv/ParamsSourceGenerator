@@ -82,6 +82,7 @@ namespace SourceGeneratorTests.Data
             var diagnosticInfo = new DiagnosticInfo(descriptor, location, args);
 
             // Act
+            // ReSharper disable once SuspiciousTypeConversion.Global
             var result = diagnosticInfo.Equals("string");
 
             // Assert

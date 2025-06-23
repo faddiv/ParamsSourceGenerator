@@ -1,4 +1,5 @@
-﻿namespace Foxy.Params
+﻿// ReSharper disable All
+namespace PerformanceTest.TestFiles
 {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Foxy.Params.SourceGenerator", "1.0.0.0")]
     [global::System.AttributeUsage(global::System.AttributeTargets.Method, Inherited = false, AllowMultiple = false)]

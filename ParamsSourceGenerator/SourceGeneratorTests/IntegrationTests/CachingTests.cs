@@ -5,6 +5,7 @@ using SourceGeneratorTests.TestInfrastructure;
 using Foxy.Params.SourceGenerator;
 using static SourceGeneratorTests.TestInfrastructure.CachingTestHelpers;
 using Microsoft.CodeAnalysis;
+using Test.Infrastructure;
 
 namespace SourceGeneratorTests.IntegrationTests
 {
@@ -12,7 +13,7 @@ namespace SourceGeneratorTests.IntegrationTests
     {
 
         // A collection of all the tracking names. I'll show how to simplify this later
-        private static string[] _allTrackingNames = [TrackingNames.GetSpanParamsMethods, TrackingNames.NotNullFilter];
+        private static readonly string[] _allTrackingNames = [TrackingNames.GetSpanParamsMethods, TrackingNames.NotNullFilter];
         private readonly CompilerRunner _compilerRunner;
 
         public CachingTests()
@@ -26,7 +27,7 @@ namespace SourceGeneratorTests.IntegrationTests
         {
             var runner = new SourceGeneratorRunner<ParamsIncrementalGenerator>();
             var input = TestEnvironment.GetCachingSource();
-            var expected = TestEnvironment.GetCachingOuputs();
+            var expected = TestEnvironment.GetCachingOutputs();
 
             var compilation = _compilerRunner.CompileSources(input);
 
@@ -47,7 +48,7 @@ namespace SourceGeneratorTests.IntegrationTests
         {
             var runner = new SourceGeneratorRunner<ParamsIncrementalGenerator>();
             var inputs = TestEnvironment.GetCachingSources();
-            var expected = TestEnvironment.GetCachingOuputs();
+            var expected = TestEnvironment.GetCachingOutputs();
 
             var compilation = _compilerRunner.CompileSources(inputs[0]);
 
@@ -68,11 +69,11 @@ namespace SourceGeneratorTests.IntegrationTests
         {
             var runner = new SourceGeneratorRunner<ParamsIncrementalGenerator>();
             var inputs = TestEnvironment.GetCachingSources();
-            var expected = TestEnvironment.GetCachingOuputs();
+            var expected = TestEnvironment.GetCachingOutputs();
 
             var compilation = _compilerRunner.CompileSources(inputs[0]);
 
-            var result1 = runner.RunSourceGenerator(compilation);
+            runner.RunSourceGenerator(compilation);
 
             var compilation2 = _compilerRunner.CompileSources(inputs[1]);
 
@@ -88,11 +89,11 @@ namespace SourceGeneratorTests.IntegrationTests
         {
             var runner = new SourceGeneratorRunner<ParamsIncrementalGenerator>();
             var inputs = TestEnvironment.GetCachingSources();
-            var expected = TestEnvironment.GetCachingOuputs();
+            var expected = TestEnvironment.GetCachingOutputs();
 
             var compilation = _compilerRunner.CompileSources(inputs[0]);
 
-            var result1 = runner.RunSourceGenerator(compilation);
+            runner.RunSourceGenerator(compilation);
 
             var compilation2 = _compilerRunner.CompileSources(inputs[1]);
 
@@ -108,19 +109,19 @@ namespace SourceGeneratorTests.IntegrationTests
         {
             var runner = new SourceGeneratorRunner<ParamsIncrementalGenerator>();
             var inputs = TestEnvironment.GetCachingSources();
-            var expected = TestEnvironment.GetCachingOuputs();
+            var expected = TestEnvironment.GetCachingOutputs();
 
             var compilation = _compilerRunner.CompileSources(inputs[0], inputs[1]);
 
-            var result1 = runner.RunSourceGenerator(compilation);
+            runner.RunSourceGenerator(compilation);
 
             var compilation2 = _compilerRunner.CompileSources(inputs[0], inputs[2]);
 
             var result2 = runner.RunSourceGenerator(compilation2);
 
             AssertOutputsMatch(result2, expected);
-            AssertOutput(result2, "Something.Foo.g.cs", Microsoft.CodeAnalysis.IncrementalStepRunReason.Cached);
-            AssertOutput(result2, "Something.Baz.g.cs", Microsoft.CodeAnalysis.IncrementalStepRunReason.Modified);
+            AssertOutput(result2, "Something.Foo.g.cs", IncrementalStepRunReason.Cached);
+            AssertOutput(result2, "Something.Baz.g.cs", IncrementalStepRunReason.Modified);
         }
     }
 }

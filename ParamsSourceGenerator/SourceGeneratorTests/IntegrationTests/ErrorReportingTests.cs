@@ -4,6 +4,7 @@ using Xunit;
 using SourceGeneratorTests.TestInfrastructure;
 using Foxy.Params.SourceGenerator.Data;
 using Microsoft.CodeAnalysis;
+using SourceGeneratorTests.TestInfrastructure.Verifiers;
 
 namespace SourceGeneratorTests.IntegrationTests;
 

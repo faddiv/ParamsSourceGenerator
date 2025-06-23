@@ -12,13 +12,13 @@ namespace Foxy.Params.SourceGenerator;
 [Generator]
 public partial class ParamsIncrementalGenerator : IIncrementalGenerator
 {
-    private const string _attributeName = "Foxy.Params.ParamsAttribute";
+    private const string AttributeName = "Foxy.Params.ParamsAttribute";
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         context.RegisterPostInitializationOutput(AddParamsAttribute);
         var declarations = context.SyntaxProvider.ForAttributeWithMetadataName(
-            _attributeName,
+            AttributeName,
             predicate: Filter,
             transform: GetSpanParamsMethods)
             .WithTrackingName(TrackingNames.GetSpanParamsMethods)
