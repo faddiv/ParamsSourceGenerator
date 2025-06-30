@@ -7,7 +7,13 @@ internal partial class SourceBuilder
     public Block StartBlock()
     {
         OpenBlock();
-        return new Block(this);
+        return new Block(this, true);
+    }
+
+    public Block StartIndented()
+    {
+        IncreaseIntend();
+        return new Block(this, false);
     }
 
     private void OpenBlock()
@@ -15,18 +21,27 @@ internal partial class SourceBuilder
         AddLineInternal("{");
         IncreaseIntend();
     }
-    
+
     public void CloseBlock()
     {
         DecreaseIntend();
         AddLineInternal("}");
     }
 
-    public readonly struct Block(SourceBuilder builder) : IDisposable
+    public readonly struct Block(SourceBuilder builder, bool addClosingBracket) : IDisposable
     {
+        private readonly bool _addClosingBracket = addClosingBracket;
+
         public void Dispose()
         {
-            builder.CloseBlock();
+            if (_addClosingBracket)
+            {
+                builder.CloseBlock();
+            }
+            else
+            {
+                builder.DecreaseIntend();
+            }
         }
     }
 }

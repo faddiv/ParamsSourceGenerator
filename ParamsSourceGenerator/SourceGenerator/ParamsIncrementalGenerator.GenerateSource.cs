@@ -19,9 +19,10 @@ partial class ParamsIncrementalGenerator
         else if (typeSymbols is SuccessfulParamsGroupCandidate group)
         {
             CandidateTypeInfo typeInfo = group.TypeInfo;
+            using var generator = new OverridesGenerator(typeInfo, group.ParamCanditates);
             context.AddSource(
                 SemanticHelpers.CreateFileName(typeInfo.TypeName),
-                OverridesGenerator.Execute(typeInfo, group.ParamCanditates));
+                generator.Execute());
         } else
         {
             string diagnosticMessage = $"Invalid ParamsCandidate: {typeSymbols.GetType().Name}";
