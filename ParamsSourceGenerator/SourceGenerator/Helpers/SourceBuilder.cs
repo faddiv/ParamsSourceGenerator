@@ -7,9 +7,9 @@ namespace Foxy.Params.SourceGenerator.Helpers;
 
 internal partial class SourceBuilder
 {
+    private readonly string? _assembly;
+    private readonly string? _version;
     private int _intendLevel;
-    private string? _assembly = null;
-    private string? _version = null;
 
     private readonly StringBuilder _builder = new(2048);
 

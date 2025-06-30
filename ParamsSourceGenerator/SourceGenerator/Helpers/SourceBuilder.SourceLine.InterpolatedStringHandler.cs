@@ -8,19 +8,21 @@ internal partial class SourceBuilder
     public readonly ref partial struct SourceLine
     {
         [InterpolatedStringHandler]
-        public readonly ref struct InterpolatedStringHandler
+        public readonly ref struct SourceLineInterpolatedStringHandler
         {
-            private readonly SourceLine _builder;
+            private readonly SourceLine _sourceLine;
 
-            public InterpolatedStringHandler(int literalLength, int formattedCount, in SourceLine builder)
+            public SourceLineInterpolatedStringHandler(int literalLength, int formattedCount, in SourceLine sourceLine)
             {
-                _builder = builder;
+                _sourceLine = sourceLine;
+                _sourceLine._builder
+                    .EnsureCapacity(_sourceLine._builder._builder.Length + literalLength + (formattedCount << 4));
             }
 
 
             public readonly void AppendLiteral(string s)
             {
-                _builder.AddSegment(s);
+                _sourceLine.AddSegment(s);
             }
 
             public readonly void AppendFormatted<T>(T? t)
@@ -36,7 +38,7 @@ internal partial class SourceBuilder
                 }
                 else
                 {
-                    _builder.AppendFormatted(t);
+                    _sourceLine.AppendFormatted(t);
                 }
             }
 
@@ -44,26 +46,26 @@ internal partial class SourceBuilder
             {
                 if (arg is not null)
                 {
-                    _builder.AddSegment(arg);
+                    _sourceLine.AddSegment(arg);
                 }
             }
 
             public readonly void AppendFormatted(int arg)
             {
-                _builder.Append(arg);
+                _sourceLine.Append(arg);
             }
 
             public readonly void AppendFormatted(int? arg)
             {
                 if (arg.HasValue)
                 {
-                    _builder.Append(arg.Value);
+                    _sourceLine.Append(arg.Value);
                 }
             }
 
             public readonly void AppendFormatted(IEnumerable<string> args)
             {
-                _builder.AddCommaSeparatedList(args);
+                _sourceLine.AddCommaSeparatedList(args);
             }
         }
     }

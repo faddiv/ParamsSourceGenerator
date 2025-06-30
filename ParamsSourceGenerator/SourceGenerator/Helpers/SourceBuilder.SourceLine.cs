@@ -26,7 +26,7 @@ internal partial class SourceBuilder
             "IDE0060:Remove unused parameter",
             Justification = "Used by InterpolatedStringHandler")]
         internal void AddFormatted(
-            [InterpolatedStringHandlerArgument("")] in InterpolatedStringHandler input)
+            [InterpolatedStringHandlerArgument("")] in SourceLineInterpolatedStringHandler input)
         {
         }
 
