@@ -6,6 +6,7 @@ namespace Something
 {
     partial class Foo
     {
+        [global::System.CodeDom.Compiler.GeneratedCode("Foxy.Params.SourceGenerator", "1.0.0.0")]
         public static T Format<T>(string format, object args0)
             where T : class, global::System.ICloneable, new()
         {
@@ -14,6 +15,7 @@ namespace Something
             return Format<T>(format, argsSpan);
         }
 
+        [global::System.CodeDom.Compiler.GeneratedCode("Foxy.Params.SourceGenerator", "1.0.0.0")]
         public static T Format<T>(string format, params object[] args)
             where T : class, global::System.ICloneable, new()
         {

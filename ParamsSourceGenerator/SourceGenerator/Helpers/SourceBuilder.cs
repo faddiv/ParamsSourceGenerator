@@ -1,16 +1,30 @@
 using System.Collections.Generic;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Foxy.Params.SourceGenerator.Helpers;
 
-internal partial class SourceBuilder(string intend = "    ")
+internal partial class SourceBuilder
 {
     private int _intendLevel;
+    private string? _assembly = null;
+    private string? _version = null;
 
     private readonly StringBuilder _builder = new(2048);
 
-    public string Intend { get; } = intend;
+    public SourceBuilder(string intend = "    ",
+        string? assembly = null,
+        string? version = null)
+    {
+        Intend = intend;
+        
+        var assemblyName = Assembly.GetCallingAssembly().GetName();
+        _assembly = assembly ?? assemblyName.Name;
+        _version = version ?? assemblyName.Version.ToString();
+    }
+
+    public string Intend { get; }
 
     public override string ToString()
     {
@@ -32,9 +46,9 @@ internal partial class SourceBuilder(string intend = "    ")
         AddLineInternal("#nullable enable");
     }
 
-    public void AddGeneratedCodeAttribute(string assembly, string version)
+    public void AddGeneratedCodeAttribute()
     {
-        AppendLine($"[System.CodeDom.Compiler.GeneratedCode(\"{assembly}\", \"{version}\")]");
+        AppendLine($"[global::System.CodeDom.Compiler.GeneratedCode(\"{_assembly}\", \"{_version}\")]");
     }
 
     internal void AppendLine(

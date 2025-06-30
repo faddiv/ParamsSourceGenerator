@@ -6,6 +6,7 @@ namespace Something
 {
     partial class Foo
     {
+        [global::System.CodeDom.Compiler.GeneratedCode("Foxy.Params.SourceGenerator", "1.0.0.0")]
         public static global::Something.Foo.OuterClass<global::Something.Foo.InnerClass<object>> Format(global::Something.Foo.OuterClass<global::Something.Foo.InnerClass<object>> format, global::Something.Foo.OuterClass<global::Something.Foo.InnerClass<object>> args0)
         {
             var args = new Arguments1<global::Something.Foo.OuterClass<global::Something.Foo.InnerClass<object>>>(args0);
@@ -13,6 +14,7 @@ namespace Something
             return Format(format, argsSpan);
         }
 
+        [global::System.CodeDom.Compiler.GeneratedCode("Foxy.Params.SourceGenerator", "1.0.0.0")]
         public static global::Something.Foo.OuterClass<global::Something.Foo.InnerClass<object>> Format(global::Something.Foo.OuterClass<global::Something.Foo.InnerClass<object>> format, params global::Something.Foo.OuterClass<global::Something.Foo.InnerClass<object>>[] args)
         {
             var argsSpan = new global::System.ReadOnlySpan<global::Something.Foo.OuterClass<global::Something.Foo.InnerClass<object>>>(args);

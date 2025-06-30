@@ -123,6 +123,7 @@ internal class OverridesGenerator : IDisposable
         MethodInfo data,
         IEnumerable<string> arguments)
     {
+        _builder.AddGeneratedCodeAttribute();
         using (var line = _builder.StartLine())
         {
             line.AddSegment("public");

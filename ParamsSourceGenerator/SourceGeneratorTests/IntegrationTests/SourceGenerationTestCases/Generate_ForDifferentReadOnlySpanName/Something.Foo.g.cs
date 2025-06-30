@@ -6,6 +6,7 @@ namespace Something
 {
     partial class Foo
     {
+        [global::System.CodeDom.Compiler.GeneratedCode("Foxy.Params.SourceGenerator", "1.0.0.0")]
         public static void Format(string format, string values0)
         {
             var values = new Arguments1<string>(values0);
@@ -13,6 +14,7 @@ namespace Something
             Format(format, valuesSpan);
         }
 
+        [global::System.CodeDom.Compiler.GeneratedCode("Foxy.Params.SourceGenerator", "1.0.0.0")]
         public static void Format(string format, string values0, string values1)
         {
             var values = new Arguments2<string>(values0, values1);
@@ -20,6 +22,7 @@ namespace Something
             Format(format, valuesSpan);
         }
 
+        [global::System.CodeDom.Compiler.GeneratedCode("Foxy.Params.SourceGenerator", "1.0.0.0")]
         public static void Format(string format, params string[] values)
         {
             var valuesSpan = new global::System.ReadOnlySpan<string>(values);

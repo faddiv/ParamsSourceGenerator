@@ -6,6 +6,7 @@ namespace Something
 {
     partial class Baz
     {
+        [global::System.CodeDom.Compiler.GeneratedCode("Foxy.Params.SourceGenerator", "1.0.0.0")]
         public static T Format<T>(int format, object args0)
             where T : new()
         {
@@ -14,6 +15,7 @@ namespace Something
             return Format<T>(format, argsSpan);
         }
 
+        [global::System.CodeDom.Compiler.GeneratedCode("Foxy.Params.SourceGenerator", "1.0.0.0")]
         public static T Format<T>(int format, params object[] args)
             where T : new()
         {
