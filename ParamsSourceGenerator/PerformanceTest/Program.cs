@@ -1,4 +1,5 @@
 ﻿// See https://aka.ms/new-console-template for more information
+
 using BenchmarkDotNet.Columns;
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Loggers;
@@ -39,4 +40,6 @@ var result = c.CreateSuccessfulParamsCandidate();
 Console.WriteLine(result);
 */
 
-BenchmarkRunner.Run<GenericTypeInfoBenchmark>(config);
+BenchmarkRunner
+    .Run<SourceBuilderBlockBenchmark>(config);
+//.Run<GenericTypeInfoBenchmark>(config);

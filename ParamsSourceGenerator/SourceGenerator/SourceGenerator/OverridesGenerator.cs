@@ -49,8 +49,10 @@ internal static class OverridesGenerator
         {
             string namespaceName = typeInfo.Namespace;
             builder.AppendLine($"namespace {namespaceName}");
-            builder.AddBlock(GenerateNamespaceMembers,
-                (_typeInfo: typeInfo, paramsCandidates, maxOverridesMax));
+            using (builder.StartBlock())
+            {
+                GenerateNamespaceMembers(builder, (typeInfo, paramsCandidates, maxOverridesMax));
+            }
         }
     }
 
@@ -72,7 +74,10 @@ internal static class OverridesGenerator
         if (level < typeInfo.TypeHierarchy.Length)
         {
             builder.AppendLine($"partial class {typeInfo.TypeHierarchy[level]}");
-            builder.AddBlock(GeneratePartialClass, (typeInfo, paramsCandidates, level + 1));
+            using (builder.StartBlock())
+            {
+                GeneratePartialClass(builder, (typeInfo, paramsCandidates, level + 1));
+            }
         }
         else
         {
@@ -90,7 +95,10 @@ internal static class OverridesGenerator
                     var variableArguments = data.GetFixArguments().Concat(
                         Enumerable.Range(0, n).Select(j => $"{data.SpanArgumentType} {data.GetArgName()}{j}"));
                     GenerateMethodHeaderWithArguments(builder, data, variableArguments);
-                    builder.AddBlock(GenerateBodyForOverrideWithNArgs, (data, n));
+                    using (builder.StartBlock())
+                    {
+                        GenerateBodyForOverrideWithNArgs(builder, (data, n));
+                    }
                 }
 
                 if (paramsCandidate.HasParams)
@@ -99,7 +107,10 @@ internal static class OverridesGenerator
                     var paramsArguments = data.GetFixArguments()
                         .Append($"params {data.SpanArgumentType}[] {data.GetArgName()}");
                     GenerateMethodHeaderWithArguments(builder, data, paramsArguments);
-                    builder.AddBlock(GenerateBodyWithParamsParameter, data);
+                    using (builder.StartBlock())
+                    { 
+                        GenerateBodyWithParamsParameter(builder, data);
+                    }
                 }
             }
         }
@@ -211,7 +222,10 @@ internal static class OverridesGenerator
     {
         sb.AppendLine($"[global::System.Runtime.CompilerServices.InlineArray({length})]");
         sb.AppendLine($"file struct Arguments{length}<T>");
-        sb.AddBlock(CreateArgumentsMembers, length);
+        using (sb.StartBlock())
+        {
+            CreateArgumentsMembers(sb, length);
+        }
 
     }
 
@@ -220,7 +234,10 @@ internal static class OverridesGenerator
         sb.AppendTextLine("public T arg0;");
         sb.AppendLine();
         sb.AppendLine($"public Arguments{length}({Enumerable.Range(0, length).Select(e => $"T value{e}")})");
-        sb.AddBlock(ArgumentsConstructorBody, length);
+        using (sb.StartBlock())
+        {
+            ArgumentsConstructorBody(sb, length);
+        }
     }
 
     private static void ArgumentsConstructorBody(SourceBuilder builder, int length)

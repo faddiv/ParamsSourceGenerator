@@ -70,14 +70,13 @@ public class GenericTypeInfoBenchmark
         var builder = SourceBuilderPool.Instance.Get();
         try
         {
-            builder.AddBlock(static (sb, args) =>
+            using (builder.StartBlock())
             {
-                foreach (var arg in args)
+                foreach (var arg in _typeConstraintsOld)
                 {
-                    sb.AppendLine($"where {arg.Type}: {arg.Constraints}");
-                }
-                
-            }, _typeConstraintsOld);
+                    builder.AppendLine($"where {arg.Type}: {arg.Constraints}");
+                }   
+            }
         }
         finally
         {
@@ -91,13 +90,14 @@ public class GenericTypeInfoBenchmark
         var builder = SourceBuilderPool.Instance.Get();
         try
         {
-            builder.AddBlock(static (sb, args) =>
+            using (builder.StartBlock())
             {
-                foreach (var arg in args)
+                foreach (var arg in _genericTypeInfo)
                 {
-                    arg.WriteTo(sb);
+                    arg.WriteTo(builder);
                 }
-            }, _genericTypeInfo);
+                
+            }
         }
         finally
         {

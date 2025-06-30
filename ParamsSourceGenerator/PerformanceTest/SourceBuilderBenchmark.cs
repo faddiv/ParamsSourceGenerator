@@ -15,10 +15,11 @@ public class SourceBuilderBenchmark
         var builder = SourceBuilderPool.Instance.Get();
         try
         {
-            builder.AddBlock(static (sb, args) =>
+            using (builder.StartBlock())
             {
-                sb.AppendLine($"var {args._argName}Span = new global::System.ReadOnlySpan<{args._spanArgumentType}>({args._argName});");
-            }, (_argName, _spanArgumentType));
+                builder.AppendLine(
+                    $"var {_argName}Span = new global::System.ReadOnlySpan<{_spanArgumentType}>({_argName});");
+            }
         }
         finally
         {

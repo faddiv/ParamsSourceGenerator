@@ -17,20 +17,6 @@ internal partial class SourceBuilder(string intend = "    ")
         return _builder.ToString();
     }
 
-    public void AddBlock(Action<SourceBuilder> buidler)
-    {
-        OpenBlock();
-        buidler(this);
-        CloseBlock();
-    }
-
-    public void AddBlock<TArg1>(Action<SourceBuilder, TArg1> buidler, in TArg1 arg1)
-    {
-        OpenBlock();
-        buidler(this, arg1);
-        CloseBlock();
-    }
-
     public void AddIndented<TArg1>(Action<SourceBuilder, TArg1> buidler, in TArg1 arg1)
     {
         IncreaseIntend();
@@ -53,12 +39,6 @@ internal partial class SourceBuilder(string intend = "    ")
         AddLineInternal("#nullable enable");
     }
 
-    public void CloseBlock()
-    {
-        DecreaseIntend();
-        AddLineInternal("}");
-    }
-
     public void AppendLine()
     {
         _builder.AppendLine();
@@ -79,12 +59,6 @@ internal partial class SourceBuilder(string intend = "    ")
     {
         _intendLevel = 0;
         _builder.Clear();
-    }
-
-    private void OpenBlock()
-    {
-        AddLineInternal("{");
-        IncreaseIntend();
     }
 
     private void IncreaseIntend()
