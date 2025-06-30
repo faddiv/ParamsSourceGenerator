@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Foxy.Params.SourceGenerator.Helpers;
@@ -37,6 +38,12 @@ internal partial class SourceBuilder(string intend = "    ")
     public void NullableEnable()
     {
         AddLineInternal("#nullable enable");
+    }
+
+    internal void AppendLine(
+        [InterpolatedStringHandlerArgument("")]in InterpolatedStringHandler input)
+    {
+        input.FinishLine();
     }
 
     public void AppendLine()

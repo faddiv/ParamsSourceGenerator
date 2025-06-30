@@ -123,17 +123,19 @@ internal class OverridesGenerator : IDisposable
         MethodInfo data,
         IEnumerable<string> arguments)
     {
-        var line = _builder.StartLine();
-        line.AddSegment("public");
-        if (data.IsStatic)
+        using (var line = _builder.StartLine())
         {
-            line.AddSegment(" static");
+            line.AddSegment("public");
+            if (data.IsStatic)
+            {
+                line.AddSegment(" static");
+            }
+
+            line.AddFormatted($" {data.ReturnType} {data.MethodName}");
+            AddTypeConstraints(data, line);
+            line.AddFormatted($"({arguments})");
         }
 
-        line.AddFormatted($" {data.ReturnType} {data.MethodName}");
-        AddTypeConstraints(data, line);
-        line.AddFormatted($"({arguments})");
-        line.FinishLine();
         using (_builder.StartIndented())
         {
             foreach (var typeConstraints in data.TypeConstraints)
@@ -203,7 +205,7 @@ internal class OverridesGenerator : IDisposable
 
     private void GenerateCallOriginalMethod(MethodInfo data)
     {
-        var line = _builder.StartLine();
+        using var line = _builder.StartLine();
         if (data.ReturnsKind != ReturnKind.ReturnsVoid)
         {
             line.AddSegment("return ");
@@ -218,7 +220,6 @@ internal class OverridesGenerator : IDisposable
         AddTypeConstraints(data, line);
         var fixedParameters = data.GetFixedParameters().Select(static e => e.ToPassParameter());
         line.AddFormatted($"({fixedParameters}, {data.GetArgNameSpanInput()});");
-        line.FinishLine();
     }
 
     private static void CreateArguments(SourceBuilder sb, int length)

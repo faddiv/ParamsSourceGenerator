@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace Foxy.Params.SourceGenerator.Helpers;
 
 internal partial class SourceBuilder
 {
-    public readonly ref partial struct SourceLine
+    public readonly ref partial struct SourceLine : IDisposable
     {
         private readonly SourceBuilder _builder;
 
@@ -12,6 +14,20 @@ internal partial class SourceBuilder
         {
             _builder = builder;
             _builder.AddIntend();
+        }
+
+        public void Dispose()
+        {
+            _builder.AppendLine();
+        }
+        
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Style",
+            "IDE0060:Remove unused parameter",
+            Justification = "Used by InterpolatedStringHandler")]
+        internal void AddFormatted(
+            [InterpolatedStringHandlerArgument("")] in InterpolatedStringHandler input)
+        {
         }
 
         public readonly void AddSegment(string segment)
@@ -22,11 +38,6 @@ internal partial class SourceBuilder
         public readonly void AddCommaSeparatedList(IEnumerable<string> elements)
         {
             _builder.AddCommaSeparatedList(elements);
-        }
-
-        public readonly void FinishLine()
-        {
-            _builder.AppendLine();
         }
 
         public CommaSeparatedWriter StartCommaSeparatedList()

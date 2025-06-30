@@ -25,7 +25,7 @@ internal class GenericTypeInfo : IEquatable<GenericTypeInfo?>
         {
             return;
         }
-        var line = builder.StartLine();
+        using var line = builder.StartLine();
         line.AddFormatted($"where {Type} : ");
         var commaSeparatedList = line.StartCommaSeparatedList();
 
@@ -56,7 +56,6 @@ internal class GenericTypeInfo : IEquatable<GenericTypeInfo?>
         {
             commaSeparatedList.AddElement("new()");
         }
-        line.FinishLine();
     }
 
     public override string ToString()
