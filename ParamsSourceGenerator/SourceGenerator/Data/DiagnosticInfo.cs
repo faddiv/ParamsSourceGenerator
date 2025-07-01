@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Foxy.Params.SourceGenerator.Data;
 
@@ -28,7 +29,7 @@ internal class DiagnosticInfo(DiagnosticDescriptor descriptor, Location location
     {
         return other is not null &&
                EqualityComparer<DiagnosticDescriptor>.Default.Equals(Descriptor, other.Descriptor) &&
-               CollectionComparer.Equals(Args, other.Args);
+               Args.SequenceEqual(other.Args);
     }
 
     public override int GetHashCode()

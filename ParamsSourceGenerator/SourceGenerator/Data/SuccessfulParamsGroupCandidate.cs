@@ -1,6 +1,7 @@
 ﻿using Foxy.Params.SourceGenerator.Helpers;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Foxy.Params.SourceGenerator.Data;
 
@@ -10,7 +11,7 @@ internal class SuccessfulParamsGroupCandidate : ParamsCandidate, IEquatable<Succ
 
     public required CandidateTypeInfo TypeInfo { get; init; }
     
-    public required IReadOnlyList<SuccessfulParams> ParamCanditates { get; init; }
+    public required SuccessfulParams[] ParamCandidates { get; init; }
 
     public override bool Equals(object? obj)
     {
@@ -21,14 +22,14 @@ internal class SuccessfulParamsGroupCandidate : ParamsCandidate, IEquatable<Succ
     {
         return other is not null &&
             TypeInfo.Equals(other.TypeInfo) &&
-            CollectionComparer.Equals(ParamCanditates, other.ParamCanditates);
+            ParamCandidates.SequenceEqual(other.ParamCandidates);
     }
 
     public override int GetHashCode()
     {
         int hashCode = -1130635483;
         hashCode = hashCode * -1521134295 + TypeInfo.GetHashCode();
-        hashCode = hashCode * -1521134295 + CollectionComparer.GetHashCode(ParamCanditates);
+        hashCode = hashCode * -1521134295 + CollectionComparer.GetHashCode(ParamCandidates);
         return hashCode;
     }
 }

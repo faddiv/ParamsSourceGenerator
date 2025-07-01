@@ -41,5 +41,5 @@ Console.WriteLine(result);
 */
 
 BenchmarkRunner
-    .Run<SourceBuilderBlockBenchmark>(config);
-//.Run<GenericTypeInfoBenchmark>(config);
+    .Run<CodeGenerationBenchmark>(config);
+    //.Run<GenericTypeInfoBenchmark>(config);

@@ -1,6 +1,7 @@
 ﻿using Foxy.Params.SourceGenerator.Helpers;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Foxy.Params.SourceGenerator.Data;
 
@@ -73,7 +74,7 @@ internal class GenericTypeInfo : IEquatable<GenericTypeInfo?>
         return other is not null &&
                Type == other.Type &&
                ConstraintType == other.ConstraintType &&
-               CollectionComparer.Equals(ConstraintTypes, other.ConstraintTypes) &&
+               ConstraintTypes.SequenceEqual(other.ConstraintTypes) &&
                HasConstructorConstraint == other.HasConstructorConstraint;
     }
 

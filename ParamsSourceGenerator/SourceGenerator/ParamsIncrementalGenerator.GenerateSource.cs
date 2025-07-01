@@ -19,7 +19,7 @@ partial class ParamsIncrementalGenerator
         else if (typeSymbols is SuccessfulParamsGroupCandidate group)
         {
             CandidateTypeInfo typeInfo = group.TypeInfo;
-            using var generator = new OverridesGenerator(typeInfo, group.ParamCanditates);
+            using var generator = new OverridesGenerator(typeInfo, group.ParamCandidates);
             context.AddSource(
                 SemanticHelpers.CreateFileName(typeInfo.TypeName),
                 generator.Execute());

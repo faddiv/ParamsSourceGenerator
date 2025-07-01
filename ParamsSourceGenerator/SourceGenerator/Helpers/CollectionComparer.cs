@@ -2,15 +2,20 @@
 
 namespace Foxy.Params.SourceGenerator.Helpers;
 
-public class CollectionComparer
+public static class CollectionComparer
 {
-    public static int GetHashCode<TElement>(IReadOnlyCollection<TElement> list)
+    public static int GetHashCode<TElement>(TElement[]? list)
     {
-        return CollectionComparer<IReadOnlyCollection<TElement>, TElement>.Default.GetHashCode(list);
-    }
+        int hashCode = 2011230944;
+        if (list is null)
+            return hashCode;
 
-    public static bool Equals<TElement>(IReadOnlyCollection<TElement> x, IReadOnlyCollection<TElement> y)
-    {
-        return CollectionComparer<IReadOnlyCollection<TElement>, TElement>.Default.Equals(x, y);
+        var comparer = EqualityComparer<TElement>.Default;
+        foreach (var item in list)
+        {
+            hashCode = hashCode * -1521134295 + comparer.GetHashCode(item);
+        }
+
+        return hashCode;
     }
 }

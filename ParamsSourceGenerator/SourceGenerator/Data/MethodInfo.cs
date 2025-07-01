@@ -116,9 +116,9 @@ internal class MethodInfo : IEquatable<MethodInfo?>
         return other is not null &&
                ReturnType == other.ReturnType &&
                SpanArgumentType == other.SpanArgumentType &&
-               CollectionComparer.Equals(Parameters, other.Parameters) &&
+               Parameters.SequenceEqual(other.Parameters) &&
                ReturnsKind == other.ReturnsKind &&
-               CollectionComparer.Equals(TypeConstraints, other.TypeConstraints) &&
+               TypeConstraints.SequenceEqual(other.TypeConstraints) &&
                MethodName == other.MethodName &&
                IsStatic == other.IsStatic;
     }

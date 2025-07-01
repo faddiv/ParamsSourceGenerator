@@ -12,10 +12,10 @@ internal class OverridesGenerator : IDisposable
 {
     private readonly SourceBuilder _builder = SourceBuilderPool.Instance.Get();
     private readonly int _maxOverridesMax;
-    private readonly IReadOnlyList<SuccessfulParams> _paramsCandidates;
+    private readonly SuccessfulParams[] _paramsCandidates;
     private readonly CandidateTypeInfo _typeInfo;
 
-    public OverridesGenerator(CandidateTypeInfo typeInfo, IReadOnlyList<SuccessfulParams> paramsCandidates)
+    public OverridesGenerator(CandidateTypeInfo typeInfo, SuccessfulParams[] paramsCandidates)
     {
         _typeInfo = typeInfo ?? throw new ArgumentNullException(nameof(typeInfo));
         _paramsCandidates = paramsCandidates ?? throw new ArgumentNullException(nameof(paramsCandidates));

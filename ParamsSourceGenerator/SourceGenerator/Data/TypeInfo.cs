@@ -33,7 +33,7 @@ public class TypeInfo(string typeName, string[]? genericParameters = null) : IEq
     {
         return other is not null &&
                TypeName == other.TypeName &&
-               CollectionComparer.Equals(GenericParameters, other.GenericParameters);
+               GenericParameters.SequenceEqual(other.GenericParameters);
     }
 
     public override int GetHashCode()
