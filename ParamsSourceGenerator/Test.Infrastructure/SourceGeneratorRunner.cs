@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
 namespace Test.Infrastructure;
+
 public class SourceGeneratorRunner<T>() : SourceGeneratorRunner([typeof(T)]);
 
 public class SourceGeneratorRunner
@@ -24,7 +25,7 @@ public class SourceGeneratorRunner
 
     public GeneratorDriverRunResult RunSourceGenerator(
         CSharpCompilation compilation,
-        CancellationToken cancellation = default)
+        CancellationToken cancellation)
     {
         _driver = (CSharpGeneratorDriver)_driver.RunGenerators(compilation, cancellation);
         return _driver.GetRunResult();
@@ -37,7 +38,7 @@ public class SourceGeneratorRunner
         {
             object value = Activator.CreateInstance(type)!;
             return value as ISourceGenerator
-                ?? ((IIncrementalGenerator)value).AsSourceGenerator();
+                   ?? ((IIncrementalGenerator)value).AsSourceGenerator();
         });
     }
 }

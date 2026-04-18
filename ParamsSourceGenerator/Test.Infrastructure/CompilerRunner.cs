@@ -17,7 +17,7 @@ public class CompilerRunner(ReferenceAssemblies? referenceAssemblies = null)
         _references = await _referenceAssemblies.ResolveAsync("csharp", cancellation);
     }
 
-    public CSharpCompilation CompileSources(params CSharpFile[] sources)
+    public CSharpCompilation CompileSources(ReadOnlySpan<CSharpFile> sources, CancellationToken cancellation)
     {
         if (_references.Length == 0)
         {
@@ -25,11 +25,16 @@ public class CompilerRunner(ReferenceAssemblies? referenceAssemblies = null)
         }
 
         // Convert the source files to SyntaxTrees
-        IEnumerable<SyntaxTree> syntaxTrees = sources.Select(static x => CSharpSyntaxTree.ParseText(x.Content, path: x.Name));
+        SyntaxTree[] syntaxTrees = new SyntaxTree[sources.Length];
+        for (var index = 0; index < sources.Length; index++)
+        {
+            var source = sources[index];
+            syntaxTrees[index] = CSharpSyntaxTree.ParseText(source.Content, path: source.Name, cancellationToken: cancellation);
+        }
 
         // Create a Compilation object
         // You may want to specify other results here
-        CSharpCompilation compilation = CSharpCompilation.Create(
+        var compilation = CSharpCompilation.Create(
             AssemblyName,
             syntaxTrees,
             _references,

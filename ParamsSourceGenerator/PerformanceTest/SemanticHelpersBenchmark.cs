@@ -18,10 +18,10 @@ public class SemanticHelpersBenchmark
         runner.LoadCSharpAssemblies().GetAwaiter().GetResult();
         var paramsAttribute = TestEnvironment.GetParamsAttribute();
         var sourceFile = TestEnvironment.GetNestedSourceFile();
-        var compilation = runner.CompileSources(paramsAttribute, sourceFile);
+        var compilation = runner.CompileSources([paramsAttribute, sourceFile], CancellationToken.None);
         _containingType = TestEnvironment.FindGamma(compilation.Assembly, "Gamma");
     }
-    
+
     [Benchmark]
     public string[] GetTypeHierarchyV3()
     {

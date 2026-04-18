@@ -22,7 +22,7 @@ public class SuccessfulParamsCandidateCreationBenchmark
         runner.LoadCSharpAssemblies().GetAwaiter().GetResult();
         var paramsAttribute = TestEnvironment.GetParamsAttribute();
         var sourceFile = TestEnvironment.GetNestedSourceFile();
-        var compilation = runner.CompileSources(paramsAttribute, sourceFile);
+        var compilation = runner.CompileSources([paramsAttribute, sourceFile], CancellationToken.None);
         _methodSymbol = TestEnvironment.FindMethodByName(compilation.Assembly, "Gamma", "Format");
     }
 
