@@ -1,5 +1,4 @@
-﻿using FluentAssertions;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -8,6 +7,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Collections;
 using Test.Infrastructure;
+using Xunit;
 
 namespace SourceGeneratorTests.TestInfrastructure;
 
@@ -18,27 +18,29 @@ internal static class CachingTestHelpers
         var actualFileNames = runResult.GeneratedTrees.Select(e => Path.GetFileName(e.FilePath)).ToArray();
         var expectedFileNames = files.Select(e => e.Name).ToArray();
 
-        actualFileNames.Should().Contain(expectedFileNames);
-        expectedFileNames.Should().Contain(actualFileNames);
+        AssertContains(actualFileNames, expectedFileNames);
+        AssertContains(expectedFileNames, actualFileNames);
 
         foreach (var file in files)
         {
             var tree = runResult.GeneratedTrees.First(e => Path.GetFileName(e.FilePath) == file.Name);
-            tree.ToString().Should().Be(file.Content);
+            Assert.Equal(file.Content, tree.ToString());
         }
     }
 
     public static void AssertAllOutputs(GeneratorDriverRunResult runResult, IncrementalStepRunReason reason)
     {
         // verify the second run only generated cached source outputs
-        runResult.Results[0]
+        var outputs = runResult.Results[0]
                     .TrackedOutputSteps
                     .SelectMany(x => x.Value) // step executions
                     .SelectMany(x => x.Outputs) // execution results
-                    .Should()
-                    .HaveCountGreaterThan(0)
-                    .And
-                    .OnlyContain(x => x.Reason == reason);
+                    .ToList();
+        Assert.NotEmpty(outputs);
+        foreach (var output in outputs)
+        {
+            Assert.Equal(reason, output.Reason);
+        }
     }
 
     public static void AssertOutput(GeneratorDriverRunResult runResult, string outputName, IncrementalStepRunReason reason)
@@ -50,7 +52,11 @@ internal static class CachingTestHelpers
                     .SelectMany(x => x.Values.Select(e => new { x.Reason, Value = e }))
                     .Where(x => GetDynamicValue<string>(x.Value, "HintName") == outputName)
                     .ToList();
-        concreteOutputs.Should().HaveCount(1).And.OnlyContain(x => x.Reason == reason);
+        Assert.Single(concreteOutputs);
+        foreach (var output in concreteOutputs)
+        {
+            Assert.Equal(reason, output.Reason);
+        }
     }
 
     public static void AssertRunsEqual(
@@ -65,10 +71,12 @@ internal static class CachingTestHelpers
         var trackedSteps2 = GetTrackedSteps(runResult2, trackingNames);
 
         // Both runs should have the same tracked steps
-        trackedSteps1.Should()
-                     .NotBeEmpty()
-                     .And.HaveSameCount(trackedSteps2)
-                     .And.ContainKeys(trackedSteps2.Keys);
+        Assert.NotEmpty(trackedSteps1);
+        Assert.Equal(trackedSteps1.Count, trackedSteps2.Count);
+        foreach (var key in trackedSteps2.Keys)
+        {
+            Assert.Contains(key, trackedSteps1.Keys);
+        }
 
         // Get the IncrementalGeneratorRunStep collection for each run
         foreach (var (trackingName, runSteps1) in trackedSteps1)
@@ -119,7 +127,7 @@ internal static class CachingTestHelpers
         ImmutableArray<IncrementalGeneratorRunStep> runSteps2,
         string stepName)
     {
-        runSteps1.Should().HaveSameCount(runSteps2);
+        Assert.Equal(runSteps1.Length, runSteps2.Length);
 
         for (var i = 0; i < runSteps1.Length; i++)
         {
@@ -130,16 +138,26 @@ internal static class CachingTestHelpers
             IEnumerable<object> outputs1 = runStep1.Outputs.Select(x => x.Value);
             IEnumerable<object> outputs2 = runStep2.Outputs.Select(x => x.Value);
 
-            outputs1.Should()
-                    .Equal(outputs2, $"because {stepName} should produce cacheable outputs");
+            Assert.Equal(outputs1, outputs2);
 
             // Therefore, on the second run the results should always be cached or unchanged!
             // - Unchanged is when the _input_ has changed, but the output hasn't
             // - Cached is when the input has not changed, so the cached output is used 
-            runStep2.Outputs.Should()
-                .OnlyContain(
-                    x => x.Reason == IncrementalStepRunReason.Cached || x.Reason == IncrementalStepRunReason.Unchanged,
+            foreach (var output in runStep2.Outputs)
+            {
+                Assert.True(
+                    output.Reason is IncrementalStepRunReason.Cached or IncrementalStepRunReason.Unchanged,
                     $"{stepName} expected to have reason {IncrementalStepRunReason.Cached} or {IncrementalStepRunReason.Unchanged}");
+            }
+        }
+    }
+
+    private static void AssertContains(ReadOnlySpan<string> expectedSubSpan, ReadOnlySpan<string> actualSpan)
+    {
+        for (var i = 0; i < expectedSubSpan.Length; i++)
+        {
+            var expected = expectedSubSpan.Slice(i, 1);
+            Assert.Contains(expected, actualSpan);
         }
     }
 }

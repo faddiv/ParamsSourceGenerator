@@ -3,6 +3,8 @@
 		<TargetFramework>net10.0</TargetFramework>
 		<IsPackable>false</IsPackable>
 		<Nullable>enable</Nullable>
+    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+    <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
 	</PropertyGroup>
 	<ItemGroup>
 		<Compile Remove="IntegrationTests\SourceGenerationTestCases\**\*.cs" />
@@ -13,23 +15,22 @@
 		<None Include="IntegrationTests\CachingTestCases\**\*" />
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="coverlet.collector" Version="6.0.2">
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-			<PrivateAssets>all</PrivateAssets>
+		<PackageReference Include="coverlet.collector" Version="10.0.0">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="FluentAssertions" Version="6.12.0" />
-		<PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4">
+		<PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="5.3.0">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp.SourceGenerators.Testing" Version="1.1.2" />
-		<PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.10.0" />
-		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.10.0" />
-		<PackageReference Include="xunit" Version="2.9.0" />
-		<PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-			<PrivateAssets>all</PrivateAssets>
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="5.3.0" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.4.0" />
+		<PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
+		<PackageReference Include="xunit.v3" Version="3.2.2" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\SourceGenerator\Foxy.Params.SourceGenerator.csproj" />

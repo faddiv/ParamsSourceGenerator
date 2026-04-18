@@ -1,5 +1,4 @@
-﻿using FluentAssertions;
-using Foxy.Params.SourceGenerator.Data;
+﻿using Foxy.Params.SourceGenerator.Data;
 using Xunit;
 using SourceGeneratorTests.TestInfrastructure;
 using Foxy.Params.SourceGenerator;
@@ -39,7 +38,7 @@ namespace SourceGeneratorTests.IntegrationTests
 
             AssertRunsEqual(result1, result2, _allTrackingNames);
             AssertAllOutputs(result2, IncrementalStepRunReason.Cached);
-            result1.Diagnostics.Should().BeEmpty();
+            Assert.Empty(result1.Diagnostics);
             AssertOutputsMatch(result1, expected);
         }
 
@@ -60,7 +59,7 @@ namespace SourceGeneratorTests.IntegrationTests
 
             AssertRunsEqual(result1, result2, _allTrackingNames);
             AssertAllOutputs(result2, IncrementalStepRunReason.Cached);
-            result1.Diagnostics.Should().BeEmpty();
+            Assert.Empty(result2.Diagnostics);
             AssertOutputsMatch(result1, expected);
         }
 
@@ -80,7 +79,7 @@ namespace SourceGeneratorTests.IntegrationTests
             var result2 = runner.RunSourceGenerator(compilation2);
 
             AssertAllOutputs(result2, IncrementalStepRunReason.Modified);
-            result2.Diagnostics.Should().BeEmpty();
+            Assert.Empty(result2.Diagnostics);
             AssertOutputsMatch(result2, expected);
         }
 
@@ -100,7 +99,7 @@ namespace SourceGeneratorTests.IntegrationTests
             var result2 = runner.RunSourceGenerator(compilation2);
 
             AssertAllOutputs(result2, IncrementalStepRunReason.Modified);
-            result2.Diagnostics.Should().BeEmpty();
+            Assert.Empty(result2.Diagnostics);
             AssertOutputsMatch(result2, expected);
         }
 

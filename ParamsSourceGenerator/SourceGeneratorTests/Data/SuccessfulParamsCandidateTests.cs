@@ -1,5 +1,4 @@
 ﻿using Xunit;
-using FluentAssertions;
 using SourceGeneratorTests.TestInfrastructure;
 
 namespace SourceGeneratorTests.Data;
@@ -13,7 +12,7 @@ public class SuccessfulParamsCandidateTests
         var candidate = TestData.CreateSuccessfulParamsCandidate();
 
         // Act & Assert
-        candidate.Equals(candidate).Should().BeTrue();
+        Assert.True(candidate.Equals(candidate));
     }
 
     [Fact]
@@ -25,7 +24,7 @@ public class SuccessfulParamsCandidateTests
         var candidate2 = TestData.CreateSuccessfulParamsCandidate();
 
         // Act & Assert
-        candidate1.Equals(candidate2).Should().BeTrue();
+        Assert.True(candidate1.Equals(candidate2));
     }
 
     [Fact]
@@ -35,7 +34,7 @@ public class SuccessfulParamsCandidateTests
         var candidate = TestData.CreateSuccessfulParamsCandidate();
 
         // Act & Assert
-        candidate.Equals(null).Should().BeFalse();
+        Assert.False(candidate.Equals(null));
     }
 
     [Fact]
@@ -47,7 +46,7 @@ public class SuccessfulParamsCandidateTests
         var differentTypeObject = new { };
 
         // Act & Assert
-        candidate.Equals(differentTypeObject).Should().BeFalse();
+        Assert.False(candidate.Equals(differentTypeObject));
     }
 
     [Fact]
@@ -60,7 +59,7 @@ public class SuccessfulParamsCandidateTests
             typeInfo: TestData.CreateCandidateTypeInfo(typeName: "DifferentTypeName"));
 
         // Act & Assert
-        candidate1.Equals(candidate2).Should().BeFalse();
+        Assert.False(candidate1.Equals(candidate2));
     }
 
     [Fact]
@@ -73,7 +72,7 @@ public class SuccessfulParamsCandidateTests
             derivedData: TestData.CreateDerivedData(methodName: "DifferentMethod"));
 
         // Act & Assert
-        candidate1.Equals(candidate2).Should().BeFalse();
+        Assert.False(candidate1.Equals(candidate2));
     }
 
     [Fact]
@@ -86,7 +85,7 @@ public class SuccessfulParamsCandidateTests
             maxOverrides: 10);
 
         // Act & Assert
-        candidate1.Equals(candidate2).Should().BeFalse();
+        Assert.False(candidate1.Equals(candidate2));
     }
 
     [Fact]
@@ -99,6 +98,6 @@ public class SuccessfulParamsCandidateTests
             hasParams: false);
 
         // Act & Assert
-        candidate1.Equals(candidate2).Should().BeFalse();
+        Assert.False(candidate1.Equals(candidate2));
     }
 }

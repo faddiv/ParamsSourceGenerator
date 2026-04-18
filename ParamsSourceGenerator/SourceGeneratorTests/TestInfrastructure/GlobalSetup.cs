@@ -1,12 +1,10 @@
-﻿using FluentAssertions;
-
-namespace SourceGeneratorTests.TestInfrastructure;
+﻿namespace SourceGeneratorTests.TestInfrastructure;
 
 internal class GlobalSetup
 {
     static GlobalSetup()
     {
-        AssertionOptions.FormattingOptions.MaxDepth = 10;
+        // FluentAssertions configuration removed - using xUnit assertions only
     }
 
     public static void Run()

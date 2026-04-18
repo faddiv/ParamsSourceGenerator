@@ -1,6 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
 using Xunit;
-using FluentAssertions;
 using Foxy.Params.SourceGenerator.Data;
 
 namespace SourceGeneratorTests.Data
@@ -31,10 +30,10 @@ namespace SourceGeneratorTests.Data
             var diagnosticInfo = DiagnosticInfo.Create(descriptor, location, args);
 
             // Assert
-            diagnosticInfo.Should().NotBeNull();
-            diagnosticInfo.Descriptor.Should().Be(descriptor);
-            diagnosticInfo.Location.Should().Be(location);
-            diagnosticInfo.Args.Should().BeEquivalentTo(args);
+            Assert.NotNull(diagnosticInfo);
+            Assert.Equal(descriptor, diagnosticInfo.Descriptor);
+            Assert.Equal(location, diagnosticInfo.Location);
+            Assert.Equal(args, diagnosticInfo.Args);
         }
 
         [Fact]
@@ -51,7 +50,7 @@ namespace SourceGeneratorTests.Data
             var result = diagnosticInfo.Equals(diagnosticInfo);
 
             // Assert
-            result.Should().BeTrue();
+            Assert.True(result);
         }
 
         [Fact]
@@ -68,7 +67,7 @@ namespace SourceGeneratorTests.Data
             var result = diagnosticInfo.Equals(null);
 
             // Assert
-            result.Should().BeFalse();
+            Assert.False(result);
         }
 
         [Fact]
@@ -86,7 +85,7 @@ namespace SourceGeneratorTests.Data
             var result = diagnosticInfo.Equals("string");
 
             // Assert
-            result.Should().BeFalse();
+            Assert.False(result);
         }
 
         [Fact]
@@ -106,7 +105,7 @@ namespace SourceGeneratorTests.Data
             var result = diagnosticInfo1.Equals(diagnosticInfo2);
 
             // Assert
-            result.Should().BeFalse();
+            Assert.False(result);
         }
 
         [Fact]
@@ -124,7 +123,7 @@ namespace SourceGeneratorTests.Data
             var result = diagnosticInfo1.Equals(diagnosticInfo2);
 
             // Assert
-            result.Should().BeTrue();
+            Assert.True(result);
         }
 
         [Fact]
@@ -143,7 +142,7 @@ namespace SourceGeneratorTests.Data
             var hashCode2 = diagnosticInfo2.GetHashCode();
 
             // Assert
-            hashCode1.Should().Be(hashCode2);
+            Assert.Equal(hashCode1, hashCode2);
         }
 
         [Fact]
@@ -160,10 +159,10 @@ namespace SourceGeneratorTests.Data
             var diagnostic = diagnosticInfo.ToDiagnostics();
 
             // Assert
-            diagnostic.Should().NotBeNull();
-            diagnostic.Descriptor.Should().Be(descriptor);
-            diagnostic.Location.Should().Be(location);
-            diagnostic.GetMessage().Should().Be(string.Format(descriptor.MessageFormat.ToString(), args));
+            Assert.NotNull(diagnostic);
+            Assert.Equal(descriptor, diagnostic.Descriptor);
+            Assert.Equal(location, diagnostic.Location);
+            Assert.Equal(string.Format(descriptor.MessageFormat.ToString(), args), diagnostic.GetMessage());
         }
     }
 }

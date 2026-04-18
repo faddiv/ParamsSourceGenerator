@@ -1,6 +1,5 @@
 ﻿using Foxy.Params.SourceGenerator.Helpers;
 using Xunit;
-using FluentAssertions;
 
 namespace SourceGeneratorTests
 {
@@ -13,7 +12,7 @@ namespace SourceGeneratorTests
             var result = CollectionComparer.GetHashCode<object>(null);
 
             // Assert
-            result.Should().Be(2011230944);
+            Assert.Equal(2011230944, result);
         }
 
         [Fact]
@@ -27,7 +26,7 @@ namespace SourceGeneratorTests
 
             // Assert
             var expectedHashCode = 1884520134;
-            result.Should().Be(expectedHashCode);
+            Assert.Equal(expectedHashCode, result);
         }
 
         [Fact]
@@ -42,7 +41,7 @@ namespace SourceGeneratorTests
             var result2 = CollectionComparer.GetHashCode(list2);
 
             // Assert
-            result1.Should().Be(result2);
+            Assert.Equal(result2, result1);
         }
 
         private static int[] CreateList()
