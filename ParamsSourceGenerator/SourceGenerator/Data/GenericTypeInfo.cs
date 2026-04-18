@@ -1,7 +1,6 @@
 ﻿using Foxy.Params.SourceGenerator.Helpers;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Foxy.Params.SourceGenerator.Data;
 

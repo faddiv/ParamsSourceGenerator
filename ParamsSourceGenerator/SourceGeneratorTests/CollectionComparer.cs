@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using Foxy.Params.SourceGenerator.Helpers;
+﻿using Foxy.Params.SourceGenerator.Helpers;
 using Xunit;
 using FluentAssertions;
 

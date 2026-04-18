@@ -14,11 +14,12 @@ namespace ConsoleApp
             {
                 Console.WriteLine(t.FullName);
             }
+            Format(null, "Hello {0}", "World", "asd");
         }
 
-        [Params(MaxOverrides = 10)]
+        [Params(MaxOverrides = 1)]
         public static string Format(IFormatProvider provider, string format, ReadOnlySpan<object> span)
-        {
+        { 
             var compositeFormat = CompositeFormat.Parse(format);
             return string.Format(provider, compositeFormat, span);
         }
