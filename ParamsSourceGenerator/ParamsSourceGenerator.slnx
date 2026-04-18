@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="ConsoleApp/ConsoleApp.csproj" />
+  <Project Path="PerformanceTest/PerformanceTest.csproj" />
+  <Project Path="SourceGenerator/Foxy.Params.SourceGenerator.csproj" />
+  <Project Path="SourceGeneratorTests/SourceGeneratorTests.csproj" />
+  <Project Path="Test.Infrastructure/Test.Infrastructure.csproj" />
+</Solution>
