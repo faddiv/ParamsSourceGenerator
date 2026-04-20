@@ -2,9 +2,9 @@ using Microsoft.CodeAnalysis;
 
 namespace Foxy.Params.SourceGenerator.Data;
 
-public class DiagnosticReports
+public static class DiagnosticReports
 {
-    public const string Category = "Foxy.ParamsGenerator";
+    private const string Category = "Foxy.ParamsGenerator";
 
     public static DiagnosticDescriptor PartialIsMissingDescriptor { get; } = new DiagnosticDescriptor(
         "PRM1000",

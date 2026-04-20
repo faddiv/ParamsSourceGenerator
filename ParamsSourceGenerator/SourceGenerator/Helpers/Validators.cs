@@ -36,13 +36,7 @@ internal static class Validators
             }
         }
 
-        if (methodSymbol.ReturnType.Kind == SymbolKind.ErrorType)
-        {
-            return true;
-
-        }
-
-        return false;
+        return methodSymbol.ReturnType.Kind == SymbolKind.ErrorType;
     }
 
     public static bool HasNameCollision(
@@ -97,8 +91,7 @@ internal static class Validators
 
     public static bool IsOutParameter(IParameterSymbol? spanParam)
     {
-        return spanParam != null
-            && spanParam.RefKind == RefKind.Out;
+        return spanParam is { RefKind: RefKind.Out };
     }
 
     public static bool IsReadOnlySpan(INamedTypeSymbol? spanParam)

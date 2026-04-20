@@ -18,12 +18,12 @@ internal partial class SourceBuilder
         }
 
 
-        public readonly void AppendLiteral(string s)
+        public void AppendLiteral(string s)
         {
             _builder.Append(s);
         }
 
-        public readonly void AppendFormatted<T>(T? t)
+        public void AppendFormatted<T>(T? t)
         {
             if(t is null)
             {
@@ -40,7 +40,7 @@ internal partial class SourceBuilder
             }
         }
 
-        public readonly void AppendFormatted(string? arg)
+        public void AppendFormatted(string? arg)
         {
             if (arg is not null)
             {
@@ -48,12 +48,12 @@ internal partial class SourceBuilder
             }
         }
 
-        public readonly void AppendFormatted(int arg)
+        public void AppendFormatted(int arg)
         {
             _builder.Append(arg);
         }
 
-        public readonly void AppendFormatted(int? arg)
+        public void AppendFormatted(int? arg)
         {
             if (arg.HasValue)
             {
@@ -61,7 +61,7 @@ internal partial class SourceBuilder
             }
         }
 
-        public readonly void AppendFormatted(IEnumerable<string> args)
+        public void AppendFormatted(IEnumerable<string> args)
         {
             _builder.AddCommaSeparatedList(args);
         }

@@ -30,12 +30,12 @@ internal partial class SourceBuilder
         {
         }
 
-        public readonly void AddSegment(string segment)
+        public void AddSegment(string segment)
         {
             _builder.AppendInternal(segment);
         }
 
-        public readonly void AddCommaSeparatedList(IEnumerable<string> elements)
+        public void AddCommaSeparatedList(IEnumerable<string> elements)
         {
             _builder.AddCommaSeparatedList(elements);
         }

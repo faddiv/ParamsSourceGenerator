@@ -22,29 +22,28 @@ internal static class StringBuilderExtensions
             throw new ArgumentNullException(nameof(values));
         }
 
-        using (IEnumerator<T> en = values.GetEnumerator())
+        using var en = values.GetEnumerator();
+        if (!en.MoveNext())
         {
-            if (!en.MoveNext())
-            {
-                return builder;
-            }
+            return builder;
+        }
 
-            T value = en.Current;
+        var value = en.Current;
+        if (value != null)
+        {
+            builder.Append(value.ToString());
+        }
+
+        while (en.MoveNext())
+        {
+            builder.Append(separator);
+            value = en.Current;
             if (value != null)
             {
                 builder.Append(value.ToString());
             }
-
-            while (en.MoveNext())
-            {
-                builder.Append(separator);
-                value = en.Current;
-                if (value != null)
-                {
-                    builder.Append(value.ToString());
-                }
-            }
         }
+
         return builder;
     }
 }

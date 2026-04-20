@@ -1,5 +1,4 @@
-﻿using System.Threading;
-using Foxy.Params.SourceGenerator.Data;
+﻿using Foxy.Params.SourceGenerator.Data;
 using Xunit;
 using SourceGeneratorTests.TestInfrastructure;
 using Foxy.Params.SourceGenerator;

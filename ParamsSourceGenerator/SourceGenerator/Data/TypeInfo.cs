@@ -14,13 +14,13 @@ public class TypeInfo(string typeName, string[]? genericParameters = null) : IEq
     internal static TypeInfo Create(ITypeSymbol type)
     {
         var name = type.ToDisplayString(DisplayFormats.ForRootTypeDisplay);
-        if (type is INamedTypeSymbol namedType && namedType.TypeArguments.Length > 0)
+        if (type is INamedTypeSymbol { TypeArguments.Length: > 0 } namedType)
         {
             return new TypeInfo(name, namedType.TypeArguments.Select(e => e.ToDisplayString(DisplayFormats.ForGenericArgumentFormat)).ToArray());
         }
         else
         {
-            return new TypeInfo(name, Array.Empty<string>());
+            return new TypeInfo(name, []);
         }
     }
 
